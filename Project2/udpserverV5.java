@@ -8,6 +8,9 @@
 
 import java.io.*;
 import java.net.*;
+import java.nio.*;
+import java.nio.channels.*;
+import java.util.*;
 import static java.lang.Math.abs;
 
 class udpserver{
@@ -26,6 +29,7 @@ class udpserver{
         try{
 
             socket = new DatagramSocket(PORT);
+			//socket.setSoTimeout(500);
 
             while(true){
 
@@ -51,13 +55,13 @@ class udpserver{
                 StringBuilder fileNames = new StringBuilder("\n");
                 
                 // Find the number of files available.
-                int c = 0;
+                int count = 0;
                 for (int i = 0; i < fileList.length; i++){
 
                     if (fileList[i].canRead())
-                        c++;
+                        count++;
                 }
-                fileNames.append(c + " files found.\n\n");
+                fileNames.append(count + " files found.\n\n");
 
                 // Find the details for available files.
                 for (int i = 0; i < fileList.length; i++){
@@ -120,11 +124,10 @@ class udpserver{
                         boolean finished = false;
                         boolean exit = false;
                         int counter = 0;
+						int windowStartIndex = 0; //0-10
                         int[] window = new int[5];
                         byte[][] storage = new byte[5][];
                         while((bytesRead = fis.read(buffer)) != -1){
-
-                            counter = 0;
                             exitLoop:
                             while(!exit){
 
@@ -151,13 +154,13 @@ class udpserver{
                                             else
                                                 a[i] = 0;
                                         }                      
-                                        header = new byte[]{ (byte)8, (byte)a[0], (byte)a[1], (byte)a[2]};
+                                        header = new byte[]{ (byte)11, (byte)a[0], (byte)a[1], (byte)a[2]};
                                         finished = true;
                                     }
 
                                     // This is not the last packet to send.
                                     else{
-                                        header = new byte[]{ (byte)index, (byte)0, (byte)0, (byte)0};
+                                        header = new byte[]{ (byte)((windowStartIndex + index) % 10), (byte)0, (byte)0, (byte)0};
                                     }
                                    
                                     // Combine the header with the data.
@@ -171,67 +174,72 @@ class udpserver{
                                         break;
                                 }
 
-                                counter = 0;
-                                while(counter < 5){
-
-                                    if(finished)
-                                        System.out.println("Counter: " + counter + "  Index: " + index);
-                                    if(counter >= index){
-                                        exit = true;
-                                        break exitLoop;
-                                    }
-                                    System.out.printf("Sending Packet: %4d, Size: %d%n", (packetNum-index)+counter+1, bytesRead);
+								for(int i = 0; i < 5; i++){
+									if(finished)
+										System.out.println("Counter: " + i + " Index: " + index);
+									if(i >= index){
+										exit = true;
+										break exitLoop;
+									}
+									System.out.printf("Sending Packet: %4d, Size: %d%n", (packetNum-index)+i+1, bytesRead);
                                     // Send the packet to the client.
                                     outBuf = new byte[1024];
-                                    outBuf = storage[counter];
+                                    outBuf = storage[i];
                                     outPacket = new DatagramPacket(outBuf, 0, outBuf.length, source_address, source_port);
                                     socket.send(outPacket);
-                                    counter++;
-                                }
+								}
                                 System.out.println();
 
     // Make this timeout if no message recieved in some time instead of loop.
-                                counter = 0;
                                 String inS;
                                 int inI; 
+								//clear the window
                                 for(int x = 0; x < 5; x++)
                                     window[x] = 0;
-                                while(counter < 5){
-                                    inBuf = new byte[100];
-                                    inPacket = new DatagramPacket(inBuf, inBuf.length);
-                                    socket.receive(inPacket);
-                                    inS = new String(inPacket.getData(), 0, inPacket.getLength());
-                                    inI = Integer.parseInt(inS);
-                                    window[inI] = 1;
-                                    counter++;
+								
+								socket.setSoTimeout(500);
+                                for(int i = 0; i < 5; i++){
+									try{
+										inBuf = new byte[100];
+										inPacket = new DatagramPacket(inBuf, inBuf.length);
+										socket.receive(inPacket);
+										inS = new String(inPacket.getData(), 0, inPacket.getLength());
+										inI = Integer.parseInt(inS);
+										window[inI] = 1;
+									}catch (SocketTimeoutException ex){
+										break;
+									}finally{
+										socket.setSoTimeout(0);
+									}
                                 }
 
-                                index = 5;
-                                counter = 0;
-                                while(counter < 5){
-                                    if(window[counter] == 0){
-                                        index = counter;
+								//calculate slide
+                                int slideIndex = 5;
+                                for(int i = 0; i < 5; i++){
+                                    if(window[i] == 0){
+                                        slideIndex = i;
                                         break;
                                     }
-                                    counter++;
                                 }
-
-                                counter = 0;
+								
+								//slide storage
                                 boolean max = false;
                                 boolean checked = false;
-                                while(counter < 5){
-                                    if(!checked && counter + index >= 5){
+                                for(int i = 0; i < 5; i++){
+                                    if(!checked && i + slideIndex >= 5){
                                         max = true;
                                         checked = true;
-                                        index = counter;
+                                        slideIndex = i;
                                     }
                                     if(max)
-                                        storage[counter] = null;
+                                        storage[i] = null;
                                     else{
-                                        storage[counter] = storage[counter + index];
-                                    }
-                                    counter++;  
+                                        storage[i] = storage[i + slideIndex];
+                                    } 
                                 }
+								
+								index = slideIndex;
+								windowStartIndex = (windowStartIndex += slideIndex % 10);
                             }
                         }   
                         
@@ -240,6 +248,7 @@ class udpserver{
                             System.out.println("File Read Successful. Closing Socket.");
                         } 
                         fis.close(); 
+						System.exit(0);
                     }
                     catch(IOException ioe){
 

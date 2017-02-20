@@ -76,7 +76,7 @@ class udpclient{
                 // Check header to see if last packet. If so, determine how much data
                 // was sent, and resize the buffer accordingly. Write buffer to file.
                 //System.out.println(counter);
-                if(inBuf[0] == (byte)8){
+                if(inBuf[0] == (byte)11){
 
                     for(int i = 0; i < 5; i++){
                         if(recieved[i] != null){
