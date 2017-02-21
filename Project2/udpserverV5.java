@@ -24,11 +24,14 @@ class udpserver{
         byte[] outBuf;
         byte[] header;
         String msg;
-        final int PORT = 50000;
 		
         try{
+			Console cons = System.console();
+				int port = Integer.parseInt(cons.readLine("Please enter a port number: "));
+				if(port < 1024 || port > 65535)
+					throw new IOException("This port is not valid");
 
-            socket = new DatagramSocket(PORT);
+            socket = new DatagramSocket(port);
 
             while(true){
 
@@ -101,10 +104,7 @@ class udpserver{
                     outBuf = noFile.toString().getBytes();
                     outPacket = new DatagramPacket(outBuf, 0, outBuf.length, source_address, source_port);
                     socket.send(outPacket);
-                }
-
-                // The file was found.
-                else{
+                } else {// The file was found.
                   
                     // Begin attempt to send file.
                     try{

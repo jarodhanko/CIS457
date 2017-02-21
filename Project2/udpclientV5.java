@@ -10,6 +10,8 @@ import java.io.*;
 import java.net.*;
 import java.util.Scanner;
 import java.util.Arrays;
+import java.nio.*;
+import java.nio.channels.*;
 
 class udpclient{
 
@@ -20,21 +22,40 @@ class udpclient{
         DatagramPacket outPacket = null;
         byte[] inBuf;
         byte[] outBuf;
-        final int PORT = 50000;
         String msg = null;
+		int port = 0;
         Scanner src = new Scanner(System.in);
-
+		InetAddress address = null;
+		boolean success = false;
+		while(true){
         try{
+			while(!success) {
+				try{
+					Console cons = System.console();
+					String addr = cons.readLine("Please enter an IP address: ");
+					port = Integer.parseInt(cons.readLine("Please enter a port number: "));
+					if(port < 1024 || port > 65535)
+						throw new IOException("This port is not valid");
+					
+				    address = InetAddress.getByName(addr);
+					success = true;
+				}catch(UnresolvedAddressException ex){
+					System.out.println("The specified IP address was invalid or no server was available");
+				}catch(NumberFormatException ex){
+					System.out.println("The port must be a valid integer value");
+				}catch(IOException ex){
+					System.out.println("The specified port number or IP Address was invalid");		
+				}
+			}
 
-            InetAddress address = InetAddress.getByName("127.0.0.1");
-            socket = new DatagramSocket();
+			socket = new DatagramSocket();
 
             // Send signal to server.
             msg = "";
             outBuf = msg.getBytes();
-            outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address, PORT);
+            outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address, port);
             socket.send(outPacket);
-
+			
             // Recieve available file list from server.
             inBuf = new byte[1024];
             inPacket = new DatagramPacket(inBuf, inBuf.length);
@@ -47,7 +68,7 @@ class udpclient{
             // Send the file name.
             String filename = src.nextLine();
             outBuf = filename.getBytes();
-            outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address, PORT);
+            outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address, port);
             socket.send(outPacket);
 
             // Begin recieve file process.
@@ -73,6 +94,9 @@ class udpclient{
                 inPacket = new DatagramPacket(inBuf, inBuf.length);
                 socket.receive(inPacket);
 
+				if(new String(inPacket.getData(), 0, inPacket.getLength()).equals("ERROR: file not found"))
+					throw new FileNotFoundException("File was not found.  Please try again");
+
                 // Check header to see if last packet. If so, determine how much data
                 // was sent, and resize the buffer accordingly. Write buffer to file.
                 //System.out.println(counter);
@@ -94,8 +118,7 @@ class udpclient{
                     fos.write(tempBuf);
                     break;
                     
-                }
-                else{
+                } else{
 					//acknowledge
                     // Get packet number signal server.
                     String signal = Integer.toString((int)inBuf[0]);
@@ -105,8 +128,8 @@ class udpclient{
                     recieved[rcv] = inBuf;
                     outBuf = new byte[100];
                     outBuf = signal.getBytes();
-                    outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address, PORT);
-                    socket.send(outPacket);
+                    outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address, port);
+					socket.send(outPacket);
                 }
 
                 for(int i = 0; i < 5; i++){
@@ -127,12 +150,16 @@ class udpclient{
 
             // Close output stream.
             fos.close();
-        }
-        catch(Exception e)
+			System.exit(0);
+        } catch(FileNotFoundException e){
+			//do nothing
+		} 
+		catch(Exception e)
         {
             System.out.println("\nNetwork Error. Please try again.\n");
             e.printStackTrace();
             System.out.println(e.getMessage());
         }
+		}
     }
 }
