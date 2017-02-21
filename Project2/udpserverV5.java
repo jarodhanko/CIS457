@@ -11,7 +11,64 @@ import java.net.*;
 import java.nio.*;
 import java.nio.channels.*;
 import java.util.*;
+import java.util.LinkedList;
 import static java.lang.Math.abs;
+
+class SlidingWindow{
+	public slidingWindow(){
+		slideIndex = 0;
+		LinkedList = new LinkedList();
+	}
+
+	public int slideIndex;
+	
+	public LinkedList packets;	
+
+	public void slide(){
+		for(var i: packets){
+			if(packets.peek().acknowledged()){
+				packets.pop();
+			}else{
+				break;
+			}
+		}	
+	}
+}
+
+class SlidingPacket {
+	public slidingPacket(){
+		acknowledged = false;	
+	}	
+
+	private byte[] data;
+
+	private boolean acknowledged;
+
+	public void setData(byte[] data){
+		this.data = data;
+	}
+
+	public boolean acknowledged(){
+		return this.acknowledged;
+	}
+
+	public boolean data(){
+		return this.data;
+	}
+
+	public void acknowledge(boolean set){
+		this.acknowledged = set;
+	}
+
+	public void clear(){
+		acknowledged = false;
+		data = null;
+	}
+}
+
+class serverSend {
+	
+}
 
 class udpserver{
 
