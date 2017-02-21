@@ -96,7 +96,7 @@ class udpclient{
                     
                 }
                 else{
-
+					//acknowledge
                     // Get packet number signal server.
                     String signal = Integer.toString((int)inBuf[0]);
                     rcv = Integer.parseInt(signal);

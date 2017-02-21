@@ -1,1 +1,4 @@
 *.class
+
+/Project2/*
+!/Project2/*.java

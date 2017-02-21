@@ -25,11 +25,10 @@ class udpserver{
         byte[] header;
         String msg;
         final int PORT = 50000;
-
+		
         try{
 
             socket = new DatagramSocket(PORT);
-			//socket.setSoTimeout(500);
 
             while(true){
 
