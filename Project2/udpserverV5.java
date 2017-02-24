@@ -17,60 +17,215 @@ import static java.lang.Math.abs;
 class SlidingWindow{
 	public slidingWindow(){
 		slideIndex = 0;
-		LinkedList = new LinkedList();
+		LinkedList = new LinkedList<SlidingPacket>();
 	}
 
 	public int slideIndex;
 	
-	public LinkedList packets;	
+	private LinkedList<SlidingPacket> packets;	
+	
+	public LinkedList packets(){
+		return this.packets;
+	}
 
 	public void slide(){
-		for(var i: packets){
+		LinkedList copy = packets.clone();
+		for(int i = 0; i < packets.length; i++){
 			if(packets.peek().acknowledged()){
-				packets.pop();
+				copy.pop();
 			}else{
 				break;
 			}
 		}	
+		this.packets = copy;
 	}
 }
 
 class SlidingPacket {
 	public slidingPacket(){
-		acknowledged = false;	
+		this.initialize(1024, null, false)
 	}	
+	
+	public slidingPacket(int length){
+		this.initialize(length, null, false)
+	}
+	
+	public initialize(int length, byte[] data, boolean withHeader){		
+		this.headerlength = 4;
+		acknowledged = false;
+		this.length = length;
+		if(data != null){
+			this.setData(data, withHeader);
+		}
+	}
 
-	private byte[] data;
+	private byte[] data; //without header
 
 	private boolean acknowledged;
+	
+	private byte number;
+	
+	private int length;
+	
+	private final int headerLength;
 
-	public void setData(byte[] data){
-		this.data = data;
+	public void setData(byte[] data, boolean withHeader){
+		if(!withHeader){
+			this.data = data;
+		}else{
+			this.setFromPacket(data);
+		}
+	}
+	
+	public boolean data(){
+		return this.data;
 	}
 
 	public boolean acknowledged(){
 		return this.acknowledged;
 	}
-
-	public boolean data(){
-		return this.data;
-	}
-
+	
 	public void acknowledge(boolean set){
 		this.acknowledged = set;
 	}
+	
+	public boolean setNumber(boolean number){
+		this.number = number;
+	}
+	
+	public int number(){
+		return this.number;
+	}
 
 	public void clear(){
-		acknowledged = false;
-		data = null;
+		this.acknowledged = false;
+		this.data = null;
+	}	
+	
+	public void clear(int length){
+		this.acknowledged = false;
+		this.data = null;
+		this.length = length;
 	}
-}
-
-class serverSend {
+	
+	//assemble packet
+	public byte[] packet(byte[] data){
+		byte[] header = this.createHeader();	
+		tempBuf = new byte[header.length + data.length];		
+		System.arraycopy(header, 0, tempBuf, 0, header.length);
+		System.arraycopy(data, 0, tempBuf, header.length, data.length);
+		return tempBuf;
+	}
+	
+	//create header
+	public byte[] createHeader(){
+		int dataLength = data.size();
+		int packetNum = this.number << 24; //bit shift 3 bytes since our number will be one byte max
+		return ByteBuffer.allocate(4).putInt(packetNum + dataLength).array(); //packetnum will be 0000 - 1010 shifted 12 bytes and datalength will be max 0000 0100 0000 0000
+	}	
+	
+	public void setFromPacket(byte[] packet){
+		int packetLength = packet.size();
+		if(packetLength > this.length - this.headerLength)
+			throw new Exception("Mismatched Array Size");
+		
+		this.number = packet[0];
+		this.length = (packet[1] << 16) + (packet[2] << 8) + (packet[3] << 0); //binary shifting to add integer;
+		this.data = byte[this.length]
+		System.arraycopy(packet, this.headerLength - 1, this.data, 0, this.length);
+	}
 	
 }
 
-class udpserver{
+class serverActions {
+	private File fileList[];
+	
+	//file list
+	public String fileList(){
+		String dirname = System.getProperty("user.dir");
+		File path = new File(dirname);
+		this.fileList[] = path.listFiles();
+		
+		// String to hold names of all files/info about files.
+		StringBuilder fileNames = new StringBuilder("\n");
+		
+		// Find the number of files available.
+		int count = 0;
+		for (int i = 0; i < fileList.length; i++){
+
+			if (this.fileList[i].canRead())
+				count++;
+		}
+		fileNames.append(count + " files found.\n\n");
+
+		// Find the details for available files.
+		for (int i = 0; i < this.fileList.length; i++){
+
+			fileNames.append(this.fileList[i].getName() + " " + this.fileList[i].length() + " Bytes\n");
+		}
+		
+		return fileNames.toString();
+	}
+	
+	//file is available
+	public boolean fileFound(){
+		if(this.fileList == null)
+			return false;
+		boolean fileFound = false;
+		int index = 1;
+		for (int i = 0; i < fileList.length; i++){
+
+			if (((fileList[i].getName()).toString()).equalsIgnoreCase(fileName)){
+				index = i;
+				fileFound = true;
+			}
+		}
+		return fileFound;
+	}
+	
+	//SEND
+	
+	//filelist
+	
+	//send packet
+
+	//send window
+	
+	//RECEIVE
+	
+	//handshake
+	
+	//file selection
+	
+	//acknowledgement	
+}
+
+class clientActions {
+	//SEND
+	
+	//send handshake
+	
+	//send file selection
+	
+	//send acknowledgment
+	
+	//RECEIVE
+	
+	//filelist
+	
+	//packet	
+	
+}
+
+class fileActions{
+	
+	
+	//read one packet from file
+	
+	//write one packet to file
+}
+
+class udpserver{	
 
     public static void main(String args[]){
 
