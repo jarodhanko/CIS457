@@ -54,7 +54,7 @@ public class ClientActions {
 	* @return (DatagramPacket inPacket) -The packet received from the server.
 	*********************************************************************/
 	public DatagramPacket getServerMsg(DatagramSocket socket){
-		byte[] inBuf = new byte[100];
+		byte[] inBuf = new byte[1024];
 		DatagramPacket inPacket = new DatagramPacket(inBuf, inBuf.length);
 		try {
 			socket.receive(inPacket);

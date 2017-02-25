@@ -165,6 +165,21 @@ public class ServerActions {
 		}
 	}
 	
+	//send a whole window
+	public void sendWindow(SlidingWindow window, DatagramSocket socket, InetAddress address, int port){
+		for(SlidingPacket packet : window.packets()){
+			if(!packet.acknowledged()){
+				DatagramPacket outPacket = new DatagramPacket(packet.getPacket(), 0, packet.length(), address, port);
+				try {
+					socket.send(outPacket);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
 	/*********************************************************************
 	* Method: packetToString
 	* 

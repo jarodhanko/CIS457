@@ -47,8 +47,8 @@ public class UDPserver {
 		
 		// Variables
 		ServerActions sa = new ServerActions();
-		Window wd = new Window(); 
-		Packet pk = new Packet();
+		SlidingWindow wd = new SlidingWindow(); 
+		//Packet pk = new Packet();
         DatagramSocket socket;
         DatagramPacket inPacket;
         String msg;
@@ -101,32 +101,41 @@ public class UDPserver {
                 	sa.setupFileTransfer(file);
                 	wd.init();
                 	int index = 0;
+					
+					boolean exit = false;
                 	
-                	// Begin file transfer loop, continue until no more data to read.
-                	while(sa.readData() != -1){
+                	// Begin file transfer loop, continue until no more data to read and all packets were acknowledged.
+                	while(exit && window.packets().length == 0){
                 		
                 		//////////////////////////////////////////
                 		//***// EXAMPLES - USE AT OWN RISK //***//
                 		//////////////////////////////////////////
-                		
-                		// Create a new packet: pk.
-                		pk.newPacket(sa.getData(), sa.getBytesRead());
-                		
-                		// Add the packet to the window.
-                		wd.addPacket(pk);
-                		
-                		// Send the packet to the client.
-                		sa.sendData(pk.getPacket(), socket, address, port);
+						
+						//read new packets if necessary
+                		for(int i = 0; i < (window.maxSize - window.packets().length); i++){
+							if(sa.readData() != -1){
+								// Create a new packet: pk.
+								//pk.newPacket(sa.getData(), sa.getBytesRead());
+								SlidingPacket pk = new Packet().initialize(sa.getBytesRead, sa.getData(), false);
+								
+								// Add the packet to the window.
+								wd.addPacket(pk);								           		
+							}else{
+								exit = true;
+							}							
+						}
+						sa.sendWindow(wd, socket, address, port);
+						
                 		
                 		// Get acknowledgement from client.
                 		inPacket = sa.getClientMsg(socket);  // Datagram or...
                 		msg = sa.packetToString(inPacket);   // String
                 		
                 		// Update ack for server window, index equals sequence number in ack packet from client.
-                		index = ((inPacket.getData())[0] & 0xFF); 
+                		index = (int)(inPacket.getData())[0]; 
                 		wd.setAcknowledged(index);
                 		
-                		// Slide the window because we received an ack.
+                		// Try to slide the window because we received an ack.
                 		wd.slide();
                 	}
                 }  

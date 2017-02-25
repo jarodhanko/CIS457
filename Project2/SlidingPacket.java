@@ -6,7 +6,8 @@ public class SlidingPacket {
 	
 	private byte[] data; //without header
 	private boolean acknowledged;
-	private byte number;
+	private byte seqNumber;
+	private int number;
 	private int length;
 	private final int headerLength = 4;
 	
@@ -36,6 +37,10 @@ public class SlidingPacket {
 	public byte[] data(){
 		return this.data;
 	}
+	
+	public length(){
+		return this.length;
+	}
 
 	public boolean acknowledged(){
 		return this.acknowledged;
@@ -45,14 +50,21 @@ public class SlidingPacket {
 		this.acknowledged = set;
 	}
 	
-	public void setNumber(byte number){
+	public void setNumber(int number){
 		this.number = number;
 	}
 	
-	public int number(){
+	public byte number(){
 		return this.number;
 	}
 
+	public void setSequenceNumber(byte seqNumber){
+		this.seqNumber = seqNumber;
+	}
+	
+	public byte seqNumber(){
+		return this.seqNumber;
+	}
 	public void clear(){
 		this.acknowledged = false;
 		this.data = null;
@@ -65,7 +77,7 @@ public class SlidingPacket {
 	}
 	
 	//assemble packet
-	public byte[] packet(byte[] data){
+	public byte[] getPacket(){
 		byte[] header = this.createHeader();	
 		byte[] tempBuf = new byte[header.length + data.length];		
 		System.arraycopy(header, 0, tempBuf, 0, header.length);
@@ -76,7 +88,7 @@ public class SlidingPacket {
 	//create header
 	public byte[] createHeader(){
 		int dataLength = data.length;
-		int packetNum = this.number << 24; //bit shift 3 bytes since our number will be one byte max
+		int seqNum = this.seqNumber << 24; //bit shift 3 bytes since our number will be one byte max
 		return ByteBuffer.allocate(4).putInt(packetNum + dataLength).array(); //packetnum will be 0000 - 1010 shifted 12 bytes and datalength will be max 0000 0100 0000 0000
 	}	
 	
@@ -85,7 +97,7 @@ public class SlidingPacket {
 		if(packetLength > this.length - this.headerLength)
 			return false;
 		
-		this.number = packet[0];
+		this.seqNumber = packet[0];
 		this.length = (packet[1] << 16) + (packet[2] << 8) + (packet[3] << 0); //binary shifting to add integer;
 		this.data = new byte[this.length];
 		System.arraycopy(packet, this.headerLength - 1, this.data, 0, this.length);

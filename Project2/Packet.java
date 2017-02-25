@@ -9,8 +9,6 @@
 *  length. 
 *************************************************************************/
 public class Packet {
-	
-	private byte[] packet;
 	private byte[] header;
 	private byte[] data;
 	private boolean acknowledged;
@@ -36,10 +34,6 @@ public class Packet {
 		
 		header = new byte[]{number, (byte)((length >>> 8) & 0xFF), (byte)(length & 0xFF), 0};
 		data = newData;
-		packet = new byte[headerLength + dataLength];
-		
-		System.arraycopy(header, 0, packet, 0, header.length);
-		System.arraycopy(data, 0, packet, header.length, data.length);
 	}
 	
 	/*********************************************************************
@@ -62,7 +56,11 @@ public class Packet {
 	* @param  (void)
 	* @return (byte[] packet) -The header and data of the packet.
 	*********************************************************************/
-	public byte[] getPacket(){
+	public byte[] getPacket(){		
+		byte[] packet = new byte[headerLength + data.Length];
+		
+		System.arraycopy(header, 0, packet, 0, header.length);
+		System.arraycopy(data, 0, packet, header.length, data.length);
 		return packet;
 	}
 	
