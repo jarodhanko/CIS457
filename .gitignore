@@ -2,3 +2,6 @@
 
 /Project2/*
 !/Project2/*.java
+!/Project2/deprecated
+/Project2/deprecated/*
+!/Project2/deprecated/*.java
