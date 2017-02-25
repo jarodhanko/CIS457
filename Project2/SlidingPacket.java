@@ -66,6 +66,7 @@ public class SlidingPacket {
 	public byte seqNumber(){
 		return this.seqNumber;
 	}
+	
 	public void clear(){
 		this.acknowledged = false;
 		this.data = null;
