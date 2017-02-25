@@ -57,7 +57,7 @@ public class Packet {
 	* @return (byte[] packet) -The header and data of the packet.
 	*********************************************************************/
 	public byte[] getPacket(){		
-		byte[] packet = new byte[headerLength + data.Length];
+		byte[] packet = new byte[headerLength + data.length];
 		
 		System.arraycopy(header, 0, packet, 0, header.length);
 		System.arraycopy(data, 0, packet, header.length, data.length);

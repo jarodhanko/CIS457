@@ -99,24 +99,24 @@ public class UDPserver {
                 	
                 	// The file was found, setup file transfer.
                 	sa.setupFileTransfer(file);
-                	wd.init();
                 	int index = 0;
 					
-					boolean exit = false;
-                	
+					boolean exit = false;                	
                 	// Begin file transfer loop, continue until no more data to read and all packets were acknowledged.
-                	while(exit && window.packets().length == 0){
+                	while(exit && wd.packets().size() == 0){
                 		
                 		//////////////////////////////////////////
                 		//***// EXAMPLES - USE AT OWN RISK //***//
                 		//////////////////////////////////////////
 						
 						//read new packets if necessary
-                		for(int i = 0; i < (window.maxSize - window.packets().length); i++){
+						int iterations = wd.maxSize - wd.packets().size();
+                		for(int i = 0; i < iterations; i++){
 							if(sa.readData() != -1){
 								// Create a new packet: pk.
 								//pk.newPacket(sa.getData(), sa.getBytesRead());
-								SlidingPacket pk = new Packet().initialize(sa.getBytesRead, sa.getData(), false);
+								SlidingPacket pk = new SlidingPacket();
+								pk.initialize(sa.getBytesRead(), sa.getData(), false);
 								
 								// Add the packet to the window.
 								wd.addPacket(pk);								           		

@@ -11,19 +11,20 @@ public class SlidingPacket {
 	private int length;
 	private final int headerLength = 4;
 	
+	public SlidingPacket(){
+		this.initialize(1024, null, false);
+	}	
+	
+	public SlidingPacket(int length){
+		this.initialize(length, null, false);
+	}
+	
 	public void initialize(int length, byte[] data, boolean withHeader){		
 		acknowledged = false;
 		this.length = length;
 		if(data != null){
 			this.setData(data, withHeader);
 		}
-	}
-	public void slidingPacket(){
-		this.initialize(1024, null, false);
-	}	
-	
-	public void slidingPacket(int length){
-		this.initialize(length, null, false);
 	}
 
 	public void setData(byte[] data, boolean withHeader){
@@ -38,10 +39,10 @@ public class SlidingPacket {
 		return this.data;
 	}
 	
-	public length(){
+	public int length(){
 		return this.length;
 	}
-
+	
 	public boolean acknowledged(){
 		return this.acknowledged;
 	}
@@ -54,7 +55,7 @@ public class SlidingPacket {
 		this.number = number;
 	}
 	
-	public byte number(){
+	public int number(){
 		return this.number;
 	}
 
@@ -89,7 +90,7 @@ public class SlidingPacket {
 	public byte[] createHeader(){
 		int dataLength = data.length;
 		int seqNum = this.seqNumber << 24; //bit shift 3 bytes since our number will be one byte max
-		return ByteBuffer.allocate(4).putInt(packetNum + dataLength).array(); //packetnum will be 0000 - 1010 shifted 12 bytes and datalength will be max 0000 0100 0000 0000
+		return ByteBuffer.allocate(4).putInt((int)(this.number + dataLength)).array(); //packetnum will be 0000 - 1010 shifted 12 bytes and datalength will be max 0000 0100 0000 0000
 	}	
 	
 	public boolean setFromPacket(byte[] packet){

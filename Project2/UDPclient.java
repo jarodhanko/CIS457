@@ -54,11 +54,12 @@ public class UDPclient {
 		InetAddress address = null;
 		int port = -1;
 		boolean success = false;
+		SlidingWindow window = new SlidingWindow();
         
 		// Allow user to continue attempts to connect to server.
 		while(!success){
-        addr = ca.getIP();
-        port = ca.getPort();
+			addr = ca.getIP();
+			port = ca.getPort();
 
         	// Catch all exceptions for IP/port.
 			try {
@@ -99,7 +100,16 @@ public class UDPclient {
 		
 		// File transfer loop.
         while(true){
-        	
+        	//grab next packet
+			
+			//make sure it is not file not found -- only run on initial packet
+			
+			//check if it is the last packet
+			
+			//write packet
+			
+			//acknowledge
+			
         }
 		
 	}

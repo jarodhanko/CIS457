@@ -53,6 +53,7 @@ public class Window {
 	* @return (void)
 	*********************************************************************/
 	public void slide(){
+		//IS IT ALLOWABLE TO MUTATE THE ARRAY THAT THE LOOP IS LOOKING AT?
 		for (Packet packet : window){
 			if (packet.getAcknowledged())
 				window.pop();

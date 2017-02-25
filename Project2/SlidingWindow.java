@@ -1,6 +1,7 @@
 //package project2;
 
 import java.util.LinkedList;
+import java.util.*;
 
 public class SlidingWindow{
 	
@@ -10,10 +11,10 @@ public class SlidingWindow{
 	public byte windowSize;
 	public byte maxSize;
 	
-	public void slidingWindow(){
+	public SlidingWindow(){
 		slideIndex = 0;
 		maxSize = 5;
-		windowSize = 2 * maxSize;
+		windowSize = (byte) (2 * maxSize);
 		packets = new LinkedList<SlidingPacket>();
 	}	
 	
@@ -23,6 +24,13 @@ public class SlidingWindow{
 	
 	public void addPacket(SlidingPacket packet){
 		packets.add(packet);
+		//sort packets by sequence number
+		Collections.sort(packets, new Comparator<SlidingPacket>(){
+			@Override
+			public int compare(SlidingPacket pack1, SlidingPacket pack2){
+				return pack1.seqNumber() - pack2.seqNumber();
+			}
+		});
 	}
 
 	public void slide(){
@@ -31,7 +39,7 @@ public class SlidingWindow{
 		for(int i = 0; i < packets.size(); i++){
 			if(copy.peek().acknowledged()){
 				copy.pop();
-				slideIndex = (slideIndex++ % windowSize)
+				slideIndex = (slideIndex++ % windowSize);
 			}else{
 				break;
 			}
