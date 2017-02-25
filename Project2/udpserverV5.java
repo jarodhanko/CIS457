@@ -14,51 +14,8 @@ import java.util.*;
 import java.util.LinkedList;
 import static java.lang.Math.abs;
 
-class SlidingWindow{
-	public slidingWindow(){
-		slideIndex = 0;
-		LinkedList = new LinkedList<SlidingPacket>();
-	}
-
-	public int slideIndex;
-	
-	private LinkedList<SlidingPacket> packets;	
-	
-	public LinkedList packets(){
-		return this.packets;
-	}
-
-	public void slide(){
-		LinkedList copy = packets.clone();
-		for(int i = 0; i < packets.length; i++){
-			if(packets.peek().acknowledged()){
-				copy.pop();
-			}else{
-				break;
-			}
-		}	
-		this.packets = copy;
-	}
-}
-
 class SlidingPacket {
-	public slidingPacket(){
-		this.initialize(1024, null, false)
-	}	
 	
-	public slidingPacket(int length){
-		this.initialize(length, null, false)
-	}
-	
-	public initialize(int length, byte[] data, boolean withHeader){		
-		this.headerlength = 4;
-		acknowledged = false;
-		this.length = length;
-		if(data != null){
-			this.setData(data, withHeader);
-		}
-	}
-
 	private byte[] data; //without header
 
 	private boolean acknowledged;
@@ -67,7 +24,24 @@ class SlidingPacket {
 	
 	private int length;
 	
-	private final int headerLength;
+	private int headerLength;
+	
+	public SlidingPacket(){
+		this.initialize(1024, null, false);
+	}	
+	
+	public SlidingPacket(int length){
+		this.initialize(length, null, false);
+	}
+	
+	public void initialize(int length, byte[] data, boolean withHeader){		
+		this.headerLength = 4;
+		acknowledged = false;
+		this.length = length;
+		if(data != null){
+			this.setData(data, withHeader);
+		}
+	}
 
 	public void setData(byte[] data, boolean withHeader){
 		if(!withHeader){
@@ -77,7 +51,7 @@ class SlidingPacket {
 		}
 	}
 	
-	public boolean data(){
+	public byte[] data(){
 		return this.data;
 	}
 
@@ -89,7 +63,7 @@ class SlidingPacket {
 		this.acknowledged = set;
 	}
 	
-	public boolean setNumber(boolean number){
+	public void setNumber(byte number){
 		this.number = number;
 	}
 	
@@ -111,7 +85,7 @@ class SlidingPacket {
 	//assemble packet
 	public byte[] packet(byte[] data){
 		byte[] header = this.createHeader();	
-		tempBuf = new byte[header.length + data.length];		
+		byte[] tempBuf = new byte[header.length + data.length];		
 		System.arraycopy(header, 0, tempBuf, 0, header.length);
 		System.arraycopy(data, 0, tempBuf, header.length, data.length);
 		return tempBuf;
@@ -119,32 +93,75 @@ class SlidingPacket {
 	
 	//create header
 	public byte[] createHeader(){
-		int dataLength = data.size();
+		int dataLength = data.length;
 		int packetNum = this.number << 24; //bit shift 3 bytes since our number will be one byte max
 		return ByteBuffer.allocate(4).putInt(packetNum + dataLength).array(); //packetnum will be 0000 - 1010 shifted 12 bytes and datalength will be max 0000 0100 0000 0000
 	}	
 	
-	public void setFromPacket(byte[] packet){
-		int packetLength = packet.size();
+	public boolean setFromPacket(byte[] packet){
+		int packetLength = packet.length;
 		if(packetLength > this.length - this.headerLength)
-			throw new Exception("Mismatched Array Size");
+			return false;
 		
 		this.number = packet[0];
 		this.length = (packet[1] << 16) + (packet[2] << 8) + (packet[3] << 0); //binary shifting to add integer;
-		this.data = byte[this.length]
+		this.data = new byte[this.length];
 		System.arraycopy(packet, this.headerLength - 1, this.data, 0, this.length);
+		return true;
 	}
 	
 }
 
-class serverActions {
-	private File fileList[];
+class SlidingWindow{
+
+	public int slideIndex;
+	
+	private LinkedList<SlidingPacket> packets;
+
+	public SlidingWindow(){
+		slideIndex = 0;
+		packets = new LinkedList<SlidingPacket>();
+	}	
+	
+	public LinkedList packets(){
+		return this.packets;
+	}
+
+	public void slide(){
+		LinkedList<SlidingPacket> copy = (LinkedList<SlidingPacket>)this.packets.clone();
+		for(int i = 0; i < this.packets.size(); i++){
+			if(this.packets.peek().acknowledged()){
+				copy.pop();
+			}else{
+				break;
+			}
+		}	
+		this.packets = copy;
+	}
+}
+
+
+class ServerActions {
+	private File fileList[] = null;
+	private DatagramSocket socket = null;
+	private int source_port = -1;
+	InetAddress source_address = null;
+	
+	public ServerActions(){}
+	
+	public ServerActions(DatagramSocket socket){
+		this.socket = socket;
+	}	
+	
+	public void initialize(DatagramSocket socket){
+		this.socket = socket;
+	}
 	
 	//file list
 	public String fileList(){
 		String dirname = System.getProperty("user.dir");
 		File path = new File(dirname);
-		this.fileList[] = path.listFiles();
+		this.fileList = path.listFiles();
 		
 		// String to hold names of all files/info about files.
 		StringBuilder fileNames = new StringBuilder("\n");
@@ -168,24 +185,42 @@ class serverActions {
 	}
 	
 	//file is available
-	public boolean fileFound(){
+	public int fileIndex(String fileName){
 		if(this.fileList == null)
-			return false;
+			return -1;
 		boolean fileFound = false;
-		int index = 1;
 		for (int i = 0; i < fileList.length; i++){
 
 			if (((fileList[i].getName()).toString()).equalsIgnoreCase(fileName)){
-				index = i;
-				fileFound = true;
+				return i;
 			}
 		}
-		return fileFound;
+		return -1;
 	}
 	
 	//SEND
 	
 	//filelist
+	public void sendFileList() throws IOException{
+		String fileNames = this.fileList();
+		
+		// Prompt the client for input.
+		fileNames.concat("\nEnter file name for download: ");
+
+		// Send all information to the client(includes prompt).
+		byte[] outBuf = (fileNames).getBytes();
+		DatagramPacket outPacket = new DatagramPacket(outBuf, 0, outBuf.length, source_address, source_port);
+		socket.send(outPacket);
+	}
+	
+	//alert file not found
+	public void alertFileNotFound() throws IOException{
+		String noFile = "ERROR: file not found";
+		System.out.println(noFile);
+		byte[] outBuf = noFile.toString().getBytes();
+		DatagramPacket outPacket = new DatagramPacket(outBuf, 0, outBuf.length, source_address, source_port);
+		socket.send(outPacket);
+	}
 	
 	//send packet
 
@@ -194,13 +229,35 @@ class serverActions {
 	//RECEIVE
 	
 	//handshake
+	public void receiveHandshake() throws IOException {		
+		// Recieve new connection.
+		byte[] inBuf = new byte[100];
+		DatagramPacket inPacket = new DatagramPacket(inBuf, inBuf.length);
+		socket.receive(inPacket);
+
+		// Store client information.
+		source_port = inPacket.getPort();
+		source_address = inPacket.getAddress();
+		String msg = new String(inPacket.getData(), 0, inPacket.getLength());
+		System.out.println("Client: " + source_address + ":" + source_port);
+	}
 	
 	//file selection
+	public String fileSelection() throws IOException {
+		 // Retrieve clients file selection, store file name.
+		byte[] inBuf = new byte[100];
+		DatagramPacket inPacket = new DatagramPacket(inBuf, inBuf.length);
+		socket.receive(inPacket);
+		String fileName = new String(inPacket.getData(), 0, inPacket.getLength());
+		System.out.println("Requested File " + fileName);
+		
+		return fileName;
+	}
 	
 	//acknowledgement	
 }
 
-class clientActions {
+class ClientActions {
 	//SEND
 	
 	//send handshake
@@ -217,7 +274,7 @@ class clientActions {
 	
 }
 
-class fileActions{
+class FileActions{
 	
 	
 	//read one packet from file
