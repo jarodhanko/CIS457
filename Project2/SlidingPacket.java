@@ -80,20 +80,16 @@ public class SlidingPacket {
 		return ByteBuffer.allocate(4).putInt(packetNum + dataLength).array(); //packetnum will be 0000 - 1010 shifted 12 bytes and datalength will be max 0000 0100 0000 0000
 	}	
 	
-	public void setFromPacket(byte[] packet){
+	public boolean setFromPacket(byte[] packet){
 		int packetLength = packet.length;
 		if(packetLength > this.length - this.headerLength)
-			try {
-				throw new Exception("Mismatched Array Size");
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			return false;
 		
 		this.number = packet[0];
 		this.length = (packet[1] << 16) + (packet[2] << 8) + (packet[3] << 0); //binary shifting to add integer;
 		this.data = new byte[this.length];
 		System.arraycopy(packet, this.headerLength - 1, this.data, 0, this.length);
+		return true;
 	}
 	
 }

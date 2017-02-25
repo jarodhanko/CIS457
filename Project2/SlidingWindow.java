@@ -6,13 +6,12 @@ public class SlidingWindow{
 	
 	private LinkedList<SlidingPacket> packets;	
 	
+	public int slideIndex;
+	
 	public void slidingWindow(){
 		slideIndex = 0;
 		packets = new LinkedList<SlidingPacket>();
-	}
-
-	public int slideIndex;
-	
+	}	
 	
 	public LinkedList<SlidingPacket> packets(){
 		return this.packets;
