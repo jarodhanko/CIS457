@@ -99,18 +99,43 @@ public class UDPclient {
         ca.sendMsg(msg, socket, address, port);
 		
 		// File transfer loop.
-        while(true){
+        boolean fileFound = false;
+        boolean lastPacket = false;
+        boolean corrupted = false;
+        int seqNum = 0;
+        while(!lastPacket){
+        	
         	//grab next packet
+        	inPacket = ca.getServerMsg(socket);
 			
 			//make sure it is not file not found -- only run on initial packet
+			if (!fileFound){
+				String s = ca.packetToString(inPacket);
+				if(s.equals("ERROR: file not found")){
+					System.out.println(s);
+					break;
+				}
+				fileFound = true;
+				ca.setupFile(msg);
+			}
 			
-			//check if it is the last packet
+			// Check for corruption. FIX ME need a client sliding window.
+			corrupted = ca.checkChecksum(inPacket.getData());
+			
+			// Get the sequence number. FIX ME, is sequence number at index 4?? use seqNum to sort sliding window
+			seqNum = ca.getSeqNum(inPacket);
+        	
+			//check if it is the last packet, index 5-8 holds size??, if size less than 1024, is last packet.
+			lastPacket = ca.isLastPacket(inPacket);   // FIX ME, not sure where data size was stored in header, check method to verify.
 			
 			//write packet
+			ca.writeToFile(inPacket.getData());
 			
-			//acknowledge
+			//acknowledge, FIX ME, not sure where sequence number is in header, index 4?? Double check
+			ca.sendAck(inPacket, socket, address, port);
 			
         }
+        ca.closeFile();
 		
 	}
 	

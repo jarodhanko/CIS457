@@ -113,10 +113,13 @@ public class UDPserver {
 						int iterations = wd.maxSize - wd.packets().size();
                 		for(int i = 0; i < iterations; i++){
 							if(sa.readData() != -1){
+								
 								// Create a new packet: pk.
 								//pk.newPacket(sa.getData(), sa.getBytesRead());
 								SlidingPacket pk = new SlidingPacket();
 								pk.initialize(sa.getBytesRead(), sa.getData(), false);
+								byte[] checksum = sa.createChecksum(pk.getPacket(false, null));
+								pk.getPacket(true, checksum);
 								
 								// Add the packet to the window.
 								wd.addPacket(pk);								           		
@@ -128,11 +131,17 @@ public class UDPserver {
 						
                 		
                 		// Get acknowledgement from client.
-                		inPacket = sa.getClientMsg(socket);  // Datagram or...
-                		msg = sa.packetToString(inPacket);   // String
+                		inPacket = sa.getClientMsg(socket); 
                 		
-                		// Update ack for server window, index equals sequence number in ack packet from client.
-                		index = (int)(inPacket.getData())[0]; 
+                		// Determine the seq num from the ack
+                		index = sa.getSeqNum(inPacket);
+                		if (index == -1){
+                			// TO DO. if index is -1 that means the ack was corrupted on the way over and we could/should
+                			// not assume what the correct sequence number was. Perhaps this should be changed to 
+                			// if(index != -1) and put the update window / slide in the if statement? 
+                		}
+                		
+                		// Update ack for server window
                 		wd.setAcknowledged(index);
                 		
                 		// Try to slide the window because we received an ack.

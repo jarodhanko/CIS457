@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 public class SlidingPacket {
 	
 	private byte[] data; //without header
+	private byte[] packet; // with header
 	private boolean acknowledged;
 	private byte seqNumber;
 	private int number;
@@ -37,6 +38,10 @@ public class SlidingPacket {
 	
 	public byte[] data(){
 		return this.data;
+	}
+	
+	public byte[] packet(){
+		return packet;
 	}
 	
 	public int length(){
@@ -79,16 +84,29 @@ public class SlidingPacket {
 	}
 	
 	//assemble packet
-	public byte[] getPacket(){
-		byte[] header = this.createHeader();	
-		byte[] tempBuf = new byte[header.length + data.length];		
-		System.arraycopy(header, 0, tempBuf, 0, header.length);
-		System.arraycopy(data, 0, tempBuf, header.length, data.length);
-		return tempBuf;
+	public byte[] getPacket(boolean addChecksum, byte[] checksum){
+		
+		if (!addChecksum){
+			byte[] header = this.createHeader();	
+			byte[] tempBuf = new byte[header.length + data.length];		
+			System.arraycopy(header, 0, tempBuf, 0, header.length);
+			System.arraycopy(data, 0, tempBuf, header.length, data.length);
+			packet = tempBuf;
+			return tempBuf;
+		}
+		else {
+			byte[] header = checksum;
+			byte[] packet = getPacket(false, null);
+			byte[] tempBuf = new byte[header.length + packet.length];		
+			System.arraycopy(header, 0, tempBuf, 0, header.length);
+			System.arraycopy(packet, 0, tempBuf, header.length, packet.length);
+			return tempBuf;
+		}
 	}
 	
 	//create header
 	public byte[] createHeader(){
+		
 		int dataLength = data.length;
 		int seqNum = this.seqNumber << 24; //bit shift 3 bytes since our number will be one byte max
 		return ByteBuffer.allocate(4).putInt((int)(this.number + dataLength)).array(); //packetnum will be 0000 - 1010 shifted 12 bytes and datalength will be max 0000 0100 0000 0000

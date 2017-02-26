@@ -169,7 +169,7 @@ public class ServerActions {
 	public void sendWindow(SlidingWindow window, DatagramSocket socket, InetAddress address, int port){
 		for(SlidingPacket packet : window.packets()){
 			if(!packet.acknowledged()){
-				DatagramPacket outPacket = new DatagramPacket(packet.getPacket(), 0, packet.length(), address, port);
+				DatagramPacket outPacket = new DatagramPacket(packet.packet(), 0, packet.length(), address, port);
 				try {
 					socket.send(outPacket);
 				} catch (IOException e) {
@@ -255,6 +255,48 @@ public class ServerActions {
 	*********************************************************************/
 	public int getBytesRead(){
 		return bytesRead;
+	}
+	
+	public byte[] createChecksum(byte[] packet){
+		
+		int total = 0;
+		
+		for (int i = 0; i < packet.length; i++){
+			total += (packet[i] & 0xFF);
+		}
+		
+		byte[] checksum = new byte[] { (byte)(total >> 24),
+									   (byte)(total >> 16),
+									   (byte)(total >> 8),
+								       (byte)(total)};
+		
+		return checksum;
+	}
+	
+	
+	
+	/*********************************************************************
+	* Method: getSeqNum
+	* 
+	* Returns sequence number that the client has sent an acknowledgement for,
+	* will return -1 if there was corruption.
+	* 
+	* @param  (DatagramPacket packet)
+	* @return (int -1)    -Negative One for there was corruption.
+	* @return (int index) -The seq num of the packet.
+	*********************************************************************/
+	public int getSeqNum(DatagramPacket packet){
+		int index = 0;
+		byte[] tempBuf = packet.getData();
+		index = (tempBuf[0] & 0xFF);
+		for (int i = 1; i < 4; i++){
+			int temp = (tempBuf[i] & 0xFF);
+			if (temp != index){
+				return -1;
+			}
+		}
+		
+		return index;
 	}
 	
 	
