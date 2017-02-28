@@ -8,6 +8,10 @@ import java.io.InputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.io.*;
+import java.net.*;
+import java.nio.*;
+import java.nio.channels.*;
 
 /*************************************************************************
 * Class: UDPserver
@@ -100,7 +104,9 @@ public class UDPserver {
                 	// The file was found, setup file transfer.
                 	sa.setupFileTransfer(file);
 					
-					boolean exit = false;                	
+					boolean exit = false;
+					boolean timedOut = false;  
+					boolean slid = false;              	
                 	// Begin file transfer loop, continue until no more data to read and all packets were acknowledged.
                 	while(!exit || wd.packets().size() != 0){
                 		
@@ -124,29 +130,50 @@ public class UDPserver {
 								else
 									pk.setSequenceNumber((byte)0);
 								// Add the packet to the window.
-								wd.addPacket(pk);								           		
+								wd.addPacket(pk);
+								if(slid){							
+									byte[] checksum = sa.createChecksum(pk.getPacket(false, null));
+									byte[] toSend = pk.getPacket(true, checksum);
+									System.out.println("Sending: " + toSend[4]);
+									sa.sendData(toSend, socket, address, port);
+									slid = false;
+								}								           		
 							}else{
 								exit = true;
 							}							
 						}
-						System.out.println("Sending Window");
-						sa.sendWindow(wd, socket, address, port);
+
+						if(timedOut){
+							System.out.println("Sending Window");
+							sa.sendWindow(wd, socket, address, port);
+							timedOut = false;
+						}
 						
                 		System.out.println("waiting for ack");
-                		// Get acknowledgement from client.
-                		inPacket = sa.getClientMsg(socket); 
-                		
-                		// Determine the seq num from the ack
-                		byte seqNum = sa.getSeqNum(inPacket);
-						System.out.println("getting seq number: " + seqNum);
-                		if (seqNum != -1){
-							// Update ack for server window
-							wd.setAcknowledged(seqNum);
-                		}                		
+
+
+						socket.setSoTimeout(500);                        
+						try{
+							// Get acknowledgement from client.
+							inPacket = sa.getClientMsg(socket); 
+		            		// Determine the seq num from the ack
+		            		byte seqNum = sa.getSeqNum(inPacket);
+							System.out.println("getting seq number: " + seqNum);
+		            		if (seqNum != -1 /*&& (inPacket[0] ^ inPacket[1] ^ inPacket[2] ^ inPacket[3] == 0)*/ ){
+								// Update ack for server window
+								wd.setAcknowledged(seqNum);
+		            		}   
+						}catch (SocketTimeoutException ex){
+							timedOut = true;
+						}finally{
+							socket.setSoTimeout(0);
+						}
+
+                		             		
                 		
 						System.out.println("slide");
                 		// Try to slide the window because we received an ack (if corrupted the slide won't do anything).
-                		wd.slide();
+                		slid = wd.slide();
 						System.out.println("Exit: " + exit);
                 	}
 					System.exit(0);

@@ -11,6 +11,13 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
+import java.io.*;
+import java.net.*;
+import java.nio.*;
+import java.nio.channels.*;
+import java.util.*;
+import java.util.LinkedList;
+
 
 /*************************************************************************
 * Class: ServerActions
@@ -109,11 +116,13 @@ public class ServerActions {
 	* @param  (DatagramSocket socket)   -Socket connection.
 	* @return (DatagramPacket inPacket) -The packet received from the client.
 	*********************************************************************/
-	public DatagramPacket getClientMsg(DatagramSocket socket){
+	public DatagramPacket getClientMsg(DatagramSocket socket) throws SocketTimeoutException{
 		byte[] inBuf = new byte[100];
 		DatagramPacket inPacket = new DatagramPacket(inBuf, inBuf.length);
 		try {
 			socket.receive(inPacket);
+		}catch (SocketTimeoutException ex){
+			throw new SocketTimeoutException("Scary Exception");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -154,7 +163,7 @@ public class ServerActions {
 	* @param (int port)              -The clients port.
 	* @return (void)
 	*********************************************************************/
-	public void sendData(byte[] msg, DatagramSocket socket, InetAddress address, int port){
+	public void sendData(byte[] msg, DatagramSocket socket, InetAddress address, int port) {
 		byte[] outBuf = msg;
         DatagramPacket outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address, port);
         try {

@@ -25,10 +25,10 @@ public class SlidingWindow{
 	
 	public boolean addPacket(SlidingPacket packet){
 		boolean result = false;
-		byte upperbound = (slideIndex + maxSize) > windowSize ? (byte)windowSize : (byte)(slideIndex + maxSize);
+		byte upperbound = (slideIndex + maxSize) < windowSize ?  (byte)(slideIndex + maxSize) : (byte)windowSize;
 		byte sn = packet.seqNumber();
 		//if packet is within sliding window add it, else ignore it
-		if((sn >= slideIndex && sn <= upperbound) || ((slideIndex + maxSize < windowSize) && sn < (slideIndex + maxSize) % windowSize)){
+		if((sn >= slideIndex && sn < upperbound) || (((slideIndex + maxSize) >= windowSize) && sn < ((slideIndex + maxSize) % windowSize))){
 			//don't add duplicates
 			for(SlidingPacket pk : packets){
 				if(pk.seqNumber() == packet.seqNumber()){
@@ -48,19 +48,23 @@ public class SlidingWindow{
 		return result;
 	}
 
-	public void slide(){
+	public boolean slide(){
 		@SuppressWarnings("unchecked")
 		LinkedList<SlidingPacket> copy = (LinkedList<SlidingPacket>) packets.clone();
+		boolean changed = false;
 		for(int i = 0; i < packets.size(); i++){
 			if(copy.peek().acknowledged()){
 				copy.pop();
+				changed = true;
 				System.out.println("SLIDEINDEX: " + this.slideIndex);
 				this.slideIndex = (byte)((this.slideIndex + 1) % windowSize);
 			}else{
 				break;
 			}
 		}	
+		
 		this.packets = copy;
+		return changed;
 	}
 	
 	public void setAcknowledged(byte seqN){
