@@ -13,26 +13,26 @@ public class SlidingPacket {
 	private final int headerLength = 4;
 	
 	public SlidingPacket(){
-		this.initialize(1024, null, false);
+		this.initialize(1024, null, false, false);
 	}	
 	
 	public SlidingPacket(int length){
-		this.initialize(length, null, false);
+		this.initialize(length, null, false, false);
 	}
 	
-	public void initialize(int length, byte[] data, boolean withHeader){		
+	public void initialize(int length, byte[] data, boolean withHeader, boolean withChecksum){		
 		acknowledged = false;
 		this.length = length;
 		if(data != null){
-			this.setData(data, withHeader);
+			this.setData(data, withHeader, withChecksum);
 		}
 	}
 
-	public void setData(byte[] data, boolean withHeader){
+	public void setData(byte[] data, boolean withHeader, boolean withChecksum){
 		if(!withHeader){
 			this.data = data;
 		}else{
-			this.setFromPacket(data);
+			this.setFromPacket(data, withChecksum);
 		}
 	}
 	
@@ -100,6 +100,7 @@ public class SlidingPacket {
 			byte[] tempBuf = new byte[header.length + packet.length];		
 			System.arraycopy(header, 0, tempBuf, 0, header.length);
 			System.arraycopy(packet, 0, tempBuf, header.length, packet.length);
+			this.packet = tempBuf;
 			return tempBuf;
 		}
 	}
@@ -109,18 +110,22 @@ public class SlidingPacket {
 		
 		int dataLength = data.length;
 		int seqNum = this.seqNumber << 24; //bit shift 3 bytes since our number will be one byte max
-		return ByteBuffer.allocate(4).putInt((int)(this.number + dataLength)).array(); //packetnum will be 0000 - 1010 shifted 12 bytes and datalength will be max 0000 0100 0000 0000
+		System.out.println("seqNum " + this.seqNumber + " length " + dataLength + " total " + (dataLength + seqNum));
+		return ByteBuffer.allocate(4).putInt((int)(seqNum + dataLength)).array(); //packetnum will be 0000 - 1010 shifted 12 bytes and datalength will be max 0000 0100 0000 0000
 	}	
 	
-	public boolean setFromPacket(byte[] packet){
-		int packetLength = packet.length;
-		if(packetLength > this.length - this.headerLength)
+	public boolean setFromPacket(byte[] packet, boolean withChecksum){
+		int checksumLength = withChecksum ? 4 : 0;
+		int packetLength = packet.length - checksumLength;
+		if(packetLength > this.length)
 			return false;
-		
-		this.seqNumber = packet[0];
-		this.length = (packet[1] << 16) + (packet[2] << 8) + (packet[3] << 0); //binary shifting to add integer;
-		this.data = new byte[this.length];
-		System.arraycopy(packet, this.headerLength - 1, this.data, 0, this.length);
+		byte[] seq = {0,0,0,packet[0 + checksumLength]};
+		this.seqNumber = (byte)ByteBuffer.allocate(4).put(seq).getInt(0);
+		System.out.println("seqN: " + this.seqNumber);
+		byte[] len = {0,packet[1 + checksumLength], packet[2 + checksumLength], packet[3 + checksumLength]};		
+		this.length = ByteBuffer.allocate(4).put(len).getInt(0) + this.headerLength; //binary shifting to add integer;
+		this.data = new byte[this.length - this.headerLength - checksumLength];
+		System.arraycopy(packet, this.headerLength + checksumLength - 1, this.data, 0, this.length - this.headerLength - checksumLength);
 		return true;
 	}
 	

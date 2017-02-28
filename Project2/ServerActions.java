@@ -169,7 +169,9 @@ public class ServerActions {
 	public void sendWindow(SlidingWindow window, DatagramSocket socket, InetAddress address, int port){
 		for(SlidingPacket packet : window.packets()){
 			if(!packet.acknowledged()){
-				DatagramPacket outPacket = new DatagramPacket(packet.packet(), 0, packet.length(), address, port);
+				byte[] checksum = this.createChecksum(packet.getPacket(false, null));
+				byte[] toSend = packet.getPacket(true, checksum);
+				DatagramPacket outPacket = new DatagramPacket(toSend, 0, packet.length(), address, port);
 				try {
 					socket.send(outPacket);
 				} catch (IOException e) {
@@ -285,12 +287,12 @@ public class ServerActions {
 	* @return (int -1)    -Negative One for there was corruption.
 	* @return (int index) -The seq num of the packet.
 	*********************************************************************/
-	public int getSeqNum(DatagramPacket packet){
-		int index = 0;
+	public byte getSeqNum(DatagramPacket packet){
+		byte index = 0;
 		byte[] tempBuf = packet.getData();
-		index = (tempBuf[0] & 0xFF);
+		index = tempBuf[0];
 		for (int i = 1; i < 4; i++){
-			int temp = (tempBuf[i] & 0xFF);
+			byte temp = tempBuf[i];
 			if (temp != index){
 				return -1;
 			}

@@ -99,11 +99,10 @@ public class UDPserver {
                 	
                 	// The file was found, setup file transfer.
                 	sa.setupFileTransfer(file);
-                	int index = 0;
 					
 					boolean exit = false;                	
                 	// Begin file transfer loop, continue until no more data to read and all packets were acknowledged.
-                	while(exit && wd.packets().size() == 0){
+                	while(!exit || wd.packets().size() != 0){
                 		
                 		//////////////////////////////////////////
                 		//***// EXAMPLES - USE AT OWN RISK //***//
@@ -117,36 +116,40 @@ public class UDPserver {
 								// Create a new packet: pk.
 								//pk.newPacket(sa.getData(), sa.getBytesRead());
 								SlidingPacket pk = new SlidingPacket();
-								pk.initialize(sa.getBytesRead(), sa.getData(), false);
-								byte[] checksum = sa.createChecksum(pk.getPacket(false, null));
-								pk.getPacket(true, checksum);
-								
+								pk.initialize(sa.getBytesRead(), sa.getData(), false, false);
+								//byte[] checksum = sa.createChecksum(pk.getPacket(false, null));
+								//pk.getPacket(true, checksum);
+								if(wd.packets().peekLast() != null)
+									pk.setSequenceNumber((byte)((wd.packets().peekLast().seqNumber() + 1) % wd.windowSize));
+								else
+									pk.setSequenceNumber((byte)0);
 								// Add the packet to the window.
 								wd.addPacket(pk);								           		
 							}else{
 								exit = true;
 							}							
 						}
+						System.out.println("Sending Window");
 						sa.sendWindow(wd, socket, address, port);
 						
-                		
+                		System.out.println("waiting for ack");
                 		// Get acknowledgement from client.
                 		inPacket = sa.getClientMsg(socket); 
                 		
                 		// Determine the seq num from the ack
-                		index = sa.getSeqNum(inPacket);
-                		if (index == -1){
-                			// TO DO. if index is -1 that means the ack was corrupted on the way over and we could/should
-                			// not assume what the correct sequence number was. Perhaps this should be changed to 
-                			// if(index != -1) and put the update window / slide in the if statement? 
-                		}
+                		byte seqNum = sa.getSeqNum(inPacket);
+						System.out.println("getting seq number: " + seqNum);
+                		if (seqNum != -1){
+							// Update ack for server window
+							wd.setAcknowledged(seqNum);
+                		}                		
                 		
-                		// Update ack for server window
-                		wd.setAcknowledged(index);
-                		
-                		// Try to slide the window because we received an ack.
+						System.out.println("slide");
+                		// Try to slide the window because we received an ack (if corrupted the slide won't do anything).
                 		wd.slide();
+						System.out.println("Exit: " + exit);
                 	}
+					System.exit(0);
                 }  
             }
         }

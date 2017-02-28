@@ -7,23 +7,37 @@ public class SlidingWindow{
 	
 	private LinkedList<SlidingPacket> packets;	
 	
-	public int slideIndex;
+	public byte slideIndex;
 	public byte windowSize;
 	public byte maxSize;
+	
 	
 	public SlidingWindow(){
 		slideIndex = 0;
 		maxSize = 5;
 		windowSize = (byte) (2 * maxSize);
 		packets = new LinkedList<SlidingPacket>();
-	}	
+	}
 	
 	public LinkedList<SlidingPacket> packets(){
 		return this.packets;
 	}
 	
-	public void addPacket(SlidingPacket packet){
-		packets.add(packet);
+	public boolean addPacket(SlidingPacket packet){
+		boolean result = false;
+		byte upperbound = (slideIndex + maxSize) > windowSize ? (byte)windowSize : (byte)(slideIndex + maxSize);
+		byte sn = packet.seqNumber();
+		//if packet is within sliding window add it, else ignore it
+		if((sn >= slideIndex && sn <= upperbound) || ((slideIndex + maxSize < windowSize) && sn < (slideIndex + maxSize) % windowSize)){
+			//don't add duplicates
+			for(SlidingPacket pk : packets){
+				if(pk.seqNumber() == packet.seqNumber()){
+					return true;
+				}
+			}
+			packets.add(packet);
+			result = true;
+		}		
 		//sort packets by sequence number
 		Collections.sort(packets, new Comparator<SlidingPacket>(){
 			@Override
@@ -31,6 +45,7 @@ public class SlidingWindow{
 				return pack1.seqNumber() - pack2.seqNumber();
 			}
 		});
+		return result;
 	}
 
 	public void slide(){
@@ -39,7 +54,8 @@ public class SlidingWindow{
 		for(int i = 0; i < packets.size(); i++){
 			if(copy.peek().acknowledged()){
 				copy.pop();
-				slideIndex = (slideIndex++ % windowSize);
+				System.out.println("SLIDEINDEX: " + this.slideIndex);
+				this.slideIndex = (byte)((this.slideIndex + 1) % windowSize);
 			}else{
 				break;
 			}
@@ -47,7 +63,25 @@ public class SlidingWindow{
 		this.packets = copy;
 	}
 	
+	public void setAcknowledged(byte seqN){
+		for(SlidingPacket p : this.packets){
+			if(p.seqNumber() == seqN){
+				p.acknowledge(true);
+				System.out.println("ACKNOWLEDGED");
+			}
+		}		
+	}
+	
 	public void setAcknowledged(int index){
-		packets.get(index).acknowledge(true);
+		this.packets.get(index).acknowledge(true);
+	}
+	
+	public boolean readyForSlide(){
+		if(packets.peek() == null)
+			return false;
+		System.out.println("ready to slide: " + packets.peek().seqNumber() + " slideIndex: " + slideIndex);
+		if(packets.peek().seqNumber() == slideIndex)
+			return true;
+		return false;		
 	}
 }

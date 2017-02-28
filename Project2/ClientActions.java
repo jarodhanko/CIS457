@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.nio.ByteBuffer;
 
 
 public class ClientActions {
@@ -95,9 +96,8 @@ public class ClientActions {
 	public boolean isLastPacket(DatagramPacket packet){
 		
 		byte[] tempBuf = packet.getData();
-		int dataSize = ((0xFF * tempBuf[5]) << 16) |
-				   	   ((0xFF * tempBuf[6]) << 8) |
-				       ((0xFF * tempBuf[7]));
+		byte[] len = {0,tempBuf[5], tempBuf[6], tempBuf[7]};
+		int dataSize = ByteBuffer.allocate(4).put(len).getInt(0);
 		
 		if(dataSize < 1016)
 			return true;
@@ -133,11 +133,8 @@ public class ClientActions {
 		}
 	}
 	
-	public void sendAck(DatagramPacket inPacket, DatagramSocket socket, InetAddress address, int port){
-		
-		byte[] tempBuf = inPacket.getData();
-		byte seqNum = tempBuf[4];
-		tempBuf = new byte[] {seqNum, seqNum, seqNum, seqNum};  // Duplicated to be used as its own checksum.
+	public void sendAck(byte seqNum, DatagramSocket socket, InetAddress address, int port){
+		byte[] tempBuf = new byte[] {seqNum, seqNum, seqNum, seqNum};  // Duplicated to be used as its own checksum.
 		
 		sendMsg(tempBuf, socket, address, port);
 	}
@@ -160,11 +157,8 @@ public class ClientActions {
 		return false;
 	}
 	
-	public int getSeqNum(DatagramPacket packet){
-		int index;
-		index = packet.getData()[4];
-		
-		return index;
+	public byte getSeqNum(DatagramPacket packet){
+		return packet.getData()[4];
 	}
 
 }

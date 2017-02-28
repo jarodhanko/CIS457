@@ -7,6 +7,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.nio.channels.UnresolvedAddressException;
+import java.util.LinkedList;
+import java.util.*;
 
 /*************************************************************************
 * Class: UDPclient
@@ -71,7 +73,7 @@ public class UDPclient {
 				System.out.println("The specified IP address was invalid or no server was available");
 			}catch(NumberFormatException ex){
 				System.out.println("The port must be a valid integer value");
-			}catch(IOException ex){
+			}catch(Exception ex){
 				System.out.println("The specified port number or IP Address was invalid");		
 			}
 		}
@@ -102,9 +104,9 @@ public class UDPclient {
         boolean fileFound = false;
         boolean lastPacket = false;
         boolean corrupted = false;
-        int seqNum = 0;
+        byte seqNum = (byte)0;
         while(!lastPacket){
-        	
+        	System.out.println("Next Packet");
         	//grab next packet
         	inPacket = ca.getServerMsg(socket);
 			
@@ -112,7 +114,6 @@ public class UDPclient {
 			if (!fileFound){
 				String s = ca.packetToString(inPacket);
 				if(s.equals("ERROR: file not found")){
-					System.out.println(s);
 					break;
 				}
 				fileFound = true;
@@ -121,20 +122,40 @@ public class UDPclient {
 			
 			// Check for corruption. FIX ME need a client sliding window.
 			corrupted = ca.checkChecksum(inPacket.getData());
+			System.out.println("Corrupted: " + corrupted);
+			if(!corrupted){
 			
-			// Get the sequence number. FIX ME, is sequence number at index 4?? use seqNum to sort sliding window
-			seqNum = ca.getSeqNum(inPacket);
-        	
-			//check if it is the last packet, index 5-8 holds size??, if size less than 1024, is last packet.
-			lastPacket = ca.isLastPacket(inPacket);   // FIX ME, not sure where data size was stored in header, check method to verify.
-			
-			//write packet
-			ca.writeToFile(inPacket.getData());
-			
-			//acknowledge, FIX ME, not sure where sequence number is in header, index 4?? Double check
-			ca.sendAck(inPacket, socket, address, port);
-			
-        }
+				// Get the sequence number. FIX ME, is sequence number at index 4?? use seqNum to sort sliding window
+				seqNum = ca.getSeqNum(inPacket);
+				
+				//check if it is the last packet, index 5-8 holds size??, if size less than 1024, is last packet.
+				lastPacket = ca.isLastPacket(inPacket);   // FIX ME, not sure where data size was stored in header, check method to verify.
+				System.out.println("Seq Num: " +  seqNum + " last packet: " + lastPacket);
+				SlidingPacket newPacket = new SlidingPacket();
+				if(newPacket.setFromPacket(inPacket.getData(), true)){
+					System.out.println("Sending Ack: " + seqNum);
+					//acknowledge, always send
+					ca.sendAck(seqNum, socket, address, port);
+					
+					if(window.addPacket(newPacket)){
+						System.out.println("add to window");
+						LinkedList<SlidingPacket> packets = window.packets();
+						for(int i = 0; i < window.maxSize; i++){
+							if(window.readyForSlide()){							
+								//write packet data to file
+								ca.writeToFile(packets.get(0).data());
+								window.setAcknowledged(0);
+								window.slide();
+								System.out.println("Slide");
+							}else{
+								break;
+							}
+						}
+					}
+				}
+				
+			}
+		}
         ca.closeFile();
 		
 	}
