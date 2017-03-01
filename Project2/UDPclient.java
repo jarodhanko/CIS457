@@ -105,7 +105,7 @@ public class UDPclient {
         boolean lastPacket = false;
         boolean corrupted = false;
         byte seqNum = (byte)0;
-        while(!lastPacket || window.packets().size != 0){
+        while(!lastPacket || window.packets().size() != 0){
         	System.out.println("Next Packet");
         	//grab next packet
 			inPacket = null;
