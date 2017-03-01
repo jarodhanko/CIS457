@@ -154,6 +154,7 @@ public class ClientActions {
 			total += (packet[i] & 0xFF);
 		}
 		
+		System.out.println("\t \t \t \t CHECKSUM: " + checksum + " TOTAL: " + total);
 		if (total == checksum)
 			return true;
 		

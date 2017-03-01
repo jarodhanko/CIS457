@@ -282,7 +282,7 @@ public class ServerActions {
 									   (byte)(total >> 16),
 									   (byte)(total >> 8),
 								       (byte)(total)};
-		
+		System.out.println("\t \t \t \t CHECKSUM: " + checksum);
 		return checksum;
 	}
 	
