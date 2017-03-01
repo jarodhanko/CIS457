@@ -105,7 +105,7 @@ public class UDPclient {
         boolean lastPacket = false;
         boolean corrupted = false;
         byte seqNum = (byte)0;
-        while(!lastPacket){
+        while(!lastPacket || window.packets().size != 0){
         	System.out.println("Next Packet");
         	//grab next packet
 			inPacket = null;
@@ -157,15 +157,15 @@ public class UDPclient {
 						}
 					}
 				}else{
-					 for(SlidingPacket pk: window.packets()){
-						 if(!pk.acknowledged() && pk.seqNumber() != -1){
-							 byte[] temp = Arrays.copyOfRange(pk.data(), 0, pk.length() - 4);
-							 ca.writeToFile(temp);
-							 System.out.println("\t \t WRITING special: \t \t" + pk.seqNumber());
-							 window.setAcknowledged(pk.seqNumber());
-						 }
-					 }
-					window.slide();
+					 // for(SlidingPacket pk: window.packets()){
+						 // if(!pk.acknowledged() && pk.seqNumber() != -1){
+							 // byte[] temp = Arrays.copyOfRange(pk.data(), 0, pk.length() - 4);
+							 // ca.writeToFile(temp);
+							 // System.out.println("\t \t WRITING special: \t \t" + pk.seqNumber());
+							 // window.setAcknowledged(pk.seqNumber());
+						 // }
+					 // }
+					//window.slide();
 					lastPacket = true;
 				}
 				
