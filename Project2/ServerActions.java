@@ -180,7 +180,7 @@ public class ServerActions {
 			if(!packet.acknowledged()){
 				byte[] checksum = this.createChecksum(packet.getPacket(false, null));
 				byte[] toSend = packet.getPacket(true, checksum);
-				System.out.println(Arrays.toString(toSend));
+				//System.out.println(Arrays.toString(toSend));
 				DatagramPacket outPacket = new DatagramPacket(toSend, 0, toSend.length, address, port);
 				try {
 					socket.send(outPacket);

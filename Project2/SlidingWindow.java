@@ -41,17 +41,7 @@ public class SlidingWindow{
 			result = true;
 		}		
 		//sort packets by sequence number
-		Collections.sort(packets, new Comparator<SlidingPacket>(){
-			@Override
-			public int compare(SlidingPacket pack1, SlidingPacket pack2){
-				//if the window is wrapping, smaller is bigger
-				if ((pack1.seqNumber() < slideIndex && pack2.seqNumber() >= slideIndex)
-					|| (pack2.seqNumber() < slideIndex && pack1.seqNumber() >= slideIndex)){
-					return pack2.seqNumber() - pack1.seqNumber(); //-8,8,
-				}
-				return pack1.seqNumber() - pack2.seqNumber();//8,8,
-			}
-		});
+		this.sort();
 		return result;
 	}
 
@@ -65,6 +55,7 @@ public class SlidingWindow{
 				changed = true;
 				System.out.println("SLIDEINDEX: " + this.slideIndex);
 				this.slideIndex = (byte)((this.slideIndex + 1) % windowSize);
+				this.sort();
 			}else{
 				break;
 			}
@@ -90,9 +81,7 @@ public class SlidingWindow{
 		this.packets.peek().acknowledge(true);
 	}
 	
-	public boolean readyForSlide(){
-		if(packets.peek() == null)
-			return false;
+	public void sort(){
 		Collections.sort(packets, new Comparator<SlidingPacket>(){
 			@Override
 			public int compare(SlidingPacket pack1, SlidingPacket pack2){
@@ -104,6 +93,12 @@ public class SlidingWindow{
 				return pack1.seqNumber() - pack2.seqNumber();//8,8,
 			}
 		});
+	}
+	
+	public boolean readyForSlide(){
+		if(packets.peek() == null)
+			return false;
+		this.sort();
 		int i = 0;
 		for(SlidingPacket p : packets){
 			System.out.println("Window [" + i + "] contains: " + p.seqNumber());
