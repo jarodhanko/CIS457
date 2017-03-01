@@ -86,6 +86,10 @@ public class SlidingWindow{
 	public boolean readyForSlide(){
 		if(packets.peek() == null)
 			return false;
+		int i = 0;
+		for(SlidingPacket p : packets){
+			System.out.println("Window [" + i "] contains: " p.seqNumber());
+		}
 		System.out.println("ready to slide: " + packets.peek().seqNumber() + " slideIndex: " + slideIndex);
 		if(packets.peek().seqNumber() == slideIndex)
 			return true;
