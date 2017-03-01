@@ -162,7 +162,7 @@ public class UDPserver {
 		            		// Determine the seq num from the ack
 		            		byte seqNum = sa.getSeqNum(inPacket);
 							System.out.println("Ack: " + seqNum);
-		            		if (seqNum != -1 /*&& (inPacket[0] ^ inPacket[1] ^ inPacket[2] ^ inPacket[3] == 0)*/ ){
+		            		if (seqNum != -1 && (inPacket[0] ^ inPacket[1] ^ inPacket[2] ^ inPacket[3] == 0)){
 								// Update ack for server window
 								wd.setAcknowledged(seqNum);
 		            		}   
