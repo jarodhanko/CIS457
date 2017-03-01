@@ -75,7 +75,6 @@ public class SlidingWindow{
 		for(SlidingPacket p : this.packets){
 			if(p.seqNumber() == seqN){
 				p.acknowledge(true);
-				System.out.println("ACKNOWLEDGED");
 			}
 		}		
 	}

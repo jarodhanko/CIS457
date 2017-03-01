@@ -180,7 +180,8 @@ public class ServerActions {
 			if(!packet.acknowledged()){
 				byte[] checksum = this.createChecksum(packet.getPacket(false, null));
 				byte[] toSend = packet.getPacket(true, checksum);
-				DatagramPacket outPacket = new DatagramPacket(toSend, 0, packet.length(), address, port);
+				System.out.println(Arrays.toString(toSend));
+				DatagramPacket outPacket = new DatagramPacket(toSend, 0, toSend.length, address, port);
 				try {
 					socket.send(outPacket);
 				} catch (IOException e) {
@@ -234,6 +235,7 @@ public class ServerActions {
 	*********************************************************************/
 	public int readData(){
 		try {
+			buffer = new byte[1016]; //clear buffer
 			bytesRead = fis.read(buffer);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

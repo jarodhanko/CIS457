@@ -388,7 +388,7 @@ class udpserver{
                         
                         // Continuously read from file until EOF.
                         int packetNum = 0;
-                        int bytesRead;
+                        int bytesRead = 0;
                         index = 0;
                         boolean finished = false;
                         boolean exit = false;

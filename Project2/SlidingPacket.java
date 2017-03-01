@@ -7,13 +7,13 @@ public class SlidingPacket {
 	private byte[] data; //without header
 	private byte[] packet; // with header
 	private boolean acknowledged;
-	private byte seqNumber;
+	private byte seqNumber = -1;
 	private int number;
 	private int length;
 	private final int headerLength = 4;
 	
 	public SlidingPacket(){
-		this.initialize(1024, null, false, false);
+		this.initialize(1020, null, false, false);
 	}	
 	
 	public SlidingPacket(int length){
@@ -107,10 +107,8 @@ public class SlidingPacket {
 	
 	//create header
 	public byte[] createHeader(){
-		
-		int dataLength = data.length;
 		int seqNum = this.seqNumber << 24; //bit shift 3 bytes since our number will be one byte max
-		return ByteBuffer.allocate(4).putInt((int)(seqNum + dataLength)).array(); //packetnum will be 0000 - 1010 shifted 12 bytes and datalength will be max 0000 0100 0000 0000
+		return ByteBuffer.allocate(4).putInt((int)(seqNum + length)).array(); //packetnum will be 0000 - 1010 shifted 12 bytes and datalength will be max 0000 0100 0000 0000
 	}	
 	
 	public boolean setFromPacket(byte[] packet, boolean withChecksum){

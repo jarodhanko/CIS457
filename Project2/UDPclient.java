@@ -105,12 +105,12 @@ public class UDPclient {
         boolean lastPacket = false;
         boolean corrupted = false;
         byte seqNum = (byte)0;
-		int iterator = 0;
-        while(!lastPacket && iterator < 5){
+        while(!lastPacket){
         	System.out.println("Next Packet");
         	//grab next packet
+			inPacket = null;
         	inPacket = ca.getServerMsg(socket);
-			System.out.println(Arrays.toString(inPacket.getData()));
+			//System.out.println(Arrays.toString(inPacket.getData()));
 			
 			//make sure it is not file not found -- only run on initial packet
 			if (!fileFound){
@@ -147,7 +147,8 @@ public class UDPclient {
 								System.out.println("\t \t WRITING: \t \t " + packets.get(0).seqNumber());
 								//System.out.println(Arrays.toString(packets.get(0).data()));
 								//write packet data to file
-								ca.writeToFile(packets.get(0).data());
+								byte[] temp = Arrays.copyOfRange(packets.get(0).data(), 0, packets.get(0).length() - 4);
+								ca.writeToFile(temp);
 								window.setAcknowledged(0);
 								window.slide();
 								System.out.println("Slide");
@@ -157,16 +158,18 @@ public class UDPclient {
 						}
 					}
 				}else{
-					for(SlidingPacket pk: window.packets()){
-						ca.writeToFile(pk.data());
-						window.setAcknowledged(pk.seqNumber());
-					}
+					// for(SlidingPacket pk: window.packets()){
+						// if(!pk.acknowledged() && pk.seqNumber != -1){
+							// byte[] temp = Arrays.copyOfRange(pk.data(), 0, pk.length() - 4);
+							// ca.writeToFile(temp);
+							// window.setAcknowledged(pk.seqNumber());
+						// }
+					// }
 					window.slide();
 					lastPacket = true;
 				}
 				
 			}
-			iterator++;
 		}
         ca.closeFile();
 		

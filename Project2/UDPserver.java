@@ -137,7 +137,7 @@ public class UDPserver {
 									byte[] checksum = sa.createChecksum(pk.getPacket(false, null));
 									byte[] toSend = pk.getPacket(true, checksum);
 									System.out.println("Sending: " + toSend[4]);
-									System.out.println(Arrays.toString(toSend));
+									//System.out.println(Arrays.toString(toSend));
 									sa.sendData(toSend, socket, address, port);
 									slid = false;
 								}								           		
@@ -161,7 +161,7 @@ public class UDPserver {
 							inPacket = sa.getClientMsg(socket); 
 		            		// Determine the seq num from the ack
 		            		byte seqNum = sa.getSeqNum(inPacket);
-							System.out.println("getting seq number: " + seqNum);
+							System.out.println("Ack: " + seqNum);
 		            		if (seqNum != -1 /*&& (inPacket[0] ^ inPacket[1] ^ inPacket[2] ^ inPacket[3] == 0)*/ ){
 								// Update ack for server window
 								wd.setAcknowledged(seqNum);
