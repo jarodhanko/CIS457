@@ -141,15 +141,14 @@ public class UDPclient {
 					
 					if(window.addPacket(newPacket)){
 						System.out.println("add to window");
-						LinkedList<SlidingPacket> packets = window.packets();
 						for(int i = 0; i < window.maxSize; i++){
 							if(window.readyForSlide()){	
-								System.out.println("\t \t WRITING: \t \t " + packets.get(0).seqNumber());
+								System.out.println("\t \t WRITING: \t \t " + window.packets.peek().seqNumber());
 								//System.out.println(Arrays.toString(packets.get(0).data()));
 								//write packet data to file
-								byte[] temp = Arrays.copyOfRange(packets.get(0).data(), 0, packets.get(0).length() - 4);
+								byte[] temp = Arrays.copyOfRange(window.packets.peek().data(), 0, window.packets.peek().length() - 4);
 								ca.writeToFile(temp);
-								window.setAcknowledged(0);
+								window.acknowledgeFirst();
 								window.slide();
 								System.out.println("Slide");
 							}else{

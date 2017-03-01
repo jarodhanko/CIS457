@@ -86,6 +86,10 @@ public class SlidingWindow{
 		this.packets.get(index).acknowledge(true);
 	}
 	
+	public void acknowledgeFirst(){
+		this.packets.peek().acknowledge(true);
+	}
+	
 	public boolean readyForSlide(){
 		if(packets.peek() == null)
 			return false;
