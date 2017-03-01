@@ -28,7 +28,9 @@ public class SlidingWindow{
 		byte upperbound = (slideIndex + maxSize) < windowSize ?  (byte)(slideIndex + maxSize) : (byte)windowSize;
 		byte sn = packet.seqNumber();
 		//if packet is within sliding window add it, else ignore it
-		if((sn >= slideIndex && sn < upperbound) || (((slideIndex + maxSize) >= windowSize) && sn < ((slideIndex + maxSize) % windowSize))){
+		if((sn >= slideIndex && sn < upperbound) || 
+			(((slideIndex + maxSize) >= windowSize) && 
+			sn < ((slideIndex + maxSize) % windowSize))){
 			//don't add duplicates
 			for(SlidingPacket pk : packets){
 				if(pk.seqNumber() == packet.seqNumber()){
@@ -44,7 +46,7 @@ public class SlidingWindow{
 			public int compare(SlidingPacket pack1, SlidingPacket pack2){
 				//if the window is wrapping, smaller is bigger
 				if (pack1.seqNumber() < slideIndex && pack2.seqNumber() >= slideIndex){
-					return 1;
+					return pack2.seqNumber() - pack1.seqNumber();
 				}
 				return pack1.seqNumber() - pack2.seqNumber();
 			}

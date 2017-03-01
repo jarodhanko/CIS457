@@ -162,7 +162,7 @@ public class UDPclient {
 						 if(!pk.acknowledged() && pk.seqNumber() != -1){
 							 byte[] temp = Arrays.copyOfRange(pk.data(), 0, pk.length() - 4);
 							 ca.writeToFile(temp);
-							 System.out.println("\t \t WRITING: \t \t" + pk.seqNumber());
+							 System.out.println("\t \t WRITING special: \t \t" + pk.seqNumber());
 							 window.setAcknowledged(pk.seqNumber());
 						 }
 					 }
