@@ -221,7 +221,7 @@ public class ServerActions {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		buffer = new byte[1020];
+		buffer = new byte[1016];
 	}
 	
 	/*********************************************************************

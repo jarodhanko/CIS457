@@ -96,6 +96,9 @@ public class ClientActions {
 	public boolean isLastPacket(DatagramPacket packet){
 		
 		byte[] tempBuf = packet.getData();
+		if(tempBuf[0] == 0xF && tempBuf[1] == 0xF && tempBuf[2] == 0xF && tempBuf[3] == 0xF)
+			return true; //termination packet
+		//else check is data is shorter than max
 		byte[] len = {0,tempBuf[5], tempBuf[6], tempBuf[7]};
 		int dataSize = ByteBuffer.allocate(4).put(len).getInt(0);
 		

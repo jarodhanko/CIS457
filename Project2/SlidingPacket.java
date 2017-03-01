@@ -110,11 +110,13 @@ public class SlidingPacket {
 		
 		int dataLength = data.length;
 		int seqNum = this.seqNumber << 24; //bit shift 3 bytes since our number will be one byte max
-		System.out.println("seqNum " + this.seqNumber + " length " + dataLength + " total " + (dataLength + seqNum));
 		return ByteBuffer.allocate(4).putInt((int)(seqNum + dataLength)).array(); //packetnum will be 0000 - 1010 shifted 12 bytes and datalength will be max 0000 0100 0000 0000
 	}	
 	
 	public boolean setFromPacket(byte[] packet, boolean withChecksum){
+		if(packet[0] == 0xF && packet[1] == 0xF && packet[2] == 0xF && packet[3] == 0xF)
+			return false; //termination packet
+		
 		int checksumLength = withChecksum ? 4 : 0;
 		int packetLength = packet.length - checksumLength;
 		if(packetLength > this.length)
@@ -124,8 +126,8 @@ public class SlidingPacket {
 		System.out.println("seqN: " + this.seqNumber);
 		byte[] len = {0,packet[1 + checksumLength], packet[2 + checksumLength], packet[3 + checksumLength]};		
 		this.length = ByteBuffer.allocate(4).put(len).getInt(0) + this.headerLength; //binary shifting to add integer;
-		this.data = new byte[this.length - this.headerLength - checksumLength];
-		System.arraycopy(packet, this.headerLength + checksumLength - 1, this.data, 0, this.length - this.headerLength - checksumLength);
+		this.data = new byte[this.length - this.headerLength];
+		System.arraycopy(packet, this.headerLength + checksumLength, this.data, 0, this.length - this.headerLength);
 		return true;
 	}
 	

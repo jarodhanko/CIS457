@@ -42,6 +42,10 @@ public class SlidingWindow{
 		Collections.sort(packets, new Comparator<SlidingPacket>(){
 			@Override
 			public int compare(SlidingPacket pack1, SlidingPacket pack2){
+				//if the window is wrapping, smaller is bigger
+				if (pack1.seqNumber() < slideIndex && pack2.seqNumber() >= slideIndex){
+					return 1;
+				}
 				return pack1.seqNumber() - pack2.seqNumber();
 			}
 		});

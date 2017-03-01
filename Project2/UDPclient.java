@@ -105,10 +105,12 @@ public class UDPclient {
         boolean lastPacket = false;
         boolean corrupted = false;
         byte seqNum = (byte)0;
-        while(!lastPacket){
+		int iterator = 0;
+        while(!lastPacket && iterator < 5){
         	System.out.println("Next Packet");
         	//grab next packet
         	inPacket = ca.getServerMsg(socket);
+			System.out.println(Arrays.toString(inPacket.getData()));
 			
 			//make sure it is not file not found -- only run on initial packet
 			if (!fileFound){
@@ -141,7 +143,9 @@ public class UDPclient {
 						System.out.println("add to window");
 						LinkedList<SlidingPacket> packets = window.packets();
 						for(int i = 0; i < window.maxSize; i++){
-							if(window.readyForSlide()){							
+							if(window.readyForSlide()){	
+								System.out.println("\t \t WRITING: \t \t " + packets.get(0).seqNumber());
+								//System.out.println(Arrays.toString(packets.get(0).data()));
 								//write packet data to file
 								ca.writeToFile(packets.get(0).data());
 								window.setAcknowledged(0);
@@ -152,9 +156,17 @@ public class UDPclient {
 							}
 						}
 					}
+				}else{
+					for(SlidingPacket pk: window.packets()){
+						ca.writeToFile(pk.data());
+						window.setAcknowledged(pk.seqNumber());
+					}
+					window.slide();
+					lastPacket = true;
 				}
 				
 			}
+			iterator++;
 		}
         ca.closeFile();
 		

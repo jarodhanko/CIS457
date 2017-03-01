@@ -12,6 +12,7 @@ import java.io.*;
 import java.net.*;
 import java.nio.*;
 import java.nio.channels.*;
+import java.util.*;
 
 /*************************************************************************
 * Class: UDPserver
@@ -122,19 +123,21 @@ public class UDPserver {
 								// Create a new packet: pk.
 								//pk.newPacket(sa.getData(), sa.getBytesRead());
 								SlidingPacket pk = new SlidingPacket();
+								//System.out.println(Arrays.toString(sa.getData()));
 								pk.initialize(sa.getBytesRead(), sa.getData(), false, false);
 								//byte[] checksum = sa.createChecksum(pk.getPacket(false, null));
 								//pk.getPacket(true, checksum);
 								if(wd.packets().peekLast() != null)
 									pk.setSequenceNumber((byte)((wd.packets().peekLast().seqNumber() + 1) % wd.windowSize));
 								else
-									pk.setSequenceNumber((byte)0);
+									pk.setSequenceNumber((byte)wd.slideIndex);
 								// Add the packet to the window.
 								wd.addPacket(pk);
 								if(slid){							
 									byte[] checksum = sa.createChecksum(pk.getPacket(false, null));
 									byte[] toSend = pk.getPacket(true, checksum);
 									System.out.println("Sending: " + toSend[4]);
+									System.out.println(Arrays.toString(toSend));
 									sa.sendData(toSend, socket, address, port);
 									slid = false;
 								}								           		
@@ -176,6 +179,8 @@ public class UDPserver {
                 		slid = wd.slide();
 						System.out.println("Exit: " + exit);
                 	}
+					byte[] terminationPacket = {0xF, 0xF, 0xF, 0xF};
+					sa.sendData(terminationPacket, socket, address, port);
 					System.exit(0);
                 }  
             }
