@@ -45,10 +45,11 @@ public class SlidingWindow{
 			@Override
 			public int compare(SlidingPacket pack1, SlidingPacket pack2){
 				//if the window is wrapping, smaller is bigger
-				if (pack1.seqNumber() < slideIndex && pack2.seqNumber() >= slideIndex){
-					return pack2.seqNumber() - pack1.seqNumber();
+				if ((pack1.seqNumber() < slideIndex && pack2.seqNumber() >= slideIndex)
+					|| (pack2.seqNumber() < slideIndex && pack1.seqNumber() >= slideIndex)){
+					return pack2.seqNumber() - pack1.seqNumber(); //-8,8,
 				}
-				return pack1.seqNumber() - pack2.seqNumber();
+				return pack1.seqNumber() - pack2.seqNumber();//8,8,
 			}
 		});
 		return result;
@@ -88,9 +89,21 @@ public class SlidingWindow{
 	public boolean readyForSlide(){
 		if(packets.peek() == null)
 			return false;
+		Collections.sort(packets, new Comparator<SlidingPacket>(){
+			@Override
+			public int compare(SlidingPacket pack1, SlidingPacket pack2){
+				//if the window is wrapping, smaller is bigger
+				if ((pack1.seqNumber() < slideIndex && pack2.seqNumber() >= slideIndex)
+					|| (pack2.seqNumber() < slideIndex && pack1.seqNumber() >= slideIndex)){
+					return pack2.seqNumber() - pack1.seqNumber(); //-8,8,
+				}
+				return pack1.seqNumber() - pack2.seqNumber();//8,8,
+			}
+		});
 		int i = 0;
 		for(SlidingPacket p : packets){
 			System.out.println("Window [" + i + "] contains: " + p.seqNumber());
+			i++;
 		}
 		System.out.println("ready to slide: " + packets.peek().seqNumber() + " slideIndex: " + slideIndex);
 		if(packets.peek().seqNumber() == slideIndex)
