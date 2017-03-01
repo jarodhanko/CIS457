@@ -3,6 +3,7 @@
 /Project2/*
 !/Project2/*.java
 !/Project2/mountain.jpg
+!/Project2/~mountain.jpg
 !/Project2/deprecated
 /Project2/deprecated/*
 !/Project2/deprecated/*.java
