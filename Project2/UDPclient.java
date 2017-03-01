@@ -159,10 +159,10 @@ public class UDPclient {
 					}
 				}else{
 					 for(SlidingPacket pk: window.packets()){
-						 if(!pk.acknowledged() && pk.seqNumber != -1){
+						 if(!pk.acknowledged() && pk.seqNumber() != -1){
 							 byte[] temp = Arrays.copyOfRange(pk.data(), 0, pk.length() - 4);
 							 ca.writeToFile(temp);
-							 System.out.println("\t \t WRITING: \t \t" + pk.get(0).seqNumber());
+							 System.out.println("\t \t WRITING: \t \t" + pk.seqNumber());
 							 window.setAcknowledged(pk.seqNumber());
 						 }
 					 }
