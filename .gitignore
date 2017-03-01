@@ -4,6 +4,7 @@
 !/Project2/*.java
 !/Project2/mountain.jpg
 !/Project2/~mountain.jpg
+!/Project2/packetcorrupt.py
 !/Project2/deprecated
 /Project2/deprecated/*
 !/Project2/deprecated/*.java
