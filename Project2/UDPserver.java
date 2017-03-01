@@ -159,10 +159,11 @@ public class UDPserver {
 						try{
 							// Get acknowledgement from client.
 							inPacket = sa.getClientMsg(socket); 
+							byte[] data = inPacket.getData();
 		            		// Determine the seq num from the ack
 		            		byte seqNum = sa.getSeqNum(inPacket);
 							System.out.println("Ack: " + seqNum);
-		            		if (seqNum != -1 && (inPacket[0] ^ inPacket[1] ^ inPacket[2] ^ inPacket[3] == 0)){
+		            		if (seqNum != -1 && (data[0] ^ data[1] ^ data[2] ^ data[3] == 0)){
 								// Update ack for server window
 								wd.setAcknowledged(seqNum);
 		            		}   
