@@ -153,7 +153,7 @@ public class UDPclient {
 								ca.setupFile(selection);
 								initializationNumber++;
 							}else{
-								if(attempt > 10){
+								if(attempt > 100){
 									System.out.println("That file does not exist or the selection failed");
 									success = false;
 									attempt = 0;
