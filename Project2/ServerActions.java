@@ -278,11 +278,11 @@ public class ServerActions {
 			total += (packet[i] & 0xFF);
 		}
 		
-		byte[] checksum = new byte[] { (byte)(total >> 24),
-									   (byte)(total >> 16),
-									   (byte)(total >> 8),
+		byte[] checksum = new byte[] { (byte)(total >>> 24),
+									   (byte)(total >>> 16),
+									   (byte)(total >>> 8),
 								       (byte)(total)};
-		System.out.println("\t \t \t \t CHECKSUM: " + checksum);
+		System.out.println("\t \t \t \t CHECKSUM: " + total);
 		return checksum;
 	}
 	

@@ -145,10 +145,10 @@ public class ClientActions {
 	public boolean checkChecksum(byte[] packet){
 		
 		int total = 0;
-		int checksum = ((0xFF * packet[0]) << 24) |
-					   ((0xFF * packet[1]) << 16) |
-					   ((0xFF * packet[2]) << 8) |
-				       ((0xFF * packet[3]));
+		int checksum = ((0xFF & packet[0]) << 24) |
+					   ((0xFF & packet[1]) << 16) |
+					   ((0xFF & packet[2]) << 8) |
+				       ((0xFF & packet[3]));
 		
 		for (int i = 4; i < packet.length; i++){
 			total += (packet[i] & 0xFF);

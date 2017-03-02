@@ -123,7 +123,7 @@ public class UDPclient {
 			}
 			
 			// Check for corruption. FIX ME need a client sliding window.
-			corrupted = ca.checkChecksum(inPacket.getData());
+			corrupted = !ca.checkChecksum(inPacket.getData());
 			System.out.println("Corrupted: " + corrupted);
 			if(!corrupted){
 			
