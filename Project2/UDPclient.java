@@ -149,7 +149,6 @@ public class UDPclient {
 							}
 							ca.sendData(ca.signPacket(selection.getBytes(), initializationNumber), socket, address, port);
 							inPacket = ca.getMsg(socket);
-							System.out.println(ca.getPacketSign(inPacket.getData());
 							if(ca.getPacketSign(inPacket.getData()) == initializationNumber){
 								ca.setupFile(selection);
 								initializationNumber++;
