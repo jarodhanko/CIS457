@@ -152,8 +152,10 @@ public class UDPclient {
 							if(ca.getPacketSign(inPacket.getData()) == initializationNumber){
 								ca.setupFile(selection);
 								initializationNumber++;
+								attempt = 0;
+								success = false;	
 							}else{
-								if(attempt > 100){
+								if(attempt > 10){
 									System.out.println("That file does not exist or the selection failed");
 									success = false;
 									attempt = 0;
@@ -163,9 +165,7 @@ public class UDPclient {
 							}							
 						}catch(Exception ex){
 							//do nothing
-						}finally{
-							attempt = 0;
-							success = false;							
+						}finally{						
 							socket.setSoTimeout(0); 							
 						}
 						break;
