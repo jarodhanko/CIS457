@@ -197,6 +197,12 @@ public class UDPserver {
 						System.out.println("Sending Window");
 						sa.sendWindow(wd, socket, address, port);
 						timedOut = false;
+						if(attempt > 20){ //client disconnected so acknowledge all packets so it can close
+							System.out.println("The client has been lost");
+							for(SlidingPacket p: wd.packets()){
+								wd.setAcknowledged(p.seqNumber());
+							}
+						}
 					}
 					
 					System.out.println("waiting for ack");
@@ -215,12 +221,6 @@ public class UDPserver {
 							wd.setAcknowledged(seqNum);
 							attempt = 0;
 						}   
-						if(attempt > 20){ //client disconnected so acknowledge all packets so it can close
-							System.out.println("The client has been lost");
-							for(SlidingPacket p: wd.packets()){
-								wd.setAcknowledged(p.seqNumber());
-							}
-						}
 					}catch (SocketTimeoutException ex){
 						timedOut = true;
 						attempt++;
