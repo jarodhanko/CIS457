@@ -73,7 +73,7 @@ public class SlidingWindow{
 		}		
 	}
 	
-	public void setAcknowledged(int index){
+	public void setAcknowledgedInt(int index){
 		this.packets.get(index).acknowledge(true);
 	}
 	
