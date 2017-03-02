@@ -247,7 +247,7 @@ public class UDPclient {
 							//window.slide();
 							//is a termination packet
 							byte[] pk = inPacket.getData();
-							if(pk[0] == 0xF && pk[1] == 0xF && pk[2] == 0xF && pk[3] == 0xF){
+							if(pk[0] == 0xF && pk[1] == 0xF && pk[2] == 0xF && pk[3] == 0xF && pk[4] == 0xF && pk[5] == 0xF && pk[6] == 0xF && pk[7] == 0xF){
 								lastPacket = true;
 							}
 						}

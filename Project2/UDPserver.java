@@ -235,7 +235,7 @@ public class UDPserver {
 					slid = wd.slide();
 					System.out.println("Exit: " + exit);
 				}
-				byte[] terminationPacket = {0xF, 0xF, 0xF, 0xF};
+				byte[] terminationPacket = {0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF};
 				sa.sendData(terminationPacket, socket, address, port);
             }
         }
