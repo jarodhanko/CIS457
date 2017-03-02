@@ -160,7 +160,8 @@ public class UDPserver {
 				
 				boolean exit = false;
 				boolean timedOut = false;  
-				boolean slid = false;              	
+				boolean slid = false;   
+				int attempt = 0;
 				// Begin file transfer loop, continue until no more data to read and all packets were acknowledged.
 				while(!exit || wd.packets().size() != 0){
 											
@@ -212,9 +213,17 @@ public class UDPserver {
 						if (seqNum != -1 && ((data[0] ^ data[1] ^ data[2] ^ data[3]) == 0)){
 							// Update ack for server window
 							wd.setAcknowledged(seqNum);
+							attempt = 0;
 						}   
+						if(attempt > 20){ //client disconnected so acknowledge all packets so it can close
+							System.out.println("The client has been lost");
+							for(SlidingPacket p: wd.packets()){
+								wd.setAcknowledged(p.seqNumber());
+							}
+						}
 					}catch (SocketTimeoutException ex){
 						timedOut = true;
+						attempt++;
 					}finally{
 						socket.setSoTimeout(0);
 					}
@@ -228,7 +237,6 @@ public class UDPserver {
 				}
 				byte[] terminationPacket = {0xF, 0xF, 0xF, 0xF};
 				sa.sendData(terminationPacket, socket, address, port);
-				System.exit(0);
             }
         }
         catch (Exception e){
