@@ -138,7 +138,7 @@ public class UDPserver {
 						case 3:
 							System.out.println("Case 3");
 							try{	
-								socket.setSoTimeout(1000);							
+								socket.setSoTimeout(500);							
 								sa.sendData(sa.signedAck((byte)(initializationNumber - 1)), socket, address, port); //ack previous step	
 								inPacket = sa.getMsg(socket);
 								if(sa.getPacketSign(inPacket.getData()) == 3){ //wait for ack to continue

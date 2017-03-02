@@ -204,9 +204,7 @@ public class UDPclient {
 					corrupted = !ca.checkChecksum(inPacket.getData());
 					System.out.println("Corrupted: " + corrupted);
 					
-					success = true; //don't need to send continue ack anymorex
-					if(!corrupted){
-					
+					if(!corrupted){					
 						// Get the sequence number. FIX ME, is sequence number at index 4?? use seqNum to sort sliding window
 						seqNum = ca.getSeqNum(inPacket);
 						
@@ -215,6 +213,7 @@ public class UDPclient {
 						System.out.println("Seq Num: " +  seqNum + " last packet: " + lastPacket);
 						SlidingPacket newPacket = new SlidingPacket();
 						if(newPacket.setFromPacket(inPacket.getData(), true)){
+							success = true; //don't need to send continue ack anymore since we sucessfully received a packet
 							System.out.println("Sending Ack: " + seqNum);
 							//acknowledge, always send
 							ca.sendAck(seqNum, socket, address, port);
