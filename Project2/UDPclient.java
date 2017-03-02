@@ -105,7 +105,7 @@ public class UDPclient {
 								initializationNumber++;
 							}
 						}catch(Exception ex){
-							if(attempt > 2){ //attempt to connect 3 times before restarting
+							if(attempt > 10){ //attempt to connect 3 times before restarting
 								System.out.println("Failed to connect to server");
 								success = false;
 								attempt = 0;
@@ -149,11 +149,12 @@ public class UDPclient {
 							}
 							ca.sendData(ca.signPacket(selection.getBytes(), initializationNumber), socket, address, port);
 							inPacket = ca.getMsg(socket);
+							System.out.println(ca.getPacketSign(inPacket.getData());
 							if(ca.getPacketSign(inPacket.getData()) == initializationNumber){
 								ca.setupFile(selection);
 								initializationNumber++;
 							}else{
-								if(attempt == 2){
+								if(attempt > 10){
 									System.out.println("That file does not exist or the selection failed");
 									success = false;
 									attempt = 0;
