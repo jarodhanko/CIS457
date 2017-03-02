@@ -11,7 +11,7 @@ import java.net.InetAddress;
 import java.nio.ByteBuffer;
 
 
-public class ClientActions {
+public class ClientActions extends SharedActions{
 	
 	private OutputStream fos;
 	
@@ -59,26 +59,6 @@ public class ClientActions {
 		}
 	}
 	
-	/*********************************************************************
-	* Method: getServerMsg
-	* 
-	* Waits for a message from a Server and returns the datagram packet
-	* that it receives from the server.
-	*  
-	* @param  (DatagramSocket socket)   -Socket connection.
-	* @return (DatagramPacket inPacket) -The packet received from the server.
-	*********************************************************************/
-	public DatagramPacket getServerMsg(DatagramSocket socket){
-		byte[] inBuf = new byte[1024];
-		DatagramPacket inPacket = new DatagramPacket(inBuf, inBuf.length);
-		try {
-			socket.receive(inPacket);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        return inPacket;
-	}
 	
 	/*********************************************************************
 	* Method: packetToString

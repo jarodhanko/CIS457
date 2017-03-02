@@ -57,133 +57,178 @@ public class UDPserver {
         DatagramSocket socket;
         DatagramPacket inPacket;
         String msg;
-        String file;
+        String file = "";
         int myPort;
-        int port;
-        InetAddress address;
+        int port = -1;
+        InetAddress address = null;
 		
         try{
 			
         	// Get the port from the user, set socket port.
         	myPort = sa.getPort();
             socket = new DatagramSocket(myPort);
+			
 
             // Have server loop to accept more clients after finishing.
             while (true){
 
                 System.out.println("\nRunning...\n");
-                
-                // Get packet from a connecting client.
-                inPacket = sa.getClientMsg(socket);
-                
-                // Store the clients IP and port.
-                address = inPacket.getAddress();
-                port = inPacket.getPort();
-                
-                System.out.println("Client: " + address + " : " + port);
-                
-                // Get the files in the directory, send to client.
-                msg = sa.fileList();
-                sa.sendMsg(msg, socket, address, port);
-                
-                // Get the clients file selection.
-                inPacket = sa.getClientMsg(socket);
-                file = sa.packetToString(inPacket);
-                
-                System.out.println("Selected File: " + file);
-                
-                // Check that the file selected is a valid file.
-                if (!sa.fileFound(file)){
-                	
-                	// The file was not valid, print error message, send error message to client.
-                	msg = "ERROR: file not found";
-                	System.out.println(msg);
-                	sa.sendMsg(msg, socket, address, port);
-                }
-                else {
-                	
-                	// The file was found, setup file transfer.
-                	sa.setupFileTransfer(file);
+                byte initializationNumber = 0;
+				while(initializationNumber < 4) {
+					switch (initializationNumber){
+						case 0: //get packet from connection client;
+							System.out.println("Case 0");
+							inPacket = sa.getMsg(socket);
+							try {
+								socket.setSoTimeout(500); 
+								if(sa.getPacketSign(inPacket.getData()) == initializationNumber){								
+									// Store the clients IP and port.
+									address = inPacket.getAddress();
+									port = inPacket.getPort();								
+									System.out.println("Client: " + address + " : " + port);
+									initializationNumber++;
+								}
+							}catch(Exception ex){
+								break;
+							}finally{								
+								socket.setSoTimeout(0); 
+							}
+							break;
+						case 1: //send fileList
+							System.out.println("Case 1");
+							try {
+								socket.setSoTimeout(500); 
+								sa.sendData(sa.signedAck((byte)(initializationNumber - 1)), socket, address, port); //ack previous step							
+								// Get the files in the directory, send to client.
+								msg = sa.fileList();
+								sa.sendData(sa.signPacket(msg.getBytes(), initializationNumber), socket, address, port);								
+								inPacket = sa.getMsg(socket); //wait for ack
+								if(sa.getPacketSign(inPacket.getData()) == initializationNumber){
+									initializationNumber++; //ack successful; continue
+								}
+							}catch (Exception ex){
+								break;
+							}finally{								
+								socket.setSoTimeout(0); 
+							}			
+							break;
+						case 2: //get file selection
+							System.out.println("Case 2");
+							try{
+								socket.setSoTimeout(500);
+								// Get the clients file selection.
+								inPacket = sa.getMsg(socket);
+								if(sa.getPacketSign(inPacket.getData()) == initializationNumber){
+									byte[] designed = sa.designPacket(inPacket.getData());
+									file = sa.byteArrayToString(designed).trim();			
+									System.out.println("Selected File: " + file);
+									if (!sa.fileFound(file)){        									
+										msg = "ERROR: file not found";
+										System.out.println(msg);
+									}else{
+										initializationNumber++;
+									}
+								}								
+							}catch(Exception ex){
+								break;
+							}finally{								
+								socket.setSoTimeout(0); 
+							}
+							break;
+						case 3:
+							System.out.println("Case 3");
+							try{	
+								socket.setSoTimeout(1000);							
+								sa.sendData(sa.signedAck((byte)(initializationNumber - 1)), socket, address, port); //ack previous step	
+								inPacket = sa.getMsg(socket);
+								if(sa.getPacketSign(inPacket.getData()) == 3){ //wait for ack to continue
+									initializationNumber++;
+								}
+							}catch(Exception ex){
+								break;
+							}finally{								
+								socket.setSoTimeout(0); 
+							}
+							break;
+						default:
+							break;
+					}
+				}
+                              	
+				// The file was found, setup file transfer.
+				sa.setupFileTransfer(file);
+				
+				boolean exit = false;
+				boolean timedOut = false;  
+				boolean slid = false;              	
+				// Begin file transfer loop, continue until no more data to read and all packets were acknowledged.
+				while(!exit || wd.packets().size() != 0){
+											
+					//read new packets if necessary
+					int iterations = wd.maxSize - wd.packets().size();
+					for(int i = 0; i < iterations; i++){
+						if(sa.readData() != -1){
+							
+							// Create a new packet
+							SlidingPacket pk = new SlidingPacket();
+							//System.out.println(Arrays.toString(sa.getData()));
+							pk.initialize(sa.getBytesRead(), sa.getData(), false, false);
+							if(wd.packets().peekLast() != null)
+								pk.setSequenceNumber((byte)((wd.packets().peekLast().seqNumber() + 1) % wd.windowSize));
+							else
+								pk.setSequenceNumber((byte)wd.slideIndex);
+							// Add the packet to the window.
+							wd.addPacket(pk);
+							if(slid){							
+								byte[] checksum = sa.createChecksum(pk.getPacket(false, null));
+								byte[] toSend = pk.getPacket(true, checksum);
+								System.out.println("Sending: " + toSend[4]);
+								//System.out.println(Arrays.toString(toSend));
+								sa.sendData(toSend, socket, address, port);
+								slid = false;
+							}								           		
+						}else{
+							exit = true;
+						}							
+					}
+
+					if(timedOut){
+						System.out.println("Sending Window");
+						sa.sendWindow(wd, socket, address, port);
+						timedOut = false;
+					}
 					
-					boolean exit = false;
-					boolean timedOut = false;  
-					boolean slid = false;              	
-                	// Begin file transfer loop, continue until no more data to read and all packets were acknowledged.
-                	while(!exit || wd.packets().size() != 0){
-                		
-                		//////////////////////////////////////////
-                		//***// EXAMPLES - USE AT OWN RISK //***//
-                		//////////////////////////////////////////
-						
-						//read new packets if necessary
-						int iterations = wd.maxSize - wd.packets().size();
-                		for(int i = 0; i < iterations; i++){
-							if(sa.readData() != -1){
-								
-								// Create a new packet: pk.
-								//pk.newPacket(sa.getData(), sa.getBytesRead());
-								SlidingPacket pk = new SlidingPacket();
-								//System.out.println(Arrays.toString(sa.getData()));
-								pk.initialize(sa.getBytesRead(), sa.getData(), false, false);
-								//byte[] checksum = sa.createChecksum(pk.getPacket(false, null));
-								//pk.getPacket(true, checksum);
-								if(wd.packets().peekLast() != null)
-									pk.setSequenceNumber((byte)((wd.packets().peekLast().seqNumber() + 1) % wd.windowSize));
-								else
-									pk.setSequenceNumber((byte)wd.slideIndex);
-								// Add the packet to the window.
-								wd.addPacket(pk);
-								if(slid){							
-									byte[] checksum = sa.createChecksum(pk.getPacket(false, null));
-									byte[] toSend = pk.getPacket(true, checksum);
-									System.out.println("Sending: " + toSend[4]);
-									//System.out.println(Arrays.toString(toSend));
-									sa.sendData(toSend, socket, address, port);
-									slid = false;
-								}								           		
-							}else{
-								exit = true;
-							}							
-						}
+					System.out.println("waiting for ack");
 
-						if(timedOut){
-							System.out.println("Sending Window");
-							sa.sendWindow(wd, socket, address, port);
-							timedOut = false;
-						}
-						
-                		System.out.println("waiting for ack");
+                        
+					try{
+						socket.setSoTimeout(500);
+						// Get acknowledgement from client.
+						inPacket = sa.getMsg(socket); 
+						byte[] data = inPacket.getData();
+						// Determine the seq num from the ack
+						byte seqNum = sa.getSeqNum(inPacket);
+						System.out.println("Ack: " + seqNum);
+						if (seqNum != -1 && ((data[0] ^ data[1] ^ data[2] ^ data[3]) == 0)){
+							// Update ack for server window
+							wd.setAcknowledged(seqNum);
+						}   
+					}catch (SocketTimeoutException ex){
+						timedOut = true;
+					}finally{
+						socket.setSoTimeout(0);
+					}
 
-
-						socket.setSoTimeout(500);                        
-						try{
-							// Get acknowledgement from client.
-							inPacket = sa.getClientMsg(socket); 
-							byte[] data = inPacket.getData();
-		            		// Determine the seq num from the ack
-		            		byte seqNum = sa.getSeqNum(inPacket);
-							System.out.println("Ack: " + seqNum);
-		            		if (seqNum != -1 && ((data[0] ^ data[1] ^ data[2] ^ data[3]) == 0)){
-								// Update ack for server window
-								wd.setAcknowledged(seqNum);
-		            		}   
-						}catch (SocketTimeoutException ex){
-							timedOut = true;
-						}finally{
-							socket.setSoTimeout(0);
-						}
-
-                		             		
-                		
-						System.out.println("slide");
-                		// Try to slide the window because we received an ack (if corrupted the slide won't do anything).
-                		slid = wd.slide();
-						System.out.println("Exit: " + exit);
-                	}
-					byte[] terminationPacket = {0xF, 0xF, 0xF, 0xF};
-					sa.sendData(terminationPacket, socket, address, port);
-					System.exit(0);
-                }  
+										
+					
+					System.out.println("slide");
+					// Try to slide the window because we received an ack (if corrupted the slide won't do anything).
+					slid = wd.slide();
+					System.out.println("Exit: " + exit);
+				}
+				byte[] terminationPacket = {0xF, 0xF, 0xF, 0xF};
+				sa.sendData(terminationPacket, socket, address, port);
+				System.exit(0);
             }
         }
         catch (Exception e){

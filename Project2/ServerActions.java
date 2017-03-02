@@ -26,7 +26,7 @@ import java.util.LinkedList;
 *  would need in order to carry out its operations. Can be considered a 
 *  helper class to held declutter the UDPserver class.  
 *************************************************************************/
-public class ServerActions {
+public class ServerActions extends SharedActions {
 	
 	private File[] fList;
 	private File file;
@@ -60,7 +60,6 @@ public class ServerActions {
 			}
 		}
 		fileNames.insert(0, "\n" + totalFiles + " files found\n\n");
-		fileNames.append("\nEnter a file name for transfer: ");
 		return fileNames.toString();
 	}
 	
@@ -107,28 +106,6 @@ public class ServerActions {
 		return port;
 	}
 	
-	/*********************************************************************
-	* Method: getClientMsg
-	* 
-	* Waits for a message from a client and returns the datagram packet
-	* that it receives from the client.
-	*  
-	* @param  (DatagramSocket socket)   -Socket connection.
-	* @return (DatagramPacket inPacket) -The packet received from the client.
-	*********************************************************************/
-	public DatagramPacket getClientMsg(DatagramSocket socket) throws SocketTimeoutException{
-		byte[] inBuf = new byte[100];
-		DatagramPacket inPacket = new DatagramPacket(inBuf, inBuf.length);
-		try {
-			socket.receive(inPacket);
-		}catch (SocketTimeoutException ex){
-			throw new SocketTimeoutException("Scary Exception");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        return inPacket;
-	}
 	
 	/*********************************************************************
 	* Method: sendMsg
@@ -152,27 +129,6 @@ public class ServerActions {
 		}
 	}
 	
-	/*********************************************************************
-	* Method: sendData
-	* 
-	* Send the packet to the client.
-	* 
-	* @param (byte[] msg)            -The packet being sent
-	* @param (DatagramSocket socket) -Socket connection.
-	* @param (InetAddress address)   -The clients IP address.
-	* @param (int port)              -The clients port.
-	* @return (void)
-	*********************************************************************/
-	public void sendData(byte[] msg, DatagramSocket socket, InetAddress address, int port) {
-		byte[] outBuf = msg;
-        DatagramPacket outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address, port);
-        try {
-			socket.send(outPacket);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 	
 	//send a whole window
 	public void sendWindow(SlidingWindow window, DatagramSocket socket, InetAddress address, int port){
