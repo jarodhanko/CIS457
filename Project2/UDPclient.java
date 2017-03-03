@@ -235,10 +235,10 @@ public class UDPclient {
 						}else{
 							 for(slidingpacket pk: window.packets()){
 								 if(!pk.acknowledged() && pk.seqnumber() != -1){
-									 byte[] temp = arrays.copyofrange(pk.data(), 0, pk.length() - 4);
-									 ca.writetofile(temp);
-									 system.out.println("\t \t writing special: \t \t" + pk.seqnumber());
-									 window.setacknowledged(pk.seqnumber());
+									 byte[] temp = Arrays.copyOfRange(pk.data(), 0, pk.length() - 4);
+									 ca.writeToFile(temp);
+									 System.out.println("\t \t writing special: \t \t" + pk.seqnumber());
+									 window.setAcknowledged(pk.seqnumber());
 								 }
 							}
 							window.slide();
@@ -253,11 +253,11 @@ public class UDPclient {
 				} catch(SocketTimeoutException ex){
 					if(attempt > 20){
 						System.out.println("The server is unreachable.  Exiting");
-						System.exit(0);
+						System.Exit(0);
 					}else{
 						attempt++;
 					}
-					socket.setSoTimeout(0); 
+					Socket.setSoTimeout(0); 
 				}
 			}
 			ca.closeFile();
