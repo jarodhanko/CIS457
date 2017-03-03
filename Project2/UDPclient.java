@@ -233,7 +233,7 @@ public class UDPclient {
 								}
 							}
 						}else{
-							 for(slidingPacket pk: window.packets()){
+							 for(SlidingPacket pk: window.packets()){
 								 if(!pk.acknowledged() && pk.seqnumber() != -1){
 									 byte[] temp = Arrays.copyOfRange(pk.data(), 0, pk.length() - 4);
 									 ca.writeToFile(temp);
