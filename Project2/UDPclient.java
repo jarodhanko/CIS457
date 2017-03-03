@@ -233,7 +233,7 @@ public class UDPclient {
 								}
 							}
 						}else{
-							 for(slidingpacket pk: window.packets()){
+							 for(slidingPacket pk: window.packets()){
 								 if(!pk.acknowledged() && pk.seqnumber() != -1){
 									 byte[] temp = Arrays.copyOfRange(pk.data(), 0, pk.length() - 4);
 									 ca.writeToFile(temp);
@@ -253,11 +253,11 @@ public class UDPclient {
 				} catch(SocketTimeoutException ex){
 					if(attempt > 20){
 						System.out.println("The server is unreachable.  Exiting");
-						System.Exit(0);
+						System.exit(0);
 					}else{
 						attempt++;
 					}
-					Socket.setSoTimeout(0); 
+					socket.setSoTimeout(0); 
 				}
 			}
 			ca.closeFile();
