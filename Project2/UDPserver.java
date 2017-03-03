@@ -1,4 +1,4 @@
-//package project2;
+//Jarod Hanko and Norman Cunningham
 
 import java.io.Console;
 import java.io.File;
@@ -172,7 +172,6 @@ public class UDPserver {
 							
 							// Create a new packet
 							SlidingPacket pk = new SlidingPacket();
-							//System.out.println(Arrays.toString(sa.getData()));
 							pk.initialize(sa.getBytesRead(), sa.getData(), false, false);
 							if(wd.packets().peekLast() != null)
 								pk.setSequenceNumber((byte)((wd.packets().peekLast().seqNumber() + 1) % wd.windowSize));
@@ -184,7 +183,6 @@ public class UDPserver {
 								byte[] checksum = sa.createChecksum(pk.getPacket(false, null));
 								byte[] toSend = pk.getPacket(true, checksum);
 								System.out.println("Sending: " + toSend[4]);
-								//System.out.println(Arrays.toString(toSend));
 								sa.sendData(toSend, socket, address, port);
 								slid = false;
 							}								           		
@@ -227,7 +225,6 @@ public class UDPserver {
 					}finally{
 						socket.setSoTimeout(0);
 					}
-
 										
 					
 					System.out.println("slide");

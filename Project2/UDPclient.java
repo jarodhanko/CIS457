@@ -1,4 +1,5 @@
-//package project2;
+//Jarod Hanko and Norman Cunningham
+//3/3/2017
 
 import java.io.Console;
 import java.io.IOException;
@@ -198,18 +199,15 @@ public class UDPclient {
 					//grab next packet
 					inPacket = null;
 					inPacket = ca.getMsg(socket);
-					//System.out.println(Arrays.toString(inPacket.getData()));				
 					
-					// Check for corruption. FIX ME need a client sliding window.
 					corrupted = !ca.checkChecksum(inPacket.getData());
 					System.out.println("Corrupted: " + corrupted);
 					
 					if(!corrupted){					
-						// Get the sequence number. FIX ME, is sequence number at index 4?? use seqNum to sort sliding window
 						seqNum = ca.getSeqNum(inPacket);
 						
-						//check if it is the last packet, index 5-8 holds size??, if size less than 1024, is last packet.
-						lastPacket = ca.isLastPacket(inPacket);   // FIX ME, not sure where data size was stored in header, check method to verify.
+						//check if it is the last packet, index 5-8 holds size, if size less than 1024, is last packet.
+						lastPacket = ca.isLastPacket(inPacket);   
 						System.out.println("Seq Num: " +  seqNum + " last packet: " + lastPacket);
 						SlidingPacket newPacket = new SlidingPacket();
 						if(newPacket.setFromPacket(inPacket.getData(), true)){
@@ -223,7 +221,6 @@ public class UDPclient {
 								for(int i = 0; i < window.maxSize; i++){
 									if(window.readyForSlide()){	
 										System.out.println("\t \t WRITING: \t \t " + window.packets().peek().seqNumber());
-										//System.out.println(Arrays.toString(packets.get(0).data()));
 										//write packet data to file
 										byte[] temp = Arrays.copyOfRange(window.packets().peek().data(), 0, window.packets().peek().length() - 4);
 										ca.writeToFile(temp);
@@ -236,15 +233,15 @@ public class UDPclient {
 								}
 							}
 						}else{
-							 // for(SlidingPacket pk: window.packets()){
-								 // if(!pk.acknowledged() && pk.seqNumber() != -1){
-									 // byte[] temp = Arrays.copyOfRange(pk.data(), 0, pk.length() - 4);
-									 // ca.writeToFile(temp);
-									 // System.out.println("\t \t WRITING special: \t \t" + pk.seqNumber());
-									 // window.setAcknowledged(pk.seqNumber());
-								 // }
-							 // }
-							//window.slide();
+							 for(slidingpacket pk: window.packets()){
+								 if(!pk.acknowledged() && pk.seqnumber() != -1){
+									 byte[] temp = arrays.copyofrange(pk.data(), 0, pk.length() - 4);
+									 ca.writetofile(temp);
+									 system.out.println("\t \t writing special: \t \t" + pk.seqnumber());
+									 window.setacknowledged(pk.seqnumber());
+								 }
+							}
+							window.slide();
 							//is a termination packet
 							byte[] pk = inPacket.getData();
 							if(pk[0] == 0xF && pk[1] == 0xF && pk[2] == 0xF && pk[3] == 0xF && pk[4] == 0xF && pk[5] == 0xF && pk[6] == 0xF && pk[7] == 0xF){

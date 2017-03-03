@@ -1,4 +1,5 @@
-//package project2;
+//Jarod Hanko and Norman Cunningham
+//3/3/2017
 
 import java.io.Console;
 import java.io.FileNotFoundException;
