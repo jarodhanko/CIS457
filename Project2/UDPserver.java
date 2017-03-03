@@ -168,7 +168,7 @@ public class UDPserver {
 					//read new packets if necessary
 					int iterations = wd.maxSize - wd.packets().size();
 					for(int i = 0; i < iterations; i++){
-						if(sa.readData() != -1){
+						if(sa.readData() <= 0){
 							
 							// Create a new packet
 							SlidingPacket pk = new SlidingPacket();
