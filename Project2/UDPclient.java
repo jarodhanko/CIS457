@@ -234,11 +234,11 @@ public class UDPclient {
 							}
 						}else{
 							 for(SlidingPacket pk: window.packets()){
-								 if(!pk.acknowledged() && pk.seqnumber() != -1){
+								 if(!pk.Acknowledged() && pk.seqNumber() != -1){
 									 byte[] temp = Arrays.copyOfRange(pk.data(), 0, pk.length() - 4);
 									 ca.writeToFile(temp);
-									 System.out.println("\t \t writing special: \t \t" + pk.seqnumber());
-									 window.setAcknowledged(pk.seqnumber());
+									 System.out.println("\t \t writing special: \t \t" + pk.seqNumber());
+									 window.setAcknowledged(pk.seqNumber());
 								 }
 							}
 							window.slide();
