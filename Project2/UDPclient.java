@@ -233,8 +233,8 @@ public class UDPclient {
 								}
 							}
 						}else{
-							 for(SlidingPacket pk: window.packets()){
-								 if(!pk.Acknowledged() && pk.seqNumber() != -1){
+							for(SlidingPacket pk: window.packets()){
+								 if(!pk.acknowledged() && pk.seqNumber() != -1){
 									 byte[] temp = Arrays.copyOfRange(pk.data(), 0, pk.length() - 4);
 									 ca.writeToFile(temp);
 									 System.out.println("\t \t writing special: \t \t" + pk.seqNumber());
