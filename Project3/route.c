@@ -91,6 +91,7 @@ int main(){
 	//check if packet is an arp request
 
 	//if so, construct and send an arp response
+	//see struct ether_arp in if_ether.h
 	//sendArpResponse(n)
 
 	//check if packet is an icmp request
