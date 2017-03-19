@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <ifaddrs.h>
+#include <netinet/if_ether.h>
 
 int main(){
   int packet_socket;
@@ -83,6 +84,16 @@ int main(){
 	}
 	printf("\n");
     
+	struct ether_arp *Test;
+	Test = ((struct ether_arp*)&buf);
+
+	int i;
+	for (i = 0; i < n; i++)
+	{
+		if (i > 0) printf(":");
+		printf("%02X", Test[i]);
+	}
+	printf("\n");
     //what else to do is up to you, you can send packets with send,
     //just like we used for TCP sockets (or you can use sendto, but it
     //is not necessary, since the headers, including all addresses,
