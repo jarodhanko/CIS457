@@ -93,7 +93,18 @@ int main(){
 	struct aarp *request;
 	request = ((struct aarp*)&buf);
 
+	printf("ETHER DEST: %hu \n", ntohs(request->eth_header.ether_dhost));
+	printf("ETHER SRC: %hu \n", ntohs(request->eth_header.ether_shost));
+	printf("ETHER TYPE: %hu \n", ntohs(request->eth_header.ether_type));
+	printf("ARP OP: %hu \n", ntohs(request->arp_header.ea_hdr.ar_hrd));
+	printf("ARP OP: %hu \n", ntohs(request->arp_header.ea_hdr.ar_pro));
+	printf("ARP OP: %hu \n", ntohs(request->arp_header.ea_hdr.ar_hln));
+	printf("ARP OP: %hu \n", ntohs(request->arp_header.ea_hdr.ar_pln));
 	printf("ARP OP: %hu \n", ntohs(request->arp_header.ea_hdr.ar_op));
+	printf("ARP OP: %hu \n", ntohs(request->arp_header.arp_sha));
+	printf("ARP OP: %hu \n", ntohs(request->arp_header.arp_spa));
+	printf("ARP OP: %hu \n", ntohs(request->arp_header.arp_tha));
+	printf("ARP OP: %hu \n", ntohs(request->arp_header.arp_tpa));
 
 	struct aarp *reply;
     //what else to do is up to you, you can send packets with send,
