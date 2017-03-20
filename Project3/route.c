@@ -98,8 +98,8 @@ int main(){
 	printf("ETHER TYPE: %02X \n", ntohs(request->eth_header.ether_type));
 	printf("ARP FORMAT HARD ADDR: %02X \n", ntohs(request->arp_header.ea_hdr.ar_hrd));
 	printf("ARP FORMAT PROTO ADDR: %02X \n", ntohs(request->arp_header.ea_hdr.ar_pro));
-	printf("ARP LEN HARD ADDR: %c \n", request->arp_header.ea_hdr.ar_hln);
-	printf("ARP LEN PROTO ADDR: %c \n", request->arp_header.ea_hdr.ar_pln);
+	printf("ARP LEN HARD ADDR: %02X \n", request->arp_header.ea_hdr.ar_hln);
+	printf("ARP LEN PROTO ADDR: %02X \n", request->arp_header.ea_hdr.ar_pln);
 	printf("ARP OP: %02X \n", ntohs(request->arp_header.ea_hdr.ar_op));
 	printf("ARP SENDER HARD ADDR: %02X \n", request->arp_header.arp_sha);
 	printf("ARP SENDER PROTO ADDR: %02X \n", request->arp_header.arp_spa);
