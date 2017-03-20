@@ -93,7 +93,7 @@ int main(){
 	struct aarp *request;
 	request = ((struct aarp*)&buf);
 
-	printf("%hu", request->arp_header.ea_hdr.ar_op);
+	printf("ARP OP: %hu \n", request->arp_header.ea_hdr.ar_op);
 
 	struct aarp *reply;
     //what else to do is up to you, you can send packets with send,
