@@ -7,6 +7,12 @@
 #include <ifaddrs.h>
 #include <netinet/if_ether.h>
 
+struct aarp {
+	struct ether_header eth_header;
+	struct ether_arp arp_header;
+};
+
+
 int main(){
   int packet_socket;
   //get list of interfaces (actually addresses)
@@ -84,10 +90,12 @@ int main(){
 	}
 	printf("\n");
     
-	struct ether_arp *Test;
-	Test = ((struct ether_arp*)&buf);
+	struct aarp *request;
+	request = ((struct aarp*)&buf);
 
-	printf("%hu", (*Test).ea_hdr.ar_hrd);
+	printf("%hu", request->arp_header.ea_hdr.ar_hrd);
+
+	struct aarp *reply;
     //what else to do is up to you, you can send packets with send,
     //just like we used for TCP sockets (or you can use sendto, but it
     //is not necessary, since the headers, including all addresses,
