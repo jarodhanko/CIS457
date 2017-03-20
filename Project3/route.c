@@ -93,18 +93,18 @@ int main(){
 	struct aarp *request;
 	request = ((struct aarp*)&buf);
 
-	printf("ETHER DEST: %02X \n", ntohl(request->eth_header.ether_dhost));
-	printf("ETHER SRC: %02X \n", ntohl(request->eth_header.ether_shost));
-	printf("ETHER TYPE: %02X \n", ntohl(request->eth_header.ether_type));
+	printf("ETHER DEST: %02X \n", request->eth_header.ether_dhost);
+	printf("ETHER SRC: %02X \n", request->eth_header.ether_shost);
+	printf("ETHER TYPE: %02X \n", ntohs(request->eth_header.ether_type));
 	printf("ARP FORMAT HARD ADDR: %02X \n", ntohs(request->arp_header.ea_hdr.ar_hrd));
 	printf("ARP FORMAT PROTO ADDR: %02X \n", ntohs(request->arp_header.ea_hdr.ar_pro));
-	printf("ARP LEN HARD ADDR: %02X \n", (char)ntohs(request->arp_header.ea_hdr.ar_hln));
-	printf("ARP LEN PROTO ADDR: %02X \n", (char)ntohs(request->arp_header.ea_hdr.ar_pln));
+	printf("ARP LEN HARD ADDR: %02X \n", (char)request->arp_header.ea_hdr.ar_hln);
+	printf("ARP LEN PROTO ADDR: %02X \n", (char)request->arp_header.ea_hdr.ar_pln);
 	printf("ARP OP: %02X \n", ntohs(request->arp_header.ea_hdr.ar_op));
-	printf("ARP SENDER HARD ADDR: %02X \n", ntohs(request->arp_header.arp_sha));
-	printf("ARP SENDER PROTO ADDR: %02X \n", ntohs(request->arp_header.arp_spa));
-	printf("ARP TARGET HARD ADDR: %02X \n", ntohs(request->arp_header.arp_tha));
-	printf("ARP TARGET PROTO ADDR: %02X \n", ntohs(request->arp_header.arp_tpa));
+	printf("ARP SENDER HARD ADDR: %02X \n", request->arp_header.arp_sha);
+	printf("ARP SENDER PROTO ADDR: %02X \n", request->arp_header.arp_spa);
+	printf("ARP TARGET HARD ADDR: %02X \n", request->arp_header.arp_tha);
+	printf("ARP TARGET PROTO ADDR: %02X \n", request->arp_header.arp_tpa);
 
 	struct aarp *reply;
     //what else to do is up to you, you can send packets with send,
