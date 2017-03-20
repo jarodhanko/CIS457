@@ -87,7 +87,7 @@ int main(){
 	struct ether_arp *Test;
 	Test = ((struct ether_arp*)&buf);
 
-	printf(Test.ea_hdr.ar_hrd);
+	printf("%hu", (*Test).ea_hdr.ar_hrd);
     //what else to do is up to you, you can send packets with send,
     //just like we used for TCP sockets (or you can use sendto, but it
     //is not necessary, since the headers, including all addresses,
