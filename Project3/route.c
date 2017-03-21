@@ -40,13 +40,12 @@ struct iicmp_header {
   	u_int8_t type;		/* message type */
   	u_int8_t code;		/* type sub-code */
   	u_int16_t checksum;
-	unsigned char *data;
 };
 
 struct iicmp {
 	struct ether_header eth_header;
 	struct iip_header ip_header;
-	struct icmp_header icmp_header;
+	struct iicmp_header icmp_header;
 };
 
 //icmp checksum calculator from
