@@ -23,7 +23,7 @@ struct iicmp{
 	struct ether_header eth_header;
 	struct iphdr ip_header;
 	struct icmphdr icmp_header;
-};
+} __attribute__ ((__packed__));
 
 //icmp checksum calculator from
 //source: http://www.microhowto.info/howto/calculate_an_internet_protocol_checksum_in_c.html
@@ -227,7 +227,7 @@ int main(){
 		memcpy(reply.eth_header.ether_dhost, request2.eth_header.ether_shost, ETH_ALEN);
 
 		
-		printf("SOURCE: %s", inet_ntoa(request2.ip_header.saddr));
+		printf("SOURCE: %02X", request2.ip_header.saddr);
 		printf("DESTINATION: %02X", request2.ip_header.daddr);
 
 		memcpy(&reply.ip_header.daddr, tmp3, 4);
