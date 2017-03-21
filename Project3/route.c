@@ -206,7 +206,7 @@ int main(){
 		}
 		request2.icmp_header = *((struct icmphdr*)&icmpbuf);
 */
-		struct iicmp reply = {0};
+		struct iicmp reply = request2;
 		printf("\n REQUEST2: %d \n", sizeof(request2));
 		memcpy(&reply, &request2, 98);
 		printf("\n IPHDR_len: %02X \n", reply.ip_header.ihl);
