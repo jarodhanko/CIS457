@@ -170,7 +170,7 @@ int main(){
 
 		send(packet_socket, &reply, sizeof(reply), 0);
 	}else if(ntohs(request->eth_header.ether_type) == ETHERTYPE_IP){
-		struct iicmp *request2;
+		struct iicmp request2;
 		printf("\n IPSRC: %02X:%02X:%02X:%02X \n", buf2[26], buf2[27], buf2[28], buf2[29]);
 		printf("0");
 		printf("\n IPSDST: %02X:%02X:%02X:%02X \n", buf2[30], buf2[31], buf2[32], buf2[33]);
@@ -184,7 +184,7 @@ int main(){
 			ethbuf[i] = buf2[i];
 		}
 		printf("3");
-		request2->eth_header = *((struct ether_header*)&ethbuf);
+		request2.eth_header = *((struct ether_header*)&ethbuf);
 
 		u_int8_t length;
 		length = (((u_int8_t)buf2[14]) << 4) >> 4;
@@ -193,26 +193,26 @@ int main(){
 			ipbuf[i] = buf2[14 + i];
 		}
 		
-		request2->ip_header = *((struct iphdr*)&ipbuf);
+		request2.ip_header = *((struct iphdr*)&ipbuf);
 
-		char icmpbuf[request2->ip_header.tot_len - request2->ip_header.ihl];
+		char icmpbuf[request2.ip_header.tot_len - request2.ip_header.ihl];
 		length = sizeof(icmpbuf);
 		for(i=0; i < length; i++){
-			icmpbuf[i] = buf2[14 + request2->ip_header.ihl + i];
+			icmpbuf[i] = buf2[14 + request2.ip_header.ihl + i];
 		}
-		request2->icmp_header = *((struct icmphdr*)&icmpbuf);
-		struct iicmp reply = *request2;
+		request2.icmp_header = *((struct icmphdr*)&icmpbuf);
+		struct iicmp reply = request2;
 
 		u_int8_t tmp[6] = {0xa2, 0x22, 0xdd, 0xfc, 0x5c, 0x89};
 		memcpy(reply.eth_header.ether_shost, tmp, ETH_ALEN);
-		memcpy(reply.eth_header.ether_dhost, request2->eth_header.ether_shost, ETH_ALEN);
+		memcpy(reply.eth_header.ether_dhost, request2.eth_header.ether_shost, ETH_ALEN);
 
 		
-		printf("SOURCE: %02X", request2->ip_header.saddr);
-		printf("DESTINATION: %02X", request2->ip_header.daddr);
+		printf("SOURCE: %02X", request2.ip_header.saddr);
+		printf("DESTINATION: %02X", request2.ip_header.daddr);
 
-		reply.ip_header.daddr = request2->ip_header.saddr;
-		reply.ip_header.saddr = request2->ip_header.daddr;
+		reply.ip_header.daddr = request2.ip_header.saddr;
+		reply.ip_header.saddr = request2.ip_header.daddr;
 
 		//reply.icmp_header.type = ICMP_ECHOREPLY;
 		//reply.icmp_header.checksum = 0;
