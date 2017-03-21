@@ -218,15 +218,13 @@ int main(){
 		memcpy(reply.eth_header.ether_dhost, request2.eth_header.ether_shost, ETH_ALEN);
 
 		
-		printf("SOURCE: %02X", htonl(request2.ip_header.saddr));
-		printf("DESTINATION: %02X", htonl(request2.ip_header.daddr));
+		printf("SOURCE: %02X", request2.ip_header.saddr);
+		printf("DESTINATION: %02X", request2.ip_header.daddr);
 
-		char *tmp3 = malloc(4);
-		memcpy(tmp3, &request2.ip_header.saddr, 4);
-		reply.ip_header.daddr = *tmp3;
-		char *tmp4 = malloc(4);
-		memcpy(tmp4, &request2.ip_header.daddr, 4);;
-		reply.ip_header.saddr = *tmp4; //request2.ip_header.daddr;
+		unsigned char tmp3[] = {buf2[26], buf2[27], buf2[28], buf2[29]};
+		memcpy(&reply.ip_header.daddr, &tmp3, 4);
+		unsigned char tmp4[] = {buf2[30], buf2[31], buf2[32], buf2[33]};
+		memcpy(&reply.ip_header.saddr, &tmp4, 4);
 
 		reply.icmp_header.type = ICMP_ECHOREPLY;
 		reply.icmp_header.checksum = 0;
