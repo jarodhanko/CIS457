@@ -224,7 +224,7 @@ int main(){
 		memcpy(reply.eth_header.ether_dhost, request2.eth_header.ether_shost, ETH_ALEN);
 
 		
-		printf("SOURCE: %02X", request2.ip_header.saddr);
+		printf("SOURCE: %s", inet_ntoa(request2.ip_header));
 		printf("DESTINATION: %02X", request2.ip_header.daddr);
 
 		memcpy(&reply.ip_header.daddr, tmp3, 4);
