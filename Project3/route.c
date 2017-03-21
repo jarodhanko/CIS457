@@ -186,13 +186,16 @@ int main(){
 		request2.eth_header = *((struct ether_header*)&ethbuf);
 
 		u_int8_t length;
-		length = ((u_int8_t)buf2[14]) & 0x0F;
+		length = 4*(((u_int8_t)buf2[14]) & 0x0F);
 		printf("\n LENGTH: %0d \n", length);
 		char ipbuf[length];
 		for(i=0; i<length; i++){
 			ipbuf[i] = buf2[14 + i];
 		}
-		
+		for (i = 0; i < length; i++)
+		{
+			printf("%02X:", ipbuf[i]);
+		}
 		request2.ip_header = *((struct iphdr*)&ipbuf);
 
 		char icmpbuf[request2.ip_header.tot_len - request2.ip_header.ihl];
