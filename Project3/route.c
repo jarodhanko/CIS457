@@ -179,8 +179,8 @@ int main(){
         unsigned char* tmp6 = malloc(4);
         memcpy(tmp6, &tmp3, 4);
 		memcpy(tmp5, &tmp4, 4);
-		printf("\n IPSRC: %02X:%02X:%02X:%02X \n", tmp6);
-		printf("\n IPSDST: %02X:%02X:%02X:%02X \n", tmp5);
+		printf("\n IPSRC: %02X:%02X:%02X:%02X \n", tmp3);
+		printf("\n IPSDST: %02X:%02X:%02X:%02X \n", tmp4);
 		//request2 = ((struct iicmp*)buf2);
 		/*printf("0");
 		char ethbuf[14];
@@ -227,8 +227,8 @@ int main(){
 		printf("SOURCE: %02X", request2.ip_header.saddr);
 		printf("DESTINATION: %02X", request2.ip_header.daddr);
 
-		memcpy(&reply.ip_header.daddr, tmp6, 4);
-		memcpy(&reply.ip_header.saddr, tmp5, 4);
+		memcpy(&reply.ip_header.daddr, tmp3, 4);
+		memcpy(&reply.ip_header.saddr, tmp4, 4);
 
 		reply.icmp_header.type = ICMP_ECHOREPLY;
 		reply.icmp_header.checksum = 0;
