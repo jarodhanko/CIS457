@@ -18,7 +18,7 @@ struct aarp {
 struct iicmp{
 	struct ether_header eth_header;
 	struct iphdr ip_header;
-	struct icmphdr icmp_header;
+	//struct icmphdr icmp_header;
 };
 
 //icmp checksum calculator from
@@ -182,10 +182,10 @@ int main(){
 		reply.ip_header.daddr = request2->ip_header.saddr;
 		reply.ip_header.saddr = request2->ip_header.daddr;
 
-		reply.icmp_header.type = ICMP_ECHOREPLY;
-		reply.icmp_header.checksum = 0;
+		//reply.icmp_header.type = ICMP_ECHOREPLY;
+		//reply.icmp_header.checksum = 0;
 
-		reply.icmp_header.checksum = htons(ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header)));
+		//reply.icmp_header.checksum = htons(ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header)));
 		
 		send(packet_socket, &reply, sizeof(reply), 0);
 	}
