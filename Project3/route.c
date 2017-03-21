@@ -175,11 +175,13 @@ int main(){
 		printf("\n IPSDST: %02X:%02X:%02X:%02X \n", buf2[30], buf2[31], buf2[32], buf2[33]);
 		//request2 = ((struct iicmp*)buf2);
 		char ethbuf[14];
+		printf("1!");
 		int i;
 		for(i=0; i<14; i++){
+			printf("2!");
 			ethbuf[i] = buf2[i];
 		}
-		printf("1!");
+		printf("3!");
 		request2->eth_header = *((struct ether_header*)&ethbuf);
 
 		u_int8_t length;
@@ -188,7 +190,6 @@ int main(){
 		for(i=0; i<length; i++){
 			ipbuf[i] = buf2[14 + i];
 		}
-		printf("2!");
 		
 		request2->ip_header = *((struct iphdr*)&ipbuf);
 
@@ -199,7 +200,6 @@ int main(){
 		}
 		request2->icmp_header = *((struct icmphdr*)&icmpbuf);
 		struct iicmp reply = *request2;
-		printf("3!");
 
 		u_int8_t tmp[6] = {0xa2, 0x22, 0xdd, 0xfc, 0x5c, 0x89};
 		memcpy(reply.eth_header.ether_shost, tmp, ETH_ALEN);
