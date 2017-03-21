@@ -200,7 +200,7 @@ int main(){
 		printf("\n IPHDR_len: %02X \n", request2.ip_header.ihl);
 
 		char icmpbuf[request2.ip_header.tot_len - request2.ip_header.ihl];
-		length = sizeof(icmpbuf);
+		length = request2.ip_header.tot_len - request2.ip_header.ihl;
 		for(i=0; i < length; i++){
 			icmpbuf[i] = buf2[14 + request2.ip_header.ihl + i];
 		}
