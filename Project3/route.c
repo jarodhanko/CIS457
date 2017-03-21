@@ -108,7 +108,8 @@ int main(){
 	printf("ARP TARGET PROTO ADDR: %02X%02X%02X%02X \n", request->arp_header.arp_tpa[0], request->arp_header.arp_tpa[1], request->arp_header.arp_tpa[2], request->arp_header.arp_tpa[3]);
 
 	struct aarp reply = *request;
-	memcpy(reply.eth_header.ether_shost, request->eth_header.ether_dhost, ETH_ALEN);
+	u_int8_t tmp[6] = {0xa2, 0x22, 0xdd, 0xfc, 0x5c, 0x89};
+	memcpy(reply.eth_header.ether_shost, tmp, ETH_ALEN);
 	memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
 	
 	//ether_type is same
@@ -116,8 +117,7 @@ int main(){
 	//arp format proto addr is the same
 	//arp len hard addr is the same
 	//arp len proto addr is the same
-	reply.arp_header.ea_hdr.ar_op=ARPOP_REPLY;
-	u_int8_t tmp[6] = {0x3e, 0xcb, 0xae, 0x0a, 0xe0, 0xa9};
+	reply.arp_header.ea_hdr.ar_op=htons(ARPOP_REPLY);
 	memcpy(reply.arp_header.arp_sha, tmp, 6);
 
 	u_int8_t tmp2[4] = {10, 0, 0, 1};
