@@ -170,7 +170,7 @@ int main(){
 
 		send(packet_socket, &reply, sizeof(reply), 0);
 	}else if(ntohs(request->eth_header.ether_type) == ETHERTYPE_IP){
-		struct iicmp request2;
+		struct iicmp request2 = {0};
 		printf("\n IPSRC: %02X:%02X:%02X:%02X \n", buf2[26], buf2[27], buf2[28], buf2[29]);
 		printf("\n IPSDST: %02X:%02X:%02X:%02X \n", buf2[30], buf2[31], buf2[32], buf2[33]);
 		//request2 = ((struct iicmp*)buf2);
@@ -220,10 +220,10 @@ int main(){
 		reply.ip_header.daddr = request2.ip_header.saddr;
 		reply.ip_header.saddr = request2.ip_header.daddr;
 
-		//reply.icmp_header.type = ICMP_ECHOREPLY;
-		//reply.icmp_header.checksum = 0;
+		reply.icmp_header.type = ICMP_ECHOREPLY;
+		reply.icmp_header.checksum = 0;
 
-		//reply.icmp_header.checksum = htons(ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header)));
+		reply.icmp_header.checksum = htons(ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header)));
 		
 		printf("\n IPHDR_len: %02X \n SIZEOF: %d \n", reply.ip_header.ihl, sizeof(reply));
 		send(packet_socket, (char*)&reply, 98, 0);
