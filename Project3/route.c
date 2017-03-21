@@ -156,7 +156,7 @@ int main(){
 		printf("ARP TARGET PROTO ADDR: %02X%02X%02X%02X \n", request->arp_header.arp_tpa[0], request->arp_header.arp_tpa[1], request->arp_header.arp_tpa[2], request->arp_header.arp_tpa[3]);
 
 		struct aarp reply = *request;
-		u_int8_t tmp[6] = {0xa2, 0x22, 0xdd, 0xfc, 0x5c, 0x89};
+		u_int8_t tmp[6] = {0x52, 0x46, 0x9d, 0x78, 0xeb, 0xfd};
 		memcpy(reply.eth_header.ether_shost, tmp, ETH_ALEN);
 		memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
 
@@ -227,8 +227,8 @@ int main(){
 		printf("SOURCE: %02X", request2.ip_header.saddr);
 		printf("DESTINATION: %02X", request2.ip_header.daddr);
 
-		memcpy(&reply.ip_header.daddr, &tmp6, 4);
-		memcpy(&reply.ip_header.saddr, &tmp5, 4);
+		memcpy(&reply.ip_header.daddr, tmp6, 4);
+		memcpy(&reply.ip_header.saddr, tmp5, 4);
 
 		reply.icmp_header.type = ICMP_ECHOREPLY;
 		reply.icmp_header.checksum = 0;
