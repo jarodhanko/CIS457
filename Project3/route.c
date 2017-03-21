@@ -172,7 +172,6 @@ int main(){
 	}else if(ntohs(request->eth_header.ether_type) == ETHERTYPE_IP){
 		struct iicmp request2;
 		printf("\n IPSRC: %02X:%02X:%02X:%02X \n", buf2[26], buf2[27], buf2[28], buf2[29]);
-		printf("0");
 		printf("\n IPSDST: %02X:%02X:%02X:%02X \n", buf2[30], buf2[31], buf2[32], buf2[33]);
 		//request2 = ((struct iicmp*)buf2);
 		printf("0");
@@ -187,7 +186,7 @@ int main(){
 		request2.eth_header = *((struct ether_header*)&ethbuf);
 
 		u_int8_t length;
-		length = ((u_int8_t)buf2[14]) & 0b00001111);
+		length = ((u_int8_t)buf2[14]) & 0x0F);
 		printf("\n LENGTH: %0d \n", length);
 		char ipbuf[length];
 		for(i=0; i<length; i++){
