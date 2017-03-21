@@ -173,8 +173,10 @@ int main(){
 	}else if(ntohs(request->eth_header.ether_type) == ETHERTYPE_IP){
 		struct iicmp request2;
 		request2 = *((struct iicmp*)&buf2);
-		printf("\n IPSRC: %02X:%02X:%02X:%02X \n", buf2[26], buf2[27], buf2[28], buf2[29]);
-		printf("\n IPSDST: %02X:%02X:%02X:%02X \n", buf2[30], buf2[31], buf2[32], buf2[33]);
+		unsigned char tmp3[] = {buf2[26], buf2[27], buf2[28], buf2[29]};
+		unsigned char tmp4[] = {buf2[30], buf2[31], buf2[32], buf2[33]};
+		printf("\n IPSRC: %02X:%02X:%02X:%02X \n", &tmp3);
+		printf("\n IPSDST: %02X:%02X:%02X:%02X \n", &tmp4);
 		//request2 = ((struct iicmp*)buf2);
 		/*printf("0");
 		char ethbuf[14];
@@ -221,9 +223,7 @@ int main(){
 		printf("SOURCE: %02X", request2.ip_header.saddr);
 		printf("DESTINATION: %02X", request2.ip_header.daddr);
 
-		unsigned char tmp3[] = {buf2[26], buf2[27], buf2[28], buf2[29]};
 		memcpy(&reply.ip_header.daddr, &tmp3, 4);
-		unsigned char tmp4[] = {buf2[30], buf2[31], buf2[32], buf2[33]};
 		memcpy(&reply.ip_header.saddr, &tmp4, 4);
 
 		reply.icmp_header.type = ICMP_ECHOREPLY;
