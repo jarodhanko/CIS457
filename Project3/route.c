@@ -102,7 +102,7 @@ int main(){
 	struct aarp *request;
 	request = ((struct aarp*)&buf);
 
-	if(request->eth_header.ether_type == ETHERTYPE_ARP){
+	if(ntohs(request->eth_header.ether_type) == ETHERTYPE_ARP){
 
 		printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_dhost[0], request->eth_header.ether_dhost[1], request->eth_header.ether_dhost[2], request->eth_header.ether_dhost[3], request->eth_header.ether_dhost[4], request->eth_header.ether_dhost[5]);
 		printf("ETHER SRC: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_shost[0], request->eth_header.ether_shost[1], request->eth_header.ether_shost[2], request->eth_header.ether_shost[3], request->eth_header.ether_shost[4], request->eth_header.ether_shost[5]);
@@ -137,7 +137,7 @@ int main(){
 		memcpy(reply.arp_header.arp_tpa, request->arp_header.arp_spa, 4);
 
 		send(packet_socket, &reply, sizeof(reply), 0);
-	}else if(request->eth_header.ether_type == ETHERTYPE_IP){
+	}else if(ntohs(request->eth_header.ether_type) == ETHERTYPE_IP){
 		struct iicmp *request;
 		request = ((struct iicmp*)&buf);
 		printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_dhost[0], request->eth_header.ether_dhost[1], request->eth_header.ether_dhost[2], request->eth_header.ether_dhost[3], request->eth_header.ether_dhost[4], request->eth_header.ether_dhost[5]);
