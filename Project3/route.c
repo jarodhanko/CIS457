@@ -19,6 +19,7 @@ struct iicmp{
 	struct ether_header eth_header;
 	struct iphdr ip_header;
 	struct icmphdr icmp_header;
+	char *data;
 };
 
 //icmp checksum calculator from
@@ -179,6 +180,10 @@ int main(){
 		memcpy(reply.eth_header.ether_shost, tmp, ETH_ALEN);
 		memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
 
+		reply.ip_header.saddr = 0;
+		reply.ip_header.daddr = 0;
+		u_int32_t *sizeptr;
+		sizeptr = 32;
 		reply.ip_header.saddr = request->ip_header.daddr;
 		reply.ip_header.daddr = request->ip_header.saddr;
 
