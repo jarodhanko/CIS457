@@ -18,7 +18,7 @@ struct aarp {
 struct iicmp{
 	struct ether_header eth_header;
 	struct iphdr ip_header;
-	//struct icmphdr icmp_header;
+	struct icmphdr icmp_header;
 };
 
 //icmp checksum calculator from
@@ -137,9 +137,9 @@ int main(){
 
 	char buf2[1500];
 	memcpy(buf2, buf, sizeof(buf));
-	//request = ((struct aarp*)&buf);
+	request = ((struct aarp*)&buf);
 
-	/*if(ntohs(request->eth_header.ether_type) == ETHERTYPE_ARP){
+	if(ntohs(request->eth_header.ether_type) == ETHERTYPE_ARP){
 
 		printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_dhost[0], request->eth_header.ether_dhost[1], request->eth_header.ether_dhost[2], request->eth_header.ether_dhost[3], request->eth_header.ether_dhost[4], request->eth_header.ether_dhost[5]);
 		printf("ETHER SRC: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_shost[0], request->eth_header.ether_shost[1], request->eth_header.ether_shost[2], request->eth_header.ether_shost[3], request->eth_header.ether_shost[4], request->eth_header.ether_shost[5]);
@@ -169,7 +169,7 @@ int main(){
 		memcpy(reply.arp_header.arp_tpa, request->arp_header.arp_spa, 4);
 
 		send(packet_socket, &reply, sizeof(reply), 0);
-	*///}else if(ntohs(request->eth_header.ether_type) == ETHERTYPE_IP){
+	}else if(ntohs(request->eth_header.ether_type) == ETHERTYPE_IP){
 		struct iicmp *request2;
 		request2 = ((struct iicmp*)&buf2);
 
@@ -178,6 +178,10 @@ int main(){
 		u_int8_t tmp[6] = {0xa2, 0x22, 0xdd, 0xfc, 0x5c, 0x89};
 		memcpy(reply.eth_header.ether_shost, tmp, ETH_ALEN);
 		memcpy(reply.eth_header.ether_dhost, request2->eth_header.ether_shost, ETH_ALEN);
+
+		
+		printf("SOURCE: %02X", request2->ip_header.saddr);
+		printf("DESTINATION: %02X", request2->ip_header.daddr);
 
 		reply.ip_header.daddr = request2->ip_header.saddr;
 		reply.ip_header.saddr = request2->ip_header.daddr;
@@ -188,7 +192,7 @@ int main(){
 		//reply.icmp_header.checksum = htons(ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header)));
 		
 		send(packet_socket, &reply, sizeof(reply), 0);
-	//}
+	}
 
   }
   //exit
