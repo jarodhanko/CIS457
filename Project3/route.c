@@ -120,7 +120,7 @@ int main(){
 	reply.arp_header.ea_hdr.ar_op=htons(ARPOP_REPLY);
 	memcpy(reply.arp_header.arp_sha, tmp, 6);
 
-	u_int8_t tmp2[4] = {10, 0, 0, 1};
+	u_int8_t tmp2[4] = {10, 1, 0, 1};
 	memcpy(reply.arp_header.arp_spa, tmp2, 4);
 
 	memcpy(reply.arp_header.arp_tha, request->arp_header.arp_sha, ETH_ALEN);
