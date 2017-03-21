@@ -176,7 +176,7 @@ int main(){
 		unsigned char tmp3[] = {buf2[26], buf2[27], buf2[28], buf2[29]};
 		unsigned char tmp4[] = {buf2[30], buf2[31], buf2[32], buf2[33]};
 		unsigned char* tmp5;
-		memcpy(tmp5, tmp4, 4);
+		memcpy(tmp5, &tmp4, 4);
 		printf("\n IPSRC: %02X:%02X:%02X:%02X \n", tmp3);
 		printf("\n IPSDST: %02X:%02X:%02X:%02X \n", tmp5);
 		//request2 = ((struct iicmp*)buf2);
