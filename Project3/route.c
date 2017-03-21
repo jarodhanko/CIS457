@@ -187,7 +187,7 @@ int main(){
 		request2.eth_header = *((struct ether_header*)&ethbuf);
 
 		u_int8_t length;
-		length = (((u_int8_t)buf2[14]) << 4) >> 4;
+		length = ((u_int8_t)buf2[14]) & 0b00001111);
 		printf("\n LENGTH: %0d \n", length);
 		char ipbuf[length];
 		for(i=0; i<length; i++){
