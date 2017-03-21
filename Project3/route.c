@@ -174,7 +174,7 @@ int main(){
 		printf("\n IPSRC: %02X:%02X:%02X:%02X \n", buf2[26], buf2[27], buf2[28], buf2[29]);
 		printf("\n IPSDST: %02X:%02X:%02X:%02X \n", buf2[30], buf2[31], buf2[32], buf2[33]);
 		//request2 = ((struct iicmp*)buf2);
-		printf("0");
+		/*printf("0");
 		char ethbuf[14];
 		printf("1");
 		int i;
@@ -205,6 +205,7 @@ int main(){
 			icmpbuf[i] = buf2[14 + request2.ip_header.ihl + i];
 		}
 		request2.icmp_header = *((struct icmphdr*)&icmpbuf);
+*/
 		struct iicmp reply = {0};
 		printf("\n REQUEST2: %d \n", sizeof(request2));
 		memcpy(&reply, &request2, 98);
@@ -246,7 +247,7 @@ int main(){
 		printf("ICMP CODE: %02X \n", reply.icmp_header.code);
 		printf("ICMP CHECKSUM: %02X \n", ntohs(reply.icmp_header.checksum));
 
-		int len = sizeof(reply.eth_header);
+		/*int len = sizeof(reply.eth_header);
 		unsigned char *ethtemp[len];
 		memcpy(ethtemp, &reply.eth_header, len);
 		len = sizeof(reply.ip_header);
@@ -270,8 +271,8 @@ int main(){
 		{
 			printf("%02X:", tempreply[i]);
 		}
-		printf("\n\n\n");
-		send(packet_socket, tempreply, 98, 0);
+		printf("\n\n\n");*/
+		send(packet_socket, &reply, 98, 0);
 	}
 
   }
