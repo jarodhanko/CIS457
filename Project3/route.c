@@ -15,11 +15,30 @@ struct aarp {
 	struct ether_arp arp_header;
 };
 
-struct iicmp{
+struct iip_header {
+	unsigned char v_ihl[1];
+	unsigned char tos[1];
+	unsigned char len[2];
+	unsigned char id[2];
+	unsigned char frag[2];
+	unsigned char ttl[1];
+	unsigned char protocol[1];
+	unsigned char checksum[2];
+	unsigned char src_ip[4];
+	unsigned char dst_ip[4];
+};
+
+struct iicmp_header {
+  	u_int8_t type;		/* message type */
+  	u_int8_t code;		/* type sub-code */
+  	u_int16_t checksum;
+	unsigned char *data;
+};
+
+struct iicmp {
 	struct ether_header eth_header;
-	struct iphdr ip_header;
-	struct icmphdr icmp_header;
-	char *data;
+	struct iip_header ip_header;
+	struct iicmp_header icmp_header;
 };
 
 //icmp checksum calculator from
@@ -170,9 +189,6 @@ int main(){
 	}else if(ntohs(request->eth_header.ether_type) == ETHERTYPE_IP){
 		struct iicmp *request;
 		request = ((struct iicmp*)&buf);
-		printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_dhost[0], request->eth_header.ether_dhost[1], request->eth_header.ether_dhost[2], request->eth_header.ether_dhost[3], request->eth_header.ether_dhost[4], request->eth_header.ether_dhost[5]);
-		printf("ETHER SRC: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_shost[0], request->eth_header.ether_shost[1], request->eth_header.ether_shost[2], request->eth_header.ether_shost[3], request->eth_header.ether_shost[4], request->eth_header.ether_shost[5]);
-		printf("ETHER TYPE: %02X \n", ntohs(request->eth_header.ether_type));
 
 		struct iicmp reply = *request;
 
@@ -180,10 +196,10 @@ int main(){
 		memcpy(reply.eth_header.ether_shost, tmp, ETH_ALEN);
 		memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
 
-		printf("%02X !!\n", request->ip_header.saddr);
-		memcpy(&reply.ip_header.daddr, &request->ip_header.saddr, 4);
-		printf("%02X!! \n", request->ip_header.daddr);
-		memcpy(&reply.ip_header.saddr, &request->ip_header.daddr, 4);
+		printf("%02X !!\n", request->ip_header.src_ip);
+		memcpy(&reply.ip_header.dst_ip, &request->ip_header.src_ip, 4);
+		printf("%02X!! \n", request->ip_header.dst_ip);
+		memcpy(&reply.ip_header.src_ip, &request->ip_header.dst_ip, 4);
 
 		reply.icmp_header.type = ICMP_ECHOREPLY;
 		reply.icmp_header.checksum = 0;
