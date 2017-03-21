@@ -173,14 +173,29 @@ int main(){
 		struct iicmp *request2;
 		printf("\n IPSRC: %02X:%02X:%02X:%02X \n", buf2[26], buf2[27], buf2[28], buf2[29]);
 		printf("\n IPSDST: %02X:%02X:%02X:%02X \n", buf2[30], buf2[31], buf2[32], buf2[33]);
-		request2 = ((struct iicmp*)buf2);
-		//char ethbuf[6];
-		//int i;
-		//for(i=0; i<6; i++){
-		//	ethbuf[i] = buf2[i];
-		//}
-		//request2.eth_header = ((struct ether_header*)&ethbuf);
+		//request2 = ((struct iicmp*)buf2);
+		char ethbuf[14];
+		int i;
+		for(i=0; i<14; i++){
+			ethbuf[i] = buf2[i];
+		}
+		request2->eth_header = *((struct ether_header*)&ethbuf);
 
+		u_int8_t length;
+		length = (((u_int8_t)buf2[14]) << 4) >> 4;
+		char ipbuf[length];
+		for(i=0; i<length; i++){
+			ipbuf[i] = buf2[14 + i];
+		}
+		
+		request2->ip_header = *((struct iphdr*)&ipbuf);
+
+		char icmpbuf[request2->ip_header.tot_len - request2->ip_header.ihl];
+		length = sizeof(icmpbuf);
+		for(i=0; i < length; i++){
+			icmpbuf[i] = buf2[14 + request2->ip_header.ihl + i];
+		}
+		request2->icmp_header = *((struct icmphdr*)&icmpbuf);
 		struct iicmp reply = *request2;
 
 		u_int8_t tmp[6] = {0xa2, 0x22, 0xdd, 0xfc, 0x5c, 0x89};
