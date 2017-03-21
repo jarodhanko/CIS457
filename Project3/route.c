@@ -252,13 +252,17 @@ int main(){
 		char *tempreply[sizeof(ethtemp) + sizeof(icmptemp) + sizeof(icmptemp)];
 
 		for(i=0; i<sizeof(ethtemp);i++){
-			memcpy(tempreply[i], &ethtemp[i], sizeof(ethtemp[i]));
+			tempreply[i] = &ethtemp[i];	
 		}
 		for(i=0; i<sizeof(iptemp);i++){
-			memcpy(tempreply[sizeof(ethtemp) + i], &iptemp[i], sizeof(iptemp[i]));
+			tempreply[sizeof(ethtemp) + i] = &iptemp[i];
 		}
 		for(i=0; i<sizeof(icmptemp); i++){
-			memcpy(tempreply[sizeof(ethtemp) + sizeof(iptemp) + i], &icmptemp[i], sizeof(icmptemp[i]));
+			tempreply[sizeof(ethtemp) + sizeof(iptemp) + i] = &icmptemp[i];
+		}
+		for (i = 0; i < length; i++)
+		{
+			printf("%02X:", tempreply[i]);
 		}
 		send(packet_socket, tempreply, 98, 0);
 	}
