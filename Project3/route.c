@@ -125,6 +125,8 @@ int main(){
 
 	memcpy(reply.arp_header.arp_tha, request->arp_header.arp_sha, ETH_ALEN);
 	memcpy(reply.arp_header.arp_tpa, request->arp_header.arp_spa, 4);
+
+	send(packet_socket, reply);
     //what else to do is up to you, you can send packets with send,
     //just like we used for TCP sockets (or you can use sendto, but it
     //is not necessary, since the headers, including all addresses,
