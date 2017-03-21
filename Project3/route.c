@@ -19,7 +19,6 @@ struct iicmp{
 	struct ether_header eth_header;
 	struct iphdr ip_header;
 	struct icmphdr icmp_header;
-	char data[1400];
 };
 
 //icmp checksum calculator from
