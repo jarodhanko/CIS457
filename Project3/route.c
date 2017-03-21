@@ -21,6 +21,40 @@ struct iicmp{
 	struct icmphdr icmp_header;
 };
 
+//icmp checksum calculator from
+//source: http://www.microhowto.info/howto/calculate_an_internet_protocol_checksum_in_c.html
+u_int16_t ip_checksum(void* vdata,size_t length) {
+    // Cast the data pointer to one that can be indexed.
+    char* data=(char*)vdata;
+
+    // Initialise the accumulator.
+    u_int32_t acc=0xffff;
+
+    // Handle complete 16-bit blocks.
+	size_t i;
+    for (i=0;i+1<length;i+=2) {
+        u_int16_t word;
+        memcpy(&word,data+i,2);
+        acc+=ntohs(word);
+        if (acc>0xffff) {
+            acc-=0xffff;
+        }
+    }
+
+    // Handle any partial block at the end of the data.
+    if (length&1) {
+        u_int16_t word=0;
+        memcpy(&word,data+length-1,1);
+        acc+=ntohs(word);
+        if (acc>0xffff) {
+            acc-=0xffff;
+        }
+    }
+
+    // Return the checksum in network byte order.
+    return htons(~acc);
+}
+
 
 int main(){
   int packet_socket;
@@ -121,12 +155,7 @@ int main(){
 		u_int8_t tmp[6] = {0xa2, 0x22, 0xdd, 0xfc, 0x5c, 0x89};
 		memcpy(reply.eth_header.ether_shost, tmp, ETH_ALEN);
 		memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
-	
-		//ether_type is same
-		//arp format hard addr is the same
-		//arp format proto addr is the same
-		//arp len hard addr is the same
-		//arp len proto addr is the same
+
 		reply.arp_header.ea_hdr.ar_op=htons(ARPOP_REPLY);
 		memcpy(reply.arp_header.arp_sha, tmp, 6);
 
@@ -143,6 +172,22 @@ int main(){
 		printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_dhost[0], request->eth_header.ether_dhost[1], request->eth_header.ether_dhost[2], request->eth_header.ether_dhost[3], request->eth_header.ether_dhost[4], request->eth_header.ether_dhost[5]);
 		printf("ETHER SRC: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_shost[0], request->eth_header.ether_shost[1], request->eth_header.ether_shost[2], request->eth_header.ether_shost[3], request->eth_header.ether_shost[4], request->eth_header.ether_shost[5]);
 		printf("ETHER TYPE: %02X \n", ntohs(request->eth_header.ether_type));
+
+		struct iicmp reply = *request;
+
+		u_int8_t tmp[6] = {0xa2, 0x22, 0xdd, 0xfc, 0x5c, 0x89};
+		memcpy(reply.eth_header.ether_shost, tmp, ETH_ALEN);
+		memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
+
+		reply.ip_header.saddr = request->ip_header.daddr;
+		reply.ip_header.daddr = request->ip_header.saddr;
+
+		reply.icmp_header.type = ICMP_ECHOREPLY;
+		reply.icmp_header.checksum = 0;
+
+		reply.icmp_header.checksum = ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header));
+		
+		send(packet_socket, &reply, sizeof(reply), 0);
 	}
 
   }
