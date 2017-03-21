@@ -210,7 +210,8 @@ int main(){
 		reply.icmp_header.checksum = 0;
 
 		//reply.icmp_header.checksum = htons(ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header));
-		reply.icmp_header.checksum = ip2_checksum(&reply.icmp_header, sizeof(reply.icmp_header));
+		printf("\n \t SIZEOFHEADER: %02X \n", sizeof(reply.icmp_header));
+		reply.icmp_header.checksum = htons(ip2_checksum(&reply.icmp_header, sizeof(reply.icmp_header)));
 
 
 		printf("\n IPHDR_len: %02X \n SIZEOF: %d \n", reply.ip_header.ihl, sizeof(reply));
