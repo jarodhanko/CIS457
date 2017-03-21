@@ -16,7 +16,8 @@ struct aarp {
 };
 
 struct iip_header {
-	unsigned char v_ihl[1];
+	unsigned int ihl;
+	unsigned int version;
 	unsigned char tos[1];
 	unsigned char len[2];
 	unsigned char id[2];
