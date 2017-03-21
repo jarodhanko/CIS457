@@ -188,7 +188,7 @@ int main(){
 
 		u_int8_t length;
 		length = (((u_int8_t)buf2[14]) << 4) >> 4;
-		printf("LENGTH: %d", length);
+		printf("\n LENGTH: %0d \n", length);
 		char ipbuf[length];
 		for(i=0; i<length; i++){
 			ipbuf[i] = buf2[14 + i];
