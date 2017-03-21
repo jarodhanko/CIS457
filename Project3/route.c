@@ -207,7 +207,7 @@ int main(){
 		memcpy(&reply.ip_header.saddr, tmp4, 4);
 
 		reply.icmp_header.type = ICMP_ECHOREPLY;
-		reply.icmp_header.checksum = 0;
+		//reply.icmp_header.checksum = 0;
 
 		//reply.icmp_header.checksum = htons(ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header));
 		printf("\n \t SIZEOFHEADER: %02X \n", sizeof(reply.icmp_header));
