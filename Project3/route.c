@@ -226,7 +226,7 @@ int main(){
 		//reply.icmp_header.checksum = htons(ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header)));
 		
 		printf("\n IPHDR_len: %02X \n SIZEOF: %d \n", reply.ip_header.ihl, sizeof(reply));
-		send(packet_socket, &reply, sizeof(reply), 0);
+		send(packet_socket, &reply, 98, 0);
 	}
 
   }
