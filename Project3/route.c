@@ -7,10 +7,18 @@
 #include <ifaddrs.h>
 #include <netinet/if_ether.h>
 #include <string.h>
+#include <netinet/ip.h>
+#include <netinet/ip_icmp.h>
 
 struct aarp {
 	struct ether_header eth_header;
 	struct ether_arp arp_header;
+};
+
+struct iicmp{
+	struct ether_header eth_header;
+	struct iphdr ip_header;
+	struct icmphdr icmp_header;
 };
 
 
@@ -94,54 +102,48 @@ int main(){
 	struct aarp *request;
 	request = ((struct aarp*)&buf);
 
-	printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_dhost[0], request->eth_header.ether_dhost[1], request->eth_header.ether_dhost[2], request->eth_header.ether_dhost[3], request->eth_header.ether_dhost[4], request->eth_header.ether_dhost[5]);
-	printf("ETHER SRC: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_shost[0], request->eth_header.ether_shost[1], request->eth_header.ether_shost[2], request->eth_header.ether_shost[3], request->eth_header.ether_shost[4], request->eth_header.ether_shost[5]);
-	printf("ETHER TYPE: %02X \n", ntohs(request->eth_header.ether_type));
-	printf("ARP FORMAT HARD ADDR: %02X \n", ntohs(request->arp_header.ea_hdr.ar_hrd));
-	printf("ARP FORMAT PROTO ADDR: %02X \n", ntohs(request->arp_header.ea_hdr.ar_pro));
-	printf("ARP LEN HARD ADDR: %02X \n", request->arp_header.ea_hdr.ar_hln);
-	printf("ARP LEN PROTO ADDR: %02X \n", request->arp_header.ea_hdr.ar_pln);
-	printf("ARP OP: %02X \n", ntohs(request->arp_header.ea_hdr.ar_op));
-	printf("ARP SENDER HARD ADDR: %02X%02X%02X%02X%02X%02X \n", request->arp_header.arp_sha[0], request->arp_header.arp_sha[1], request->arp_header.arp_sha[2], request->arp_header.arp_sha[3], request->arp_header.arp_sha[4], request->arp_header.arp_sha[5]);
-	printf("ARP SENDER PROTO ADDR: %02X%02X%02X%02X \n", request->arp_header.arp_spa[0], request->arp_header.arp_spa[1], request->arp_header.arp_spa[2], request->arp_header.arp_spa[3]);
-	printf("ARP TARGET HARD ADDR: %02X%02X%02X%02X%02X%02X \n", request->arp_header.arp_tha[0], request->arp_header.arp_tha[1], request->arp_header.arp_tha[2], request->arp_header.arp_tha[3]);
-	printf("ARP TARGET PROTO ADDR: %02X%02X%02X%02X \n", request->arp_header.arp_tpa[0], request->arp_header.arp_tpa[1], request->arp_header.arp_tpa[2], request->arp_header.arp_tpa[3]);
+	if(request->eth_header.ether_type == ETHERTYPE_ARP){
 
-	struct aarp reply = *request;
-	u_int8_t tmp[6] = {0xa2, 0x22, 0xdd, 0xfc, 0x5c, 0x89};
-	memcpy(reply.eth_header.ether_shost, tmp, ETH_ALEN);
-	memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
+		printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_dhost[0], request->eth_header.ether_dhost[1], request->eth_header.ether_dhost[2], request->eth_header.ether_dhost[3], request->eth_header.ether_dhost[4], request->eth_header.ether_dhost[5]);
+		printf("ETHER SRC: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_shost[0], request->eth_header.ether_shost[1], request->eth_header.ether_shost[2], request->eth_header.ether_shost[3], request->eth_header.ether_shost[4], request->eth_header.ether_shost[5]);
+		printf("ETHER TYPE: %02X \n", ntohs(request->eth_header.ether_type));
+		printf("ARP FORMAT HARD ADDR: %02X \n", ntohs(request->arp_header.ea_hdr.ar_hrd));
+		printf("ARP FORMAT PROTO ADDR: %02X \n", ntohs(request->arp_header.ea_hdr.ar_pro));
+		printf("ARP LEN HARD ADDR: %02X \n", request->arp_header.ea_hdr.ar_hln);
+		printf("ARP LEN PROTO ADDR: %02X \n", request->arp_header.ea_hdr.ar_pln);
+		printf("ARP OP: %02X \n", ntohs(request->arp_header.ea_hdr.ar_op));
+		printf("ARP SENDER HARD ADDR: %02X%02X%02X%02X%02X%02X \n", request->arp_header.arp_sha[0], request->arp_header.arp_sha[1], request->arp_header.arp_sha[2], request->arp_header.arp_sha[3], request->arp_header.arp_sha[4], request->arp_header.arp_sha[5]);
+		printf("ARP SENDER PROTO ADDR: %02X%02X%02X%02X \n", request->arp_header.arp_spa[0], request->arp_header.arp_spa[1], request->arp_header.arp_spa[2], request->arp_header.arp_spa[3]);
+		printf("ARP TARGET HARD ADDR: %02X%02X%02X%02X%02X%02X \n", request->arp_header.arp_tha[0], request->arp_header.arp_tha[1], request->arp_header.arp_tha[2], request->arp_header.arp_tha[3]);
+		printf("ARP TARGET PROTO ADDR: %02X%02X%02X%02X \n", request->arp_header.arp_tpa[0], request->arp_header.arp_tpa[1], request->arp_header.arp_tpa[2], request->arp_header.arp_tpa[3]);
+
+		struct aarp reply = *request;
+		u_int8_t tmp[6] = {0xa2, 0x22, 0xdd, 0xfc, 0x5c, 0x89};
+		memcpy(reply.eth_header.ether_shost, tmp, ETH_ALEN);
+		memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
 	
-	//ether_type is same
-	//arp format hard addr is the same
-	//arp format proto addr is the same
-	//arp len hard addr is the same
-	//arp len proto addr is the same
-	reply.arp_header.ea_hdr.ar_op=htons(ARPOP_REPLY);
-	memcpy(reply.arp_header.arp_sha, tmp, 6);
+		//ether_type is same
+		//arp format hard addr is the same
+		//arp format proto addr is the same
+		//arp len hard addr is the same
+		//arp len proto addr is the same
+		reply.arp_header.ea_hdr.ar_op=htons(ARPOP_REPLY);
+		memcpy(reply.arp_header.arp_sha, tmp, 6);
 
-	u_int8_t tmp2[4] = {10, 1, 0, 1};
-	memcpy(reply.arp_header.arp_spa, tmp2, 4);
+		u_int8_t tmp2[4] = {10, 1, 0, 1};
+		memcpy(reply.arp_header.arp_spa, tmp2, 4);
 
-	memcpy(reply.arp_header.arp_tha, request->arp_header.arp_sha, ETH_ALEN);
-	memcpy(reply.arp_header.arp_tpa, request->arp_header.arp_spa, 4);
+		memcpy(reply.arp_header.arp_tha, request->arp_header.arp_sha, ETH_ALEN);
+		memcpy(reply.arp_header.arp_tpa, request->arp_header.arp_spa, 4);
 
-	send(packet_socket, &reply, sizeof(reply), 0);
-    //what else to do is up to you, you can send packets with send,
-    //just like we used for TCP sockets (or you can use sendto, but it
-    //is not necessary, since the headers, including all addresses,
-    //need to be in the buffer you are sending)
-
-	//check if packet is an arp request
-
-	//if so, construct and send an arp response
-	//see struct ether_arp in if_ether.h
-	//sendArpResponse(n)
-
-	//check if packet is an icmp request
-	
-	//if so, construct and send an icmp response
-	//sendICMPResponse(n)    
+		send(packet_socket, &reply, sizeof(reply), 0);
+	}else if(request->eth_header.ether_type == ETHERTYPE_IP){
+		struct iicmp *request;
+		request = ((struct iicmp*)&buf);
+		printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_dhost[0], request->eth_header.ether_dhost[1], request->eth_header.ether_dhost[2], request->eth_header.ether_dhost[3], request->eth_header.ether_dhost[4], request->eth_header.ether_dhost[5]);
+		printf("ETHER SRC: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_shost[0], request->eth_header.ether_shost[1], request->eth_header.ether_shost[2], request->eth_header.ether_shost[3], request->eth_header.ether_shost[4], request->eth_header.ether_shost[5]);
+		printf("ETHER TYPE: %02X \n", ntohs(request->eth_header.ether_type));
+	}
 
   }
   //exit
