@@ -9,6 +9,7 @@
 #include <string.h>
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
+#include <stdlib.h>
 
 struct aarp {
 	struct ether_header eth_header;
@@ -220,10 +221,10 @@ int main(){
 		printf("SOURCE: %02X", request2.ip_header.saddr);
 		printf("DESTINATION: %02X", request2.ip_header.daddr);
 
-		char *tmp3;
+		char *tmp3 = malloc(4);
 		memcpy(tmp3, &request2.ip_header.saddr, 4);
 		reply.ip_header.daddr = *tmp3;
-		char *tmp4;
+		char *tmp4 = malloc(4);
 		memcpy(tmp4, &request2.ip_header.daddr, 4);;
 		reply.ip_header.saddr = *tmp4; //request2.ip_header.daddr;
 
