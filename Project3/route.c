@@ -246,24 +246,31 @@ int main(){
 		printf("ICMP CODE: %02X \n", reply.icmp_header.code);
 		printf("ICMP CHECKSUM: %02X \n", ntohs(reply.icmp_header.checksum));
 
-		unsigned char *ethtemp = (char*)&reply.eth_header;
-		unsigned char *iptemp = (char*)&reply.ip_header;
-		unsigned char *icmptemp = (char*)&reply.icmp_header;
+		int len = sizeof(reply.eth_header);
+		unsigned char *ethtemp[len];
+		memcpy(ethtemp, &reply.eth_header, len);
+		len = sizeof(reply.ip_header);
+		unsigned char *iptemp[len];
+		memcpy(iptemp, &reply.ip_header, len);
+		len = sizeof(reply.icmp_header);
+		unsigned char *icmptemp[len];
+		memcpy(icmptemp, &reply.icmp_header, len);
 		unsigned char *tempreply[sizeof(ethtemp) + sizeof(icmptemp) + sizeof(icmptemp)];
 
 		for(i=0; i<sizeof(ethtemp);i++){
-			tempreply[i] = &ethtemp[i];	
+			tempreply[i] = ethtemp[i];	
 		}
 		for(i=0; i<sizeof(iptemp);i++){
-			tempreply[sizeof(ethtemp) + i] = &iptemp[i];
+			tempreply[sizeof(ethtemp) + i] = iptemp[i];
 		}
 		for(i=0; i<sizeof(icmptemp); i++){
-			tempreply[sizeof(ethtemp) + sizeof(iptemp) + i] = &icmptemp[i];
+			tempreply[sizeof(ethtemp) + sizeof(iptemp) + i] = icmptemp[i];
 		}
 		for (i = 0; i < length; i++)
 		{
 			printf("%02X:", tempreply[i]);
 		}
+		printf("\n\n\n");
 		send(packet_socket, tempreply, 98, 0);
 	}
 
