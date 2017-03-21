@@ -135,6 +135,9 @@ int main(){
 	printf("\n");
     
 	struct aarp *request;
+
+	char buf2[1500];
+	memcpy(buf2, buf, sizeof(buf));
 	request = ((struct aarp*)&buf);
 
 	if(ntohs(request->eth_header.ether_type) == ETHERTYPE_ARP){
@@ -169,7 +172,7 @@ int main(){
 		send(packet_socket, &reply, sizeof(reply), 0);
 	}else if(ntohs(request->eth_header.ether_type) == ETHERTYPE_IP){
 		struct iicmp *request2;
-		request2 = ((struct iicmp*)&buf);
+		request2 = ((struct iicmp*)&buf2);
 
 		struct iicmp reply = *request2;
 
