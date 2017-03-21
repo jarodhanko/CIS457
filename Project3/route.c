@@ -207,11 +207,10 @@ int main(){
 		memcpy(&reply.ip_header.saddr, tmp4, 4);
 
 		reply.icmp_header.type = ICMP_ECHOREPLY;
-		//reply.icmp_header.checksum = 0;
+		reply.icmp_header.checksum = 0;
 
-		//reply.icmp_header.checksum = htons(ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header));
 		printf("\n \t SIZEOFHEADER: %02X \n", sizeof(reply.icmp_header));
-		//reply.icmp_header.checksum = ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header));
+		reply.icmp_header.checksum = ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header));
 
 
 		printf("\n IPHDR_len: %02X \n SIZEOF: %d \n", reply.ip_header.ihl, sizeof(reply));
@@ -235,7 +234,7 @@ int main(){
 		printf("ICMP CHECKSUM: %02X \n", ntohs(reply.icmp_header.checksum));
 
 		
-		send(packet_socket, &reply, 98, 0);
+		send(packet_socket, &reply, sizeof(reply), 0);
 	}
 
   }
