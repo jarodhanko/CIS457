@@ -17,7 +17,7 @@
 struct aarp {
 	struct ether_header eth_header;
 	struct ether_arp arp_header;
-};
+} __attribute__ ((__packed__));
 
 struct iicmp{
 	struct ether_header eth_header;
@@ -184,39 +184,7 @@ int main(){
 		memcpy(tmp5, &tmp4, 4);
 		printf("\n IPSRC: %02X:%02X:%02X:%02X \n", tmp3);
 		printf("\n IPSDST: %02X:%02X:%02X:%02X \n", tmp4);
-		//request2 = ((struct iicmp*)buf2);
-		/*printf("0");
-		char ethbuf[14];
-		printf("1");
-		int i;
-		for(i=0; i<14; i++){
-			printf("2");
-			ethbuf[i] = buf2[i];
-		}
-		printf("3");
-		request2.eth_header = *((struct ether_header*)&ethbuf);
-
-		u_int8_t length;
-		length = 4*(((u_int8_t)buf2[14]) & 0x0F);
-		printf("\n LENGTH: %0d \n", length);
-		char ipbuf[length];
-		for(i=0; i<length; i++){
-			ipbuf[i] = buf2[14 + i];
-		}
-		for (i = 0; i < length; i++)
-		{
-			printf("%02X:", ipbuf[i]);
-		}
-		request2.ip_header = *((struct iphdr*)&ipbuf);
-		printf("\n IPHDR_len: %02X \n", request2.ip_header.ihl);
-
-		char icmpbuf[request2.ip_header.tot_len - request2.ip_header.ihl];
-		length = request2.ip_header.tot_len - request2.ip_header.ihl;
-		for(i=0; i < length; i++){
-			icmpbuf[i] = buf2[14 + request2.ip_header.ihl + i];
-		}
-		request2.icmp_header = *((struct icmphdr*)&icmpbuf);
-*/
+		
 		struct iicmp reply = request2;
 		printf("\n REQUEST2: %d \n", sizeof(request2));
 		memcpy(&reply, &request2, 98);
@@ -236,7 +204,7 @@ int main(){
 		reply.icmp_header.type = ICMP_ECHOREPLY;
 		reply.icmp_header.checksum = 0;
 
-		reply.icmp_header.checksum = htons(ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header)));
+		reply.icmp_header.checksum = ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header));
 		
 		printf("\n IPHDR_len: %02X \n SIZEOF: %d \n", reply.ip_header.ihl, sizeof(reply));
 
@@ -258,31 +226,7 @@ int main(){
 		printf("ICMP CODE: %02X \n", reply.icmp_header.code);
 		printf("ICMP CHECKSUM: %02X \n", ntohs(reply.icmp_header.checksum));
 
-		/*int len = sizeof(reply.eth_header);
-		unsigned char *ethtemp[len];
-		memcpy(ethtemp, &reply.eth_header, len);
-		len = sizeof(reply.ip_header);
-		unsigned char *iptemp[len];
-		memcpy(iptemp, &reply.ip_header, len);
-		len = sizeof(reply.icmp_header);
-		unsigned char *icmptemp[len];
-		memcpy(icmptemp, &reply.icmp_header, len);
-		unsigned char *tempreply[sizeof(ethtemp) + sizeof(icmptemp) + sizeof(icmptemp)];
-
-		for(i=0; i<sizeof(ethtemp);i++){
-			tempreply[i] = ethtemp[i];	
-		}
-		for(i=0; i<sizeof(iptemp);i++){
-			tempreply[sizeof(ethtemp) + i] = iptemp[i];
-		}
-		for(i=0; i<sizeof(icmptemp); i++){
-			tempreply[sizeof(ethtemp) + sizeof(iptemp) + i] = icmptemp[i];
-		}
-		for (i = 0; i < length; i++)
-		{
-			printf("%02X:", tempreply[i]);
-		}
-		printf("\n\n\n");*/
+		
 		send(packet_socket, &reply, 98, 0);
 	}
 
