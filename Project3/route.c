@@ -226,7 +226,7 @@ int main(){
 		printf("DESTINATION: %02X", request2.ip_header.daddr);
 
 		memcpy(&reply.ip_header.daddr, &tmp3, 4);
-		memcpy(&reply.ip_header.saddr, &tmp4, 4);
+		memcpy(&reply.ip_header.saddr, &tmp5, 4);
 
 		reply.icmp_header.type = ICMP_ECHOREPLY;
 		reply.icmp_header.checksum = 0;
