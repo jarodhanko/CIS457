@@ -218,8 +218,8 @@ int main(){
 		memcpy(reply.eth_header.ether_dhost, request2.eth_header.ether_shost, ETH_ALEN);
 
 		
-		printf("SOURCE: %02X", request2.ip_header.saddr);
-		printf("DESTINATION: %02X", request2.ip_header.daddr);
+		printf("SOURCE: %02X", htons(request2.ip_header.saddr));
+		printf("DESTINATION: %02X", htons(request2.ip_header.daddr));
 
 		char *tmp3 = malloc(4);
 		memcpy(tmp3, &request2.ip_header.saddr, 4);
