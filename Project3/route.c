@@ -197,6 +197,7 @@ int main(){
 			printf("%02X:", ipbuf[i]);
 		}
 		request2.ip_header = *((struct iphdr*)&ipbuf);
+		printf("IPHDR_len: %02X", request2.ip_header.ihl);
 
 		char icmpbuf[request2.ip_header.tot_len - request2.ip_header.ihl];
 		length = sizeof(icmpbuf);
