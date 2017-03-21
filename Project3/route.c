@@ -15,37 +15,11 @@ struct aarp {
 	struct ether_arp arp_header;
 };
 
-struct iip_header {
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-    unsigned int ihl:4;
-    unsigned int version:4;
-#elif __BYTE_ORDER == __BIG_ENDIAN
-    unsigned int version:4;
-    unsigned int ihl:4;
-#else
-# error	"Please fix <bits/endian.h>"
-#endif
-	unsigned char tos[1];
-	unsigned char len[2];
-	unsigned char id[2];
-	unsigned char frag[2];
-	unsigned char ttl[1];
-	unsigned char protocol[1];
-	unsigned char checksum[2];
-	unsigned char src_ip[4];
-	unsigned char dst_ip[4];
-};
-
-struct iicmp_header {
-  	u_int8_t type;		/* message type */
-  	u_int8_t code;		/* type sub-code */
-  	u_int16_t checksum;
-};
-
-struct iicmp {
+struct iicmp{
 	struct ether_header eth_header;
-	struct iip_header ip_header;
-	struct iicmp_header icmp_header;
+	struct iphdr ip_header;
+	struct icmphdr icmp_header;
+	char *data;
 };
 
 //icmp checksum calculator from
@@ -194,19 +168,17 @@ int main(){
 
 		send(packet_socket, &reply, sizeof(reply), 0);
 	}else if(ntohs(request->eth_header.ether_type) == ETHERTYPE_IP){
-		struct iicmp *request;
-		request = ((struct iicmp*)&buf);
+		struct iicmp *request2;
+		request2 = ((struct iicmp*)&buf);
 
-		struct iicmp reply = *request;
+		struct iicmp reply = *request2;
 
 		u_int8_t tmp[6] = {0xa2, 0x22, 0xdd, 0xfc, 0x5c, 0x89};
 		memcpy(reply.eth_header.ether_shost, tmp, ETH_ALEN);
-		memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
+		memcpy(reply.eth_header.ether_dhost, request2->eth_header.ether_shost, ETH_ALEN);
 
-		printf("%02X !!\n", request->ip_header.src_ip);
-		memcpy(&reply.ip_header.dst_ip, &request->ip_header.src_ip, 4);
-		printf("%02X!! \n", request->ip_header.dst_ip);
-		memcpy(&reply.ip_header.src_ip, &request->ip_header.dst_ip, 4);
+		reply.ip_header.daddr = request2->ip_header.saddr;
+		reply.ip_header.saddr = request2->ip_header.daddr;
 
 		reply.icmp_header.type = ICMP_ECHOREPLY;
 		reply.icmp_header.checksum = 0;
