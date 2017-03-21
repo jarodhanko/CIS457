@@ -180,9 +180,9 @@ int main(){
 		memcpy(reply.eth_header.ether_shost, tmp, ETH_ALEN);
 		memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
 
-		printf("%02X", request->ip_header.saddr);
+		printf("%02X !!\n", request->ip_header.saddr);
 		memcpy(&reply.ip_header.daddr, &request->ip_header.saddr, 4);
-		printf("%02X", request->ip_header.daddr);
+		printf("%02X!! \n", request->ip_header.daddr);
 		memcpy(&reply.ip_header.saddr, &request->ip_header.daddr, 4);
 
 		reply.icmp_header.type = ICMP_ECHOREPLY;
