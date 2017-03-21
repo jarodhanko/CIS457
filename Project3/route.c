@@ -16,8 +16,15 @@ struct aarp {
 };
 
 struct iip_header {
-	unsigned int ihl;
-	unsigned int version;
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+    unsigned int ihl:4;
+    unsigned int version:4;
+#elif __BYTE_ORDER == __BIG_ENDIAN
+    unsigned int version:4;
+    unsigned int ihl:4;
+#else
+# error	"Please fix <bits/endian.h>"
+#endif
 	unsigned char tos[1];
 	unsigned char len[2];
 	unsigned char id[2];
@@ -39,7 +46,7 @@ struct iicmp_header {
 struct iicmp {
 	struct ether_header eth_header;
 	struct iip_header ip_header;
-	struct iicmp_header icmp_header;
+	struct icmp_header icmp_header;
 };
 
 //icmp checksum calculator from
