@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <ifaddrs.h>
 #include <netinet/if_ether.h>
+#include <string.h>
 
 struct aarp {
 	struct ether_header eth_header;
@@ -106,7 +107,24 @@ int main(){
 	printf("ARP TARGET HARD ADDR: %02X%02X%02X%02X%02X%02X \n", request->arp_header.arp_tha[0], request->arp_header.arp_tha[1], request->arp_header.arp_tha[2], request->arp_header.arp_tha[3]);
 	printf("ARP TARGET PROTO ADDR: %02X%02X%02X%02X \n", request->arp_header.arp_tpa[0], request->arp_header.arp_tpa[1], request->arp_header.arp_tpa[2], request->arp_header.arp_tpa[3]);
 
-	struct aarp *reply;
+	struct aarp reply = *request;
+	memcpy(reply.eth_header.ether_shost, request->eth_header.ether_dhost, ETH_ALEN);
+	memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
+	
+	//ether_type is same
+	//arp format hard addr is the same
+	//arp format proto addr is the same
+	//arp len hard addr is the same
+	//arp len proto addr is the same
+	reply.arp_header.ea_hdr.ar_op=ARPOP_REPLY;
+	u_int8_t tmp[6] = {0x3e, 0xcb, 0xae, 0x0a, 0xe0, 0xa9};
+	memcpy(reply.arp_header.arp_sha, tmp, 6);
+
+	u_int8_t tmp2[4] = {10, 0, 0, 1};
+	memcpy(reply.arp_header.arp_spa, tmp2, 4);
+
+	memcpy(reply.arp_header.arp_tha, request->arp_header.arp_sha, ETH_ALEN);
+	memcpy(reply.arp_header.arp_tpa, request->arp_header.arp_spa, 4);
     //what else to do is up to you, you can send packets with send,
     //just like we used for TCP sockets (or you can use sendto, but it
     //is not necessary, since the headers, including all addresses,
