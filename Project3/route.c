@@ -246,10 +246,10 @@ int main(){
 		printf("ICMP CODE: %02X \n", reply.icmp_header.code);
 		printf("ICMP CHECKSUM: %02X \n", ntohs(reply.icmp_header.checksum));
 
-		char *ethtemp = (char*)&reply.eth_header;
-		char *iptemp = (char*)&reply.ip_header;
-		char *icmptemp = (char*)&reply.icmp_header;
-		char *tempreply[sizeof(ethtemp) + sizeof(icmptemp) + sizeof(icmptemp)];
+		unsigned char *ethtemp = (char*)&reply.eth_header;
+		unsigned char *iptemp = (char*)&reply.ip_header;
+		unsigned char *icmptemp = (char*)&reply.icmp_header;
+		unsigned char *tempreply[sizeof(ethtemp) + sizeof(icmptemp) + sizeof(icmptemp)];
 
 		for(i=0; i<sizeof(ethtemp);i++){
 			tempreply[i] = &ethtemp[i];	
