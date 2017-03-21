@@ -207,6 +207,7 @@ int main(){
 		request2.icmp_header = *((struct icmphdr*)&icmpbuf);
 		struct iicmp reply;
 		memcpy(&reply, &request2, sizeof(request2));
+		printf("\n IPHDR_len: %02X \n", reply.ip_header.ihl);
 
 		u_int8_t tmp[6] = {0xa2, 0x22, 0xdd, 0xfc, 0x5c, 0x89};
 		memcpy(reply.eth_header.ether_shost, tmp, ETH_ALEN);
