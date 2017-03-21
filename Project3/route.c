@@ -60,6 +60,22 @@ u_int16_t ip_checksum(void* vdata,size_t length) {
 }
 
 
+unsigned short ip2_checksum(void *b, int len)
+{	unsigned short *buf = b;
+	unsigned int sum=0;
+	unsigned short result;
+
+	for ( sum = 0; len > 1; len -= 2 )
+		sum += *buf++;
+	if ( len == 1 )
+		sum += *(unsigned char*)buf;
+	sum = (sum >> 16) + (sum & 0xFFFF);
+	sum += (sum >> 16);
+	result = ~sum;
+	return result;
+}
+
+
 int main(){
   int packet_socket;
   //get list of interfaces (actually addresses)
@@ -178,25 +194,14 @@ int main(){
 		request2 = *((struct iicmp*)&buf2);
 		unsigned char tmp3[] = {buf2[26], buf2[27], buf2[28], buf2[29]};
 		unsigned char tmp4[] = {buf2[30], buf2[31], buf2[32], buf2[33]};
-		unsigned char* tmp5 = malloc(4);
-        unsigned char* tmp6 = malloc(4);
-        memcpy(tmp6, &tmp3, 4);
-		memcpy(tmp5, &tmp4, 4);
-		printf("\n IPSRC: %02X:%02X:%02X:%02X \n", tmp3);
-		printf("\n IPSDST: %02X:%02X:%02X:%02X \n", tmp4);
 		
 		struct iicmp reply = request2;
-		printf("\n REQUEST2: %d \n", sizeof(request2));
 		memcpy(&reply, &request2, 98);
-		printf("\n IPHDR_len: %02X \n", reply.ip_header.ihl);
 
 		u_int8_t tmp[6] = {0xa2, 0x22, 0xdd, 0xfc, 0x5c, 0x89};
 		memcpy(reply.eth_header.ether_shost, tmp, ETH_ALEN);
 		memcpy(reply.eth_header.ether_dhost, request2.eth_header.ether_shost, ETH_ALEN);
 
-		
-		printf("SOURCE: %02X", request2.ip_header.saddr);
-		printf("DESTINATION: %02X", request2.ip_header.daddr);
 
 		memcpy(&reply.ip_header.daddr, tmp3, 4);
 		memcpy(&reply.ip_header.saddr, tmp4, 4);
@@ -204,8 +209,10 @@ int main(){
 		reply.icmp_header.type = ICMP_ECHOREPLY;
 		reply.icmp_header.checksum = 0;
 
+		//reply.icmp_header.checksum = htons(ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header));
 		reply.icmp_header.checksum = ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header));
-		
+
+
 		printf("\n IPHDR_len: %02X \n SIZEOF: %d \n", reply.ip_header.ihl, sizeof(reply));
 
 		printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", reply.eth_header.ether_dhost[0], reply.eth_header.ether_dhost[1], reply.eth_header.ether_dhost[2], reply.eth_header.ether_dhost[3], reply.eth_header.ether_dhost[4], reply.eth_header.ether_dhost[5]);
