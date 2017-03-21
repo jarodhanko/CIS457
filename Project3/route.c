@@ -179,8 +179,8 @@ int main(){
 		for(i=0; i<14; i++){
 			ethbuf[i] = buf2[i];
 		}
-		request2->eth_header = *((struct ether_header*)&ethbuf);
 		printf("1!");
+		request2->eth_header = *((struct ether_header*)&ethbuf);
 
 		u_int8_t length;
 		length = (((u_int8_t)buf2[14]) << 4) >> 4;
