@@ -227,6 +227,24 @@ int main(){
 		reply.icmp_header.checksum = htons(ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header)));
 		
 		printf("\n IPHDR_len: %02X \n SIZEOF: %d \n", reply.ip_header.ihl, sizeof(reply));
+
+		printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", reply.eth_header.ether_dhost[0], reply.eth_header.ether_dhost[1], reply.eth_header.ether_dhost[2], reply.eth_header.ether_dhost[3], reply.eth_header.ether_dhost[4], reply.eth_header.ether_dhost[5]);
+		printf("ETHER SRC: %02X%02X%02X%02X%02X%02X \n", reply.eth_header.ether_shost[0], reply.eth_header.ether_shost[1], reply.eth_header.ether_shost[2], reply.eth_header.ether_shost[3], reply.eth_header.ether_shost[4], reply.eth_header.ether_shost[5]);
+		printf("ETHER TYPE: %02X \n", ntohs(reply.eth_header.ether_type));
+		printf("IP IHL: %01X", reply.ip_header.ihl);
+		printf("IP VERSION: %01X", reply.ip_header.version);
+		printf("IP TOS: %02X", reply.ip_header.tos);
+		printf("IP TOT_LEN: %02X", ntohs(reply.ip_header.tot_len));
+		printf("IP ID: %02X", ntohs(reply.ip_header.id));
+		printf("IP FRAG_OFF: %02X", ntohs(reply.ip_header.frag_off));
+		printf("IP TTL: %02X", reply.ip_header.ttl);
+		printf("IP PROTOCOL: %02X", reply.ip_header.protocol);
+		printf("IP CHECK: %02X", ntohs(reply.ip_header.check));
+		printf("IP SADDR: %02X", ntohl(reply.ip_header.saddr));
+		printf("IP DADDR: %02X", ntohl(reply.ip_header.daddr));
+		printf("ICMP TYPE: %02X", reply.icmp_header.type);
+		printf("ICMP CODE: %02X", reply.icmp_header.code);
+		printf("ICMP CHECKSUM: %02X", ntohs(reply.icmp_header.checksum));
 		send(packet_socket, (char*)&reply, 98, 0);
 	}
 
