@@ -247,6 +247,10 @@ int main(){
 		printf("ICMP CHECKSUM: %02X \n", ntohs(reply.icmp_header.checksum));
 
 		char *tempreply = (char*)&reply;
+		for (i = 0; i < sizeof(tempreply); i++)
+		{
+			printf("%02X:", tempreply[i]);
+		}
 		send(packet_socket, tempreply, 98, 0);
 	}
 
