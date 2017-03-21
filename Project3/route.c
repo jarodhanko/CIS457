@@ -220,8 +220,8 @@ int main(){
 		printf("SOURCE: %02X", request2.ip_header.saddr);
 		printf("DESTINATION: %02X", request2.ip_header.daddr);
 
-		//reply.ip_header.daddr = request2.ip_header.saddr;
-		//reply.ip_header.saddr = request2.ip_header.daddr;
+		reply.ip_header.daddr = 0x0a010003;// request2.ip_header.saddr;
+		reply.ip_header.saddr = 0x0a010001; //request2.ip_header.daddr;
 
 		reply.icmp_header.type = ICMP_ECHOREPLY;
 		reply.icmp_header.checksum = 0;
