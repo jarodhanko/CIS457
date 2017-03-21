@@ -182,10 +182,10 @@ int main(){
 		reply.ip_header.saddr = request->ip_header.daddr;
 		reply.ip_header.daddr = request->ip_header.saddr;
 
-		reply.icmp_header.type = ICMP_ECHOREPLY;
+		reply.icmp_header.type = htons(ICMP_ECHOREPLY);
 		reply.icmp_header.checksum = 0;
 
-		reply.icmp_header.checksum = ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header));
+		reply.icmp_header.checksum = htons(ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header)));
 		
 		send(packet_socket, &reply, sizeof(reply), 0);
 	}
