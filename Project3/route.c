@@ -10,6 +10,9 @@
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
 #include <stdlib.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 
 struct aarp {
 	struct ether_header eth_header;
