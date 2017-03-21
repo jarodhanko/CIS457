@@ -171,7 +171,14 @@ int main(){
 		send(packet_socket, &reply, sizeof(reply), 0);
 	}else if(ntohs(request->eth_header.ether_type) == ETHERTYPE_IP){
 		struct iicmp *request2;
+		printf("IPSRC: %d:%d:%d:%d", %buf2[18], &buf2[19], &buf2[20], &buf2[21]);
 		request2 = ((struct iicmp*)&buf2);
+		//char ethbuf[6];
+		//int i;
+		//for(i=0; i<6; i++){
+		//	ethbuf[i] = buf2[i];
+		//}
+		//request2.eth_header = ((struct ether_header*)&ethbuf);
 
 		struct iicmp reply = *request2;
 
