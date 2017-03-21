@@ -234,7 +234,7 @@ int main(){
 		printf("ICMP CHECKSUM: %02X \n", ntohs(reply.icmp_header.checksum));
 
 		
-		send(packet_socket, &reply, sizeof(reply), 0);
+		send(packet_socket, &reply, 90, 0);
 	}
 
   }
