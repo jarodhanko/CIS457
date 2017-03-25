@@ -22,8 +22,8 @@ struct aarp {
 struct iicmp{
 	struct ether_header eth_header;
 	struct iphdr ip_header;
-	struct icmp icmp;
-    u_int8_t data[1];
+	struct icmphdr icmp_header;
+	unsigned char *data;
 } __attribute__ ((__packed__));
 
 //icmp checksum calculator from
@@ -193,10 +193,14 @@ int main(){
 	}else if(ntohs(request->eth_header.ether_type) == ETHERTYPE_IP){
 		struct iicmp request2;
 		request2 = *((struct iicmp*)&buf2);
+		int datalength = request2.ip_header.tot_len - sizeof(request2.icmp_header);
+		if(datalength > 0)
+			memcpy(request2.data, &buf[sizeof(request2)-1], datalength);
 		unsigned char tmp3[] = {buf2[26], buf2[27], buf2[28], buf2[29]};
 		unsigned char tmp4[] = {buf2[30], buf2[31], buf2[32], buf2[33]};
 		
 		struct iicmp reply = request2;
+		printf("\n \t \t THE SIZE IS: %d \n", sizeof(request2));
 		memcpy(&reply, &request2, 98);
 
 		u_int8_t tmp[6] = {0xa2, 0x22, 0xdd, 0xfc, 0x5c, 0x89};
@@ -207,10 +211,11 @@ int main(){
 		memcpy(&reply.ip_header.daddr, tmp3, 4);
 		memcpy(&reply.ip_header.saddr, tmp4, 4);
 
-		reply.icmp.icmp_type = ICMP_ECHOREPLY;
-		reply.icmp.icmp_cksum = 0;
+		reply.icmp_header.type = ICMP_ECHOREPLY;
+		reply.icmp_header.checksum = 0;
 
-		reply.icmp.icmp_cksum = ip_checksum(&reply.icmp, sizeof(reply.icmp));
+		printf("\n \t SIZEOFHEADER: %02X \n", sizeof(reply.icmp_header));
+		reply.icmp_header.checksum = ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header));
 
 
 		printf("\n IPHDR_len: %02X \n SIZEOF: %d \n", reply.ip_header.ihl, sizeof(reply));
@@ -229,9 +234,9 @@ int main(){
 		printf("IP CHECK: %02X \n", ntohs(reply.ip_header.check));
 		printf("IP SADDR: %02X \n", ntohl(reply.ip_header.saddr));
 		printf("IP DADDR: %02X \n", ntohl(reply.ip_header.daddr));
-		printf("ICMP TYPE: %02X \n", reply.icmp.icmp_type);
-		printf("ICMP CODE: %02X \n", reply.icmp.icmp_code);
-		printf("ICMP CHECKSUM: %02X \n", ntohs(reply.icmp.icmp_cksum));
+		printf("ICMP TYPE: %02X \n", reply.icmp_header.type);
+		printf("ICMP CODE: %02X \n", reply.icmp_header.code);
+		printf("ICMP CHECKSUM: %02X \n", ntohs(reply.icmp_header.checksum));
 
 		
 		send(packet_socket, &reply, sizeof(reply), 0);
