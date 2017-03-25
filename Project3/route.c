@@ -195,7 +195,7 @@ int main(){
 		request2 = *((struct iicmp*)&buf2);
 		int datalength = ntohs(request2.ip_header.tot_len) - sizeof(request2.ip_header) - sizeof(request2.icmp_header);
 		if(datalength > 0)
-			memcpy(&request2.data, &buf, datalength);
+			memcpy(request2.data, &buf, datalength);
 		printf("\n THE DATA LENGTH IS %d", datalength);
 		unsigned char tmp3[] = {buf2[26], buf2[27], buf2[28], buf2[29]};
 		unsigned char tmp4[] = {buf2[30], buf2[31], buf2[32], buf2[33]};
