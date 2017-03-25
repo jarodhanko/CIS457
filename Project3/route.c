@@ -23,7 +23,7 @@ struct iicmp{
 	struct ether_header eth_header;
 	struct iphdr ip_header;
 	struct icmphdr icmp_header;
-	char *data;
+	unsigned char *data;
 } __attribute__ ((__packed__));
 
 //icmp checksum calculator from
@@ -196,7 +196,7 @@ int main(){
 		int datalength = ntohs(request2.ip_header.tot_len) - sizeof(request2.ip_header) - sizeof(request2.icmp_header);
 		printf("\n THE DATA LENGTH IS %d", datalength);
 		if(datalength > 0)
-			memcpy(request2.data, buf2 + sizeof(request2), datalength);
+			memcpy(request2.data, buf2 + 50, 48);
 		unsigned char tmp3[] = {buf2[26], buf2[27], buf2[28], buf2[29]};
 		unsigned char tmp4[] = {buf2[30], buf2[31], buf2[32], buf2[33]};
 		
