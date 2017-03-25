@@ -218,7 +218,7 @@ int main(){
 		printf("\n \t SIZEOFHEADER: %02X \n", sizeof(reply.icmp_header));
 		char *ptr;
 		memcpy(ptr, &reply.icmp_header, sizeof(reply.icmp_header));
-		memcpy(&ptr[sizeof(reply.icmp_header), reply.data, sizeof(reply.data));
+		memcpy(&ptr[sizeof(reply.icmp_header)], reply.data, sizeof(reply.data));
 		reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
 
 
