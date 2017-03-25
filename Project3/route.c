@@ -216,10 +216,10 @@ int main(){
 		reply.icmp_header.checksum = 0;
 		printf("\n \t \t THE SIZE IS: %d \n", sizeof(request2));
 		printf("\n \t SIZEOFHEADER: %02X \n", sizeof(reply.icmp_header));
-		//char *ptr;
-		//memcpy(ptr, &reply.icmp_header, sizeof(reply.icmp_header));
-		//memcpy(&ptr[sizeof(reply.icmp_header)], reply.data, sizeof(reply.data));
-		//reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
+		char *ptr;
+		memcpy(ptr, &reply.icmp_header, sizeof(reply.icmp_header));
+		memcpy(&ptr[sizeof(reply.icmp_header)], reply.data, sizeof(reply.data));
+		reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
 
 
 		printf("\n IPHDR_len: %02X \n SIZEOF: %d \n", reply.ip_header.ihl, sizeof(reply));
