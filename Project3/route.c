@@ -193,7 +193,7 @@ int main(){
 	}else if(ntohs(request->eth_header.ether_type) == ETHERTYPE_IP){
 		struct iicmp request2;
 		request2 = *((struct iicmp*)&buf2);
-		int datalength = ntohs(request2.ip_header.tot_len) - sizeof(request2.icmp_header);
+		int datalength = ntohs(request2.ip_header.tot_len) - sizeof(request2.ip_header) - sizeof(request2.icmp_header);
 		printf("\n THE DATA LENGTH IS %d", datalength);
 		//if(datalength > 0)
 			//memcpy(request2.data, &buf2 + sizeof(request2), datalength);
