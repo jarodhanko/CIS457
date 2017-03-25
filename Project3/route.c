@@ -219,7 +219,7 @@ int main(){
 		char *ptr;
 		memcpy(ptr, &reply.icmp_header, sizeof(reply.icmp_header));
 		printf("THIS WORKED");
-		memcpy(&ptr[sizeof(reply.icmp_header)], &reply.data, sizeof(reply.data));
+		//memcpy(&ptr[sizeof(reply.icmp_header)], &reply.data, sizeof(reply.data));
 		printf("THIS FAILED");
 		reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
 
