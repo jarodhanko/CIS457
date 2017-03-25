@@ -23,7 +23,7 @@ struct iicmp{
 	struct ether_header eth_header;
 	struct iphdr ip_header;
 	struct icmphdr icmp_header;
-	unsigned char *data;
+	char *data;
 } __attribute__ ((__packed__));
 
 //icmp checksum calculator from
