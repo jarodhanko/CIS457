@@ -22,7 +22,7 @@ struct aarp {
 struct iicmp{
 	struct ether_header eth_header;
 	struct iphdr ip_header;
-	struct icmphdr icmp_header;
+	struct icmp icmp;
 	unsigned char *data;
 } __attribute__ ((__packed__));
 
@@ -207,11 +207,10 @@ int main(){
 		memcpy(&reply.ip_header.daddr, tmp3, 4);
 		memcpy(&reply.ip_header.saddr, tmp4, 4);
 
-		reply.icmp_header.type = ICMP_ECHOREPLY;
-		reply.icmp_header.checksum = 0;
+		reply.icmp.icmp_type = ICMP_ECHOREPLY;
+		reply.icmp.icmp_cksum = 0;
 
-		printf("\n \t SIZEOFHEADER: %02X \n", sizeof(reply.icmp_header));
-		reply.icmp_header.checksum = ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header));
+		reply.icmp.icmp_cksum = ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header));
 
 
 		printf("\n IPHDR_len: %02X \n SIZEOF: %d \n", reply.ip_header.ihl, sizeof(reply));
@@ -230,9 +229,9 @@ int main(){
 		printf("IP CHECK: %02X \n", ntohs(reply.ip_header.check));
 		printf("IP SADDR: %02X \n", ntohl(reply.ip_header.saddr));
 		printf("IP DADDR: %02X \n", ntohl(reply.ip_header.daddr));
-		printf("ICMP TYPE: %02X \n", reply.icmp_header.type);
-		printf("ICMP CODE: %02X \n", reply.icmp_header.code);
-		printf("ICMP CHECKSUM: %02X \n", ntohs(reply.icmp_header.checksum));
+		printf("ICMP TYPE: %02X \n", reply.icmp.icmp_type);
+		printf("ICMP CODE: %02X \n", reply.icmp.icmp_code);
+		printf("ICMP CHECKSUM: %02X \n", ntohs(reply.icmp.icmp_cksum));
 
 		
 		send(packet_socket, &reply, sizeof(reply), 0);
