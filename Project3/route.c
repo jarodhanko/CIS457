@@ -201,7 +201,6 @@ int main(){
 		unsigned char tmp4[] = {buf2[30], buf2[31], buf2[32], buf2[33]};
 		
 		struct iicmp reply;
-		printf("\n \t \t THE SIZE IS: %d \n", sizeof(request2));
 		memcpy(&reply, &request2, sizeof(request2));
 		memcpy(&reply.data, &request2.data, sizeof(request2.data));
 
@@ -215,9 +214,12 @@ int main(){
 
 		reply.icmp_header.type = ICMP_ECHOREPLY;
 		reply.icmp_header.checksum = 0;
-
+		printf("\n \t \t THE SIZE IS: %d \n", sizeof(request2));
 		printf("\n \t SIZEOFHEADER: %02X \n", sizeof(reply.icmp_header));
-		reply.icmp_header.checksum = ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header));
+		char *ptr;
+		memcpy(ptr, &reply.icmp_header, sizeof(reply.icmp_header));
+		memcpy(&ptr[sizeof(reply.icmp_header), reply.data, sizeof(reply.data));
+		reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
 
 
 		printf("\n IPHDR_len: %02X \n SIZEOF: %d \n", reply.ip_header.ihl, sizeof(reply));
