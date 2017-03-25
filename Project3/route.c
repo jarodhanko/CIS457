@@ -210,7 +210,7 @@ int main(){
 		reply.icmp.icmp_type = ICMP_ECHOREPLY;
 		reply.icmp.icmp_cksum = 0;
 
-		reply.icmp.icmp_cksum = ip_checksum(&reply.icmp_header, sizeof(reply.icmp_header));
+		reply.icmp.icmp_cksum = ip_checksum(&reply.icmp, sizeof(reply.icmp));
 
 
 		printf("\n IPHDR_len: %02X \n SIZEOF: %d \n", reply.ip_header.ihl, sizeof(reply));
