@@ -195,7 +195,7 @@ int main(){
 		request2 = *((struct iicmp*)&buf2);
 		int datalength = ntohs(request2.ip_header.tot_len) - sizeof(request2.ip_header) - sizeof(request2.icmp_header);
 		if(datalength > 0)
-			memcpy(request2.data, &buf, datalength);
+			memcpy(&request2.data, &buf + sizeof(request2), datalength);
 		printf("\n THE DATA LENGTH IS %d", datalength);
 		unsigned char tmp3[] = {buf2[26], buf2[27], buf2[28], buf2[29]};
 		unsigned char tmp4[] = {buf2[30], buf2[31], buf2[32], buf2[33]};
@@ -217,9 +217,9 @@ int main(){
 		printf("\n \t \t THE SIZE IS: %d \n", sizeof(request2));
 		printf("\n \t SIZEOFHEADER: %02X \n", sizeof(reply.icmp_header));
 		char *ptr;
-		memcpy(ptr, &reply.icmp_header, sizeof(reply.icmp_header));
-		memcpy(&ptr[sizeof(reply.icmp_header)], reply.data, sizeof(reply.data));
-		reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
+		//memcpy(ptr, &reply.icmp_header, sizeof(reply.icmp_header));
+		//memcpy(&ptr[sizeof(reply.icmp_header)], reply.data, sizeof(reply.data));
+		//reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
 
 
 		printf("\n IPHDR_len: %02X \n SIZEOF: %d \n", reply.ip_header.ihl, sizeof(reply));
