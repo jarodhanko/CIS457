@@ -23,8 +23,8 @@ struct iicmp{
 	struct ether_header eth_header;
 	struct iphdr ip_header;
 	struct icmphdr icmp_header;
-	unsigned char *data;
 } __attribute__ ((__packed__));
+
 
 //icmp checksum calculator from
 //source: http://www.microhowto.info/howto/calculate_an_internet_protocol_checksum_in_c.html
@@ -192,25 +192,22 @@ int main(){
 		send(packet_socket, &reply, sizeof(reply), 0);
 	}else if(ntohs(request->eth_header.ether_type) == ETHERTYPE_IP){
 		struct iicmp request2;
-		request2.data = (char *)malloc(1500);
+		unsigned char *data;
 		request2 = *((struct iicmp*)&buf2);
 		int datalength = ntohs(request2.ip_header.tot_len) - sizeof(request2.ip_header) - sizeof(request2.icmp_header);
 
 		if(datalength > 0){
-			printf("LENGTH: %d", sizeof(request2.data));
-			request2.data = (char *)malloc(datalength);
-			printf("LENGTH: %d", sizeof(request2.data));
-			memcpy(&request2.data, buf2 + sizeof(request2), datalength);
+			printf("LENGTH: %d", sizeof(data));
+			data = (char *)malloc(datalength);
+			printf("LENGTH: %d", sizeof(data));
+			memcpy(&data, buf2 + sizeof(request2), datalength);
 		}
-		printf("\n THE DATA LENGTH IS %d", sizeof(request2.data));
+		printf("\n THE DATA LENGTH IS %d", sizeof(data));
 		unsigned char tmp3[] = {buf2[26], buf2[27], buf2[28], buf2[29]};
 		unsigned char tmp4[] = {buf2[30], buf2[31], buf2[32], buf2[33]};
 		
 		struct iicmp reply;
-		reply.data = (char*)malloc(datalength);
 		memcpy(&reply, &request2, sizeof(request2));
-		memcpy(&reply.data, &request2.data, sizeof(request2.data));
-
 		u_int8_t tmp[6] = {0xa2, 0x22, 0xdd, 0xfc, 0x5c, 0x89};
 		memcpy(&reply.eth_header.ether_shost, tmp, ETH_ALEN);
 		memcpy(&reply.eth_header.ether_dhost, request2.eth_header.ether_shost, ETH_ALEN);
@@ -223,9 +220,9 @@ int main(){
 		reply.icmp_header.checksum = 0;
 		printf("\n \t \t THE SIZE IS: %d \n", sizeof(request2));
 		printf("\n \t SIZEOFREPLY: %02X \n", sizeof(reply));
-		unsigned char ptr[sizeof(reply.icmp_header) + sizeof(reply.data)];
-		//memcpy(&ptr, &reply.icmp_header, sizeof(reply.icmp_header));
-		//memcpy(&ptr + sizeof(reply.icmp_header), &reply.data, sizeof(reply.data));
+		unsigned char ptr[sizeof(reply.icmp_header) + sizeof(data)];
+		memcpy(&ptr, &reply.icmp_header, sizeof(reply.icmp_header));
+		memcpy(&ptr + sizeof(reply.icmp_header), &data, sizeof(data));
 		reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
 
 
