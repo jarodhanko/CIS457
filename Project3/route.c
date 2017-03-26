@@ -84,28 +84,6 @@ u_int16_t ip_checksum(void* vdata,size_t length) {
 
 
 /****************************************************************************************
-* checksum 2
-****************************************************************************************/
-unsigned short ip2_checksum(void *b, int len)
-{	unsigned short *buf = b;
-	unsigned int sum=0;
-	unsigned short result;
-
-	for ( sum = 0; len > 1; len -= 2 )
-		sum += *buf++;
-	if ( len == 1 )
-		sum += *(unsigned char*)buf;
-	sum = (sum >> 16) + (sum & 0xFFFF);
-	sum += (sum >> 16);
-	result = ~sum;
-	return result;
-}
-
-
-
-
-
-/****************************************************************************************
 * MAIN
 ****************************************************************************************/
 int main(){
@@ -225,23 +203,17 @@ int main(){
 		unsigned char tmp3[] = {buf2[26], buf2[27], buf2[28], buf2[29]};
 		unsigned char tmp4[] = {buf2[30], buf2[31], buf2[32], buf2[33]};
 		
+		// Create reply structure.
 		struct iicmp reply;
-		memcpy(&reply, &request2, sizeof(request2));
 
-		
-		/** HARDCODED!!!! **/
-		//u_int8_t tmp[6] = {0xa2, 0x22, 0xdd, 0xfc, 0x5c, 0x89};
-		//memcpy(&reply.eth_header.ether_shost, tmp, ETH_ALEN);
+		// Copy info to reply.
+		memcpy(&reply, &request2, sizeof(request2));
 		memcpy(&reply.eth_header.ether_shost, request2.eth_header.ether_dhost, ETH_ALEN);
 		memcpy(&reply.eth_header.ether_dhost, request2.eth_header.ether_shost, ETH_ALEN);
-
-
 		memcpy(&reply.ip_header.daddr, tmp3, 4);
 		memcpy(&reply.ip_header.saddr, tmp4, 4);
-
 		reply.icmp_header.type = ICMP_ECHOREPLY;
 		reply.icmp_header.checksum = 0;
-
 		unsigned char ptr[sizeof(reply.icmp_header) + datalength];
 		memcpy(ptr, &reply.icmp_header, sizeof(reply.icmp_header));
 		memcpy(ptr + sizeof(reply.icmp_header), data, datalength);
