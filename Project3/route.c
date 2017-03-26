@@ -173,7 +173,7 @@ int main(){
 		
 		// Print the request contents.	
 		print_ETHERTYPE_ARP(request);
-
+		printf("ANYTHING");
 		// Create reply structure.
 		struct aarp reply = *request;
 
