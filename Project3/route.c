@@ -249,8 +249,14 @@ int main(){
 		memcpy(ptr + sizeof(reply.icmp_header), data, datalength);
 		reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
 
-		printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", reply.eth_header.ether_dhost[0], 		   							 reply.eth_header.ether_dhost[1], reply.eth_header.ether_dhost[2], 							 reply.eth_header.ether_dhost[3], reply.eth_header.ether_dhost[4], 			  				 reply.eth_header.ether_dhost[5]);
-		printf("ETHER SRC: %02X%02X%02X%02X%02X%02X \n", reply.eth_header.ether_shost[0], 							reply.eth_header.ether_shost[1], reply.eth_header.ether_shost[2], 							reply.eth_header.ether_shost[3], reply.eth_header.ether_shost[4], 							reply.eth_header.ether_shost[5]);
+		printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", reply.eth_header.ether_dhost[0],
+						 reply.eth_header.ether_dhost[1], reply.eth_header.ether_dhost[2],
+						 reply.eth_header.ether_dhost[3], reply.eth_header.ether_dhost[4],
+						 reply.eth_header.ether_dhost[5]);
+		printf("ETHER SRC: %02X%02X%02X%02X%02X%02X \n", reply.eth_header.ether_shost[0],
+						reply.eth_header.ether_shost[1], reply.eth_header.ether_shost[2],
+						reply.eth_header.ether_shost[3], reply.eth_header.ether_shost[4],
+						reply.eth_header.ether_shost[5]);
 		printf("ETHER TYPE: %02X \n", ntohs(reply.eth_header.ether_type));
 		printf("IP IHL: %01X \n", reply.ip_header.ihl);
 		printf("IP VERSION: %01X \n", reply.ip_header.version);
