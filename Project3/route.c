@@ -162,20 +162,20 @@ int main(){
 
 	if(ntohs(request->eth_header.ether_type) == ETHERTYPE_ARP){
 
-		printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_dhost[0],
-					  request->eth_header.ether_dhost[1], request->eth_header.ether_dhost[2],
-					  request->eth_header.ether_dhost[3], request->eth_header.ether_dhost[4],
-					  request->eth_header.ether_dhost[5]);
-		printf("ETHER SRC: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_shost[0],
-					 request->eth_header.ether_shost[1], request->eth_header.ether_shost[2],
-					 request->eth_header.ether_shost[3], request->eth_header.ether_shost[4],
-					 request->eth_header.ether_shost[5]);
-		printf("ETHER TYPE: %02X \n", ntohs(request->eth_header.ether_type));
-		printf("ARP FORMAT HARD ADDR: %02X \n", ntohs(request->arp_header.ea_hdr.ar_hrd));
-		printf("ARP FORMAT PROTO ADDR: %02X \n", ntohs(request->arp_header.ea_hdr.ar_pro));
-		printf("ARP LEN HARD ADDR: %02X \n", request->arp_header.ea_hdr.ar_hln);
-		printf("ARP LEN PROTO ADDR: %02X \n", request->arp_header.ea_hdr.ar_pln);
-		printf("ARP OP: %02X \n", ntohs(request->arp_header.ea_hdr.ar_op));
+		//printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_dhost[0],
+		//			  request->eth_header.ether_dhost[1], request->eth_header.ether_dhost[2],
+		//			  request->eth_header.ether_dhost[3], request->eth_header.ether_dhost[4],
+		//			  request->eth_header.ether_dhost[5]);
+		//printf("ETHER SRC: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_shost[0],
+		//			 request->eth_header.ether_shost[1], request->eth_header.ether_shost[2],
+		//			 request->eth_header.ether_shost[3], request->eth_header.ether_shost[4],
+		//			 request->eth_header.ether_shost[5]);
+		//printf("ETHER TYPE: %02X \n", ntohs(request->eth_header.ether_type));
+		//printf("ARP FORMAT HARD ADDR: %02X \n", ntohs(request->arp_header.ea_hdr.ar_hrd));
+		//printf("ARP FORMAT PROTO ADDR: %02X \n", ntohs(request->arp_header.ea_hdr.ar_pro));
+		//printf("ARP LEN HARD ADDR: %02X \n", request->arp_header.ea_hdr.ar_hln);
+		//printf("ARP LEN PROTO ADDR: %02X \n", request->arp_header.ea_hdr.ar_pln);
+		//printf("ARP OP: %02X \n", ntohs(request->arp_header.ea_hdr.ar_op));
 		//printf("ARP SENDER HARD ADDR: %02X%02X%02X%02X%02X%02X \n", request->arp_header.arp_sha[0],
 		//							request->arp_header.arp_sha[1], request->arp_header.arp_sha[2],
 		//							request->arp_header.arp_sha[3], request->arp_header.arp_sha[4],
