@@ -195,7 +195,7 @@ int main(){
 		request2 = *((struct iicmp*)&buf2);
 		int datalength = ntohs(request2.ip_header.tot_len) - sizeof(request2.ip_header) - sizeof(request2.icmp_header);
 		if(datalength > 0){
-			request2.data = (char*)realloc(request2.data, datalength);
+			request2.data = (char*)malloc(datalength);
 			memcpy(&request2.data, &buf[sizeof(request2)], datalength);
 		}
 		printf("\n THE DATA LENGTH IS %d", sizeof(request2.data));
@@ -204,6 +204,7 @@ int main(){
 		
 		struct iicmp reply;
 		memcpy(&reply, &request2, sizeof(request2));
+		reply.data = (char*)malloc(datalength);
 		memcpy(&reply.data, &request2.data, sizeof(request2.data));
 
 		u_int8_t tmp[6] = {0xa2, 0x22, 0xdd, 0xfc, 0x5c, 0x89};
