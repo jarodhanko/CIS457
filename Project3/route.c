@@ -176,6 +176,8 @@ int main(){
 		printf("ARP TARGET PROTO ADDR: %02X%02X%02X%02X \n", request->arp_header.arp_tpa[0], request->arp_header.arp_tpa[1], request->arp_header.arp_tpa[2], request->arp_header.arp_tpa[3]);
 
 		struct aarp reply = *request;
+
+		/** HARDCODED!!!! **/
 		u_int8_t tmp[6] = {0x52, 0x46, 0x9d, 0x78, 0xeb, 0xfd};
 		memcpy(reply.eth_header.ether_shost, tmp, ETH_ALEN);
 		memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
@@ -183,6 +185,8 @@ int main(){
 		reply.arp_header.ea_hdr.ar_op=htons(ARPOP_REPLY);
 		memcpy(reply.arp_header.arp_sha, tmp, 6);
 
+
+		/** HARDCODED!!!! **/
 		u_int8_t tmp2[4] = {10, 1, 0, 1};
 		memcpy(reply.arp_header.arp_spa, tmp2, 4);
 
@@ -206,6 +210,9 @@ int main(){
 		
 		struct iicmp reply;
 		memcpy(&reply, &request2, sizeof(request2));
+
+		
+		/** HARDCODED!!!! **/
 		u_int8_t tmp[6] = {0xa2, 0x22, 0xdd, 0xfc, 0x5c, 0x89};
 		memcpy(&reply.eth_header.ether_shost, tmp, ETH_ALEN);
 		memcpy(&reply.eth_header.ether_dhost, request2.eth_header.ether_shost, ETH_ALEN);
@@ -216,23 +223,11 @@ int main(){
 
 		reply.icmp_header.type = ICMP_ECHOREPLY;
 		reply.icmp_header.checksum = 0;
-		printf("\n \t \t THE SIZE IS: %d \n", datalength);
-		printf("\n \t SIZEOFREPLY: %02X \n", sizeof(reply));
 
 		unsigned char ptr[sizeof(reply.icmp_header) + datalength];
 		memcpy(ptr, &reply.icmp_header, sizeof(reply.icmp_header));
 		memcpy(ptr + sizeof(reply.icmp_header), data, datalength);
-		printf("\n\n");
-		for (i = 0; i < sizeof(reply.icmp_header) + datalength; i++)
-		{
-			if (i > 0) printf(":");
-			printf("%02X", ptr[i]);
-		}
-		printf("\n\n %02X %02X", ip_checksum(&ptr, sizeof(ptr)), ip2_checksum(&ptr, sizeof(ptr)));
 		reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
-
-
-		printf("\n IPHDR_len: %02X \n SIZEOF: %d \n", reply.ip_header.ihl, sizeof(reply));
 
 		printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", reply.eth_header.ether_dhost[0], reply.eth_header.ether_dhost[1], reply.eth_header.ether_dhost[2], reply.eth_header.ether_dhost[3], reply.eth_header.ether_dhost[4], reply.eth_header.ether_dhost[5]);
 		printf("ETHER SRC: %02X%02X%02X%02X%02X%02X \n", reply.eth_header.ether_shost[0], reply.eth_header.ether_shost[1], reply.eth_header.ether_shost[2], reply.eth_header.ether_shost[3], reply.eth_header.ether_shost[4], reply.eth_header.ether_shost[5]);
