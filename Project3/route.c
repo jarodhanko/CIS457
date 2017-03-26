@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-
+#include <inttypes.h>
 
 struct aarp {
 	struct ether_header eth_header;
@@ -25,7 +25,15 @@ struct iicmp{
 	struct icmphdr icmp_header;
 } __attribute__ ((__packed__));
 
+void print_ETHERTYPE_ARP(struct aarp *request);
+void print_ETHERTYPE_IP(struct iicmp reply);
 
+
+
+
+/****************************************************************************************
+* Checksum
+****************************************************************************************/
 //icmp checksum calculator from
 //source: http://www.microhowto.info/howto/calculate_an_internet_protocol_checksum_in_c.html
 u_int16_t ip_checksum(void* vdata,size_t length) {
@@ -60,7 +68,9 @@ u_int16_t ip_checksum(void* vdata,size_t length) {
     return htons(~acc);
 }
 
-
+/****************************************************************************************
+* checksum 2
+****************************************************************************************/
 unsigned short ip2_checksum(void *b, int len)
 {	unsigned short *buf = b;
 	unsigned int sum=0;
@@ -76,7 +86,9 @@ unsigned short ip2_checksum(void *b, int len)
 	return result;
 }
 
-
+/****************************************************************************************
+* MAIN
+****************************************************************************************/
 int main(){
   int packet_socket;
   //get list of interfaces (actually addresses)
@@ -131,7 +143,7 @@ int main(){
   while(1){
     char buf[1500];
     struct sockaddr_ll recvaddr;
-    int recvaddrlen=sizeof(struct sockaddr_ll);
+    socklen_t recvaddrlen=sizeof(struct sockaddr_ll);
     //we can use recv, since the addresses are in the packet, but we
     //use recvfrom because it gives us an easy way to determine if
     //this packet is incoming or outgoing (when using ETH_P_ALL, we
@@ -161,33 +173,7 @@ int main(){
 	request = ((struct aarp*)&buf);
 
 	if(ntohs(request->eth_header.ether_type) == ETHERTYPE_ARP){	
-		printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_dhost[0],
-					  request->eth_header.ether_dhost[1], request->eth_header.ether_dhost[2],
-					  request->eth_header.ether_dhost[3], request->eth_header.ether_dhost[4],
-					  request->eth_header.ether_dhost[5]);
-		printf("ETHER SRC: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_shost[0],
-					 request->eth_header.ether_shost[1], request->eth_header.ether_shost[2],
-					 request->eth_header.ether_shost[3], request->eth_header.ether_shost[4],
-					 request->eth_header.ether_shost[5]);
-		printf("ETHER TYPE: %02X \n", ntohs(request->eth_header.ether_type));
-		printf("ARP FORMAT HARD ADDR: %02X \n", ntohs(request->arp_header.ea_hdr.ar_hrd));
-		printf("ARP FORMAT PROTO ADDR: %02X \n", ntohs(request->arp_header.ea_hdr.ar_pro));
-		printf("ARP LEN HARD ADDR: %02X \n", request->arp_header.ea_hdr.ar_hln);
-		printf("ARP LEN PROTO ADDR: %02X \n", request->arp_header.ea_hdr.ar_pln);
-		printf("ARP OP: %02X \n", ntohs(request->arp_header.ea_hdr.ar_op));
-		printf("ARP SENDER HARD ADDR: %02X%02X%02X%02X%02X%02X \n", request->arp_header.arp_sha[0],
-									request->arp_header.arp_sha[1], request->arp_header.arp_sha[2],
-									request->arp_header.arp_sha[3], request->arp_header.arp_sha[4],
-									request->arp_header.arp_sha[5]);
-		printf("ARP SENDER PROTO ADDR: %02X%02X%02X%02X \n", request->arp_header.arp_spa[0],
-							 request->arp_header.arp_spa[1], request->arp_header.arp_spa[2],
-							 request->arp_header.arp_spa[3]);
-		printf("ARP TARGET HARD ADDR: %02X%02X%02X%02X%02X%02X \n", request->arp_header.arp_tha[0],
-									request->arp_header.arp_tha[1], request->arp_header.arp_tha[2],
-									request->arp_header.arp_tha[3]);
-		printf("ARP TARGET PROTO ADDR: %02X%02X%02X%02X \n",request>arp_header.arp_tpa[0],
-							 request->arp_header.arp_tpa[1], request->arp_header.arp_tpa[2],
-							 request->arp_header.arp_tpa[3]);
+		print_ETHERTYPE_ARP(request);
 
 		struct aarp reply = *request;
 
@@ -219,10 +205,10 @@ int main(){
 		int datalength = ntohs(request2.ip_header.tot_len) - sizeof(request2.ip_header) - sizeof(request2.icmp_header);
 
 		if(datalength > 0){
-			data = (char *)malloc(datalength);
+			data = malloc(datalength);
 			memcpy(data, buf2 + sizeof(request2), datalength);
 		}
-		printf("\n THE DATA LENGTH IS %d", sizeof(&data));
+		printf("\n THE DATA LENGTH IS %lu", sizeof(&data));
 		unsigned char tmp3[] = {buf2[26], buf2[27], buf2[28], buf2[29]};
 		unsigned char tmp4[] = {buf2[30], buf2[31], buf2[32], buf2[33]};
 		
@@ -247,30 +233,8 @@ int main(){
 		memcpy(ptr + sizeof(reply.icmp_header), data, datalength);
 		reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
 
-		printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", reply.eth_header.ether_dhost[0],
-						 reply.eth_header.ether_dhost[1], reply.eth_header.ether_dhost[2],
-						 reply.eth_header.ether_dhost[3], reply.eth_header.ether_dhost[4],
-						 reply.eth_header.ether_dhost[5]);
-		printf("ETHER SRC: %02X%02X%02X%02X%02X%02X \n", reply.eth_header.ether_shost[0],
-						reply.eth_header.ether_shost[1], reply.eth_header.ether_shost[2],
-						reply.eth_header.ether_shost[3], reply.eth_header.ether_shost[4],
-						reply.eth_header.ether_shost[5]);
-		printf("ETHER TYPE: %02X \n", ntohs(reply.eth_header.ether_type));
-		printf("IP IHL: %01X \n", reply.ip_header.ihl);
-		printf("IP VERSION: %01X \n", reply.ip_header.version);
-		printf("IP TOS: %02X \n", reply.ip_header.tos);
-		printf("IP TOT_LEN: %02X \n", ntohs(reply.ip_header.tot_len));
-		printf("IP ID: %02X \n", ntohs(reply.ip_header.id));
-		printf("IP FRAG_OFF: %02X \n", ntohs(reply.ip_header.frag_off));
-		printf("IP TTL: %02X \n", reply.ip_header.ttl);
-		printf("IP PROTOCOL: %02X \n", reply.ip_header.protocol);
-		printf("IP CHECK: %02X \n", ntohs(reply.ip_header.check));
-		printf("IP SADDR: %02X \n", ntohl(reply.ip_header.saddr));
-		printf("IP DADDR: %02X \n", ntohl(reply.ip_header.daddr));
-		printf("ICMP TYPE: %02X \n", reply.icmp_header.type);
-		printf("ICMP CODE: %02X \n", reply.icmp_header.code);
-		printf("ICMP CHECKSUM: %02X \n", ntohs(reply.icmp_header.checksum));
-		
+		print_ETHERTYPE_IP(reply);		
+
 		unsigned char result[sizeof(reply) + datalength];
 		memcpy(result, &reply, sizeof(reply));
 		memcpy(result + sizeof(reply), data, datalength);
@@ -281,4 +245,70 @@ int main(){
   }
   //exit
   return 0;
+}
+
+
+
+/****************************************************************************************
+* print_ETHERTYPE_IP
+****************************************************************************************/
+void print_ETHERTYPE_ARP(struct aarp *request){
+	printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_dhost[0],
+				  request->eth_header.ether_dhost[1], request->eth_header.ether_dhost[2],
+				  request->eth_header.ether_dhost[3], request->eth_header.ether_dhost[4],
+				  request->eth_header.ether_dhost[5]);
+	printf("ETHER SRC: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_shost[0],
+				 request->eth_header.ether_shost[1], request->eth_header.ether_shost[2],
+				 request->eth_header.ether_shost[3], request->eth_header.ether_shost[4],
+				 request->eth_header.ether_shost[5]);
+	printf("ETHER TYPE: %02X \n", ntohs(request->eth_header.ether_type));
+	printf("ARP FORMAT HARD ADDR: %02X \n", ntohs(request->arp_header.ea_hdr.ar_hrd));
+	printf("ARP FORMAT PROTO ADDR: %02X \n", ntohs(request->arp_header.ea_hdr.ar_pro));
+	printf("ARP LEN HARD ADDR: %02X \n", request->arp_header.ea_hdr.ar_hln);
+	printf("ARP LEN PROTO ADDR: %02X \n", request->arp_header.ea_hdr.ar_pln);
+	printf("ARP OP: %02X \n", ntohs(request->arp_header.ea_hdr.ar_op));
+	printf("ARP SENDER HARD ADDR: %02X%02X%02X%02X%02X%02X \n", request->arp_header.arp_sha[0],
+								request->arp_header.arp_sha[1], request->arp_header.arp_sha[2],
+								request->arp_header.arp_sha[3], request->arp_header.arp_sha[4],
+								request->arp_header.arp_sha[5]);
+	printf("ARP SENDER PROTO ADDR: %02X%02X%02X%02X \n", request->arp_header.arp_spa[0],
+						 request->arp_header.arp_spa[1], request->arp_header.arp_spa[2],
+						 request->arp_header.arp_spa[3]);
+	printf("ARP TARGET HARD ADDR: %02X%02X%02X%02X \n", request->arp_header.arp_tha[0],
+								request->arp_header.arp_tha[1], request->arp_header.arp_tha[2],
+								request->arp_header.arp_tha[3]);
+	printf("ARP TARGET PROTO ADDR: %02X%02X%02X%02X \n",request->arp_header.arp_tpa[0],
+   	  				   request->arp_header.arp_tpa[1], request->arp_header.arp_tpa[2],
+					   request->arp_header.arp_tpa[3]);
+}
+
+
+
+/****************************************************************************************
+* print_ETHERTYPE_IP
+****************************************************************************************/
+void print_ETHERTYPE_IP(struct iicmp reply){
+	printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", reply.eth_header.ether_dhost[0],
+					 reply.eth_header.ether_dhost[1], reply.eth_header.ether_dhost[2],
+					 reply.eth_header.ether_dhost[3], reply.eth_header.ether_dhost[4],
+					 reply.eth_header.ether_dhost[5]);
+	printf("ETHER SRC: %02X%02X%02X%02X%02X%02X \n", reply.eth_header.ether_shost[0],
+					reply.eth_header.ether_shost[1], reply.eth_header.ether_shost[2],
+					reply.eth_header.ether_shost[3], reply.eth_header.ether_shost[4],
+					reply.eth_header.ether_shost[5]);
+	printf("ETHER TYPE: %02X \n", ntohs(reply.eth_header.ether_type));
+	printf("IP IHL: %01X \n", reply.ip_header.ihl);
+	printf("IP VERSION: %01X \n", reply.ip_header.version);
+	printf("IP TOS: %02X \n", reply.ip_header.tos);
+	printf("IP TOT_LEN: %02X \n", ntohs(reply.ip_header.tot_len));
+	printf("IP ID: %02X \n", ntohs(reply.ip_header.id));
+	printf("IP FRAG_OFF: %02X \n", ntohs(reply.ip_header.frag_off));
+	printf("IP TTL: %02X \n", reply.ip_header.ttl);
+	printf("IP PROTOCOL: %02X \n", reply.ip_header.protocol);
+	printf("IP CHECK: %02X \n", ntohs(reply.ip_header.check));
+	printf("IP SADDR: %02X \n", ntohl(reply.ip_header.saddr));
+	printf("IP DADDR: %02X \n", ntohl(reply.ip_header.daddr));
+	printf("ICMP TYPE: %02X \n", reply.icmp_header.type);
+	printf("ICMP CODE: %02X \n", reply.icmp_header.code);
+	printf("ICMP CHECKSUM: %02X \n", ntohs(reply.icmp_header.checksum));
 }
