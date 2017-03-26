@@ -261,7 +261,7 @@ int main(int argc, char **argv){
 
 
 /****************************************************************************************
-* LOAD ROUTING TABLE  ---- FIX ME
+* LOAD ROUTING TABLE  ---- FIX ME ---- 
 ****************************************************************************************/
 void load_table(struct routing_table **rtable, char *filename){
 	
