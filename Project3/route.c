@@ -201,13 +201,13 @@ int main(int argc, char **argv){
 
 		// Copy info to reply.
 		printf("SEG ---------\n");
-		memcpy(reply.eth_header.ether_shost, request->eth_header.ether_dhost, ETH_ALEN);
+		memcpy(reply.eth_header.ether_shost, tmp->ifa_addr, ETH_ALEN);
 printf("SEG ---------\n");		
 		memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
 printf("SEG ---------\n");
 		reply.arp_header.ea_hdr.ar_op=htons(ARPOP_REPLY);
 printf("SEG ---------\n");
-		memcpy(reply.arp_header.arp_sha, tmp->ifa_addr, 6);
+		//memcpy(reply.arp_header.arp_sha, tmp->ifa_addr, 6);
 printf("SEG ---------\n");
 		memcpy(reply.arp_header.arp_spa, request->arp_header.arp_spa, 4);
 printf("SEG ---------\n");
