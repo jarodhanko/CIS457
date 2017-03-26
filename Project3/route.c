@@ -62,7 +62,7 @@ u_int16_t ip_checksum(void* vdata,size_t length) {
 
 
 unsigned short ip2_checksum(void *b, int len)
-{	unsigned short *buf = ntoh(b);
+{	unsigned short *buf = ntohs(b);
 	unsigned int sum=0;
 	unsigned short result;
 
