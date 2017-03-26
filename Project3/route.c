@@ -188,18 +188,16 @@ int main(){
 		printf("ARP TARGET PROTO ADDR: %02X%02X%02X%02X \n",request>arp_header.arp_tpa[0],
 							 request->arp_header.arp_tpa[1], request->arp_header.arp_tpa[2],
 							 request->arp_header.arp_tpa[3]);
-		printf("WHY\n");	
+
 		struct aarp reply = *request;
 
 		/** HARDCODED!!!! **/
 		//u_int8_t tmp[6] = {0x52, 0x46, 0x9d, 0x78, 0xeb, 0xfd};		
 		//memcpy(reply.eth_header.ether_shost, tmp, ETH_ALEN);
 		//memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
-		printf("WHY\n");		
-		//memcpy(reply.eth_header.ether_shost, request->eth_header.ether_dhost, ETH_ALEN);
-		printf("WHY\n");		
+		
+		memcpy(reply.eth_header.ether_shost, request->eth_header.ether_dhost, ETH_ALEN);		
 		memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
-		printf("WHY\n");
 
 		reply.arp_header.ea_hdr.ar_op=htons(ARPOP_REPLY);
 		memcpy(reply.arp_header.arp_sha, tmp, 6);
