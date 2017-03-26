@@ -161,7 +161,7 @@ int main(){
 	request = ((struct aarp*)&buf);
 
 	if(ntohs(request->eth_header.ether_type) == ETHERTYPE_ARP){
-
+		printf("WHY");	
 		//printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_dhost[0],
 		//			  request->eth_header.ether_dhost[1], request->eth_header.ether_dhost[2],
 		//			  request->eth_header.ether_dhost[3], request->eth_header.ether_dhost[4],
