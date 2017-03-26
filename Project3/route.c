@@ -30,11 +30,20 @@ struct iicmp{
 	struct icmphdr icmp_header;
 } __attribute__ ((__packed__));
 
+struct routing_table {
+	u_int32_t network;
+	int prefix;
+	u_int32_t hop;
+	u_int32_t interface;
+	struct rtable *next;
+};
+
 
 
 
 
 /* PROTOTYPES **/
+void load_table(struct routing_table **rtable, char *filename);
 void print_ETHERTYPE_ARP(struct aarp *request);
 void print_ETHERTYPE_IP(struct iicmp reply);
 
@@ -86,7 +95,7 @@ u_int16_t ip_checksum(void* vdata,size_t length) {
 /****************************************************************************************
 * MAIN
 ****************************************************************************************/
-int main(){
+int main(int argc, char **argv){
   int packet_socket;
   //get list of interfaces (actually addresses)
   struct ifaddrs *ifaddr, *tmp;
@@ -136,6 +145,8 @@ int main(){
   //for the project you will probably want to look at more (to do so,
   //a good way is to have one socket per interface and use select to
   //see which ones have data)
+  struct routing_table *rtable = malloc(sizeof(struct routing_table));
+  load_table(&rtable, argv[1]);
   printf("Ready to recieve now\n");
   while(1){
     char buf[1500];
@@ -174,10 +185,12 @@ int main(){
 		// Print the request contents.	
 		print_ETHERTYPE_ARP(request);
 		printf("ANYTHING");
+
 		// Create reply structure.
 		struct aarp reply = *request;
 
 		// IS THIS FOR US?
+		//int our_IP = 0;
 		//if (request->eth_header.ether_dhost == our_IP){
 			
 		//}
@@ -208,7 +221,7 @@ int main(){
 			data = malloc(datalength);
 			memcpy(data, buf2 + sizeof(request2), datalength);
 		}
-		printf("\n THE DATA LENGTH IS %lu", sizeof(&data));
+		printf("\n THE DATA LENGTH IS %lu\n", sizeof(&data));
 		unsigned char tmp3[] = {buf2[26], buf2[27], buf2[28], buf2[29]};
 		unsigned char tmp4[] = {buf2[30], buf2[31], buf2[32], buf2[33]};
 		
@@ -241,6 +254,37 @@ int main(){
   }
   //exit
   return 0;
+}
+
+
+
+
+
+/****************************************************************************************
+* LOAD ROUTING TABLE  ---- FIX ME
+****************************************************************************************/
+void load_table(struct routing_table **rtable, char *filename){
+	
+	FILE *fp = fopen(filename, "r");  	
+  	if (fp == NULL){
+    	printf("Could Not Open File");
+    	exit(1);
+	}
+	char item[9];
+	int index = 0;
+	char c;
+	while ((c = fgetc(fp)) != EOF){
+		item[index++] = c;
+		if (c == '/'){
+			item[--index] = '\0';
+			unsigned char tbuf[sizeof(struct in_addr)];
+			inet_pton(AF_INET, item, tbuf);
+			(*rtable)->network = *(u_int32_t *)&tbuf;
+			index = 0;
+			break;
+		}
+	}
+	printf("------------%02X", (*rtable)->network);  
 }
 
 
@@ -296,7 +340,7 @@ void print_ETHERTYPE_IP(struct iicmp reply){
 					reply.eth_header.ether_shost[1], reply.eth_header.ether_shost[2],
 					reply.eth_header.ether_shost[3], reply.eth_header.ether_shost[4],
 					reply.eth_header.ether_shost[5]);
-	printf("ETHER TYPE: %02X \n", ntohs(reply.eth_header.ether_type));
+	printf("ETHER TYPE: %02X \n\n", ntohs(reply.eth_header.ether_type));
 	printf("IP IHL: %01X \n", reply.ip_header.ihl);
 	printf("IP VERSION: %01X \n", reply.ip_header.version);
 	printf("IP TOS: %02X \n", reply.ip_header.tos);
@@ -307,8 +351,8 @@ void print_ETHERTYPE_IP(struct iicmp reply){
 	printf("IP PROTOCOL: %02X \n", reply.ip_header.protocol);
 	printf("IP CHECK: %02X \n", ntohs(reply.ip_header.check));
 	printf("IP SADDR: %02X \n", ntohl(reply.ip_header.saddr));
-	printf("IP DADDR: %02X \n", ntohl(reply.ip_header.daddr));
+	printf("IP DADDR: %02X \n\n", ntohl(reply.ip_header.daddr));
 	printf("ICMP TYPE: %02X \n", reply.icmp_header.type);
 	printf("ICMP CODE: %02X \n", reply.icmp_header.code);
-	printf("ICMP CHECKSUM: %02X \n", ntohs(reply.icmp_header.checksum));
+	printf("ICMP CHECKSUM: %02X \n\n", ntohs(reply.icmp_header.checksum));
 }
