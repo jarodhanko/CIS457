@@ -245,9 +245,12 @@ int main(){
 		printf("ICMP TYPE: %02X \n", reply.icmp_header.type);
 		printf("ICMP CODE: %02X \n", reply.icmp_header.code);
 		printf("ICMP CHECKSUM: %02X \n", ntohs(reply.icmp_header.checksum));
-
 		
-		send(packet_socket, &reply, sizeof(reply), 0);
+		unsigned char result[sizeof(reply) + sizeof(data)];
+		memcpy(&result, &reply, sizeof(reply));
+		memcpy(&result + sizeof(reply), &data, sizeof(data));
+		
+		send(packet_socket, &result, sizeof(reply), 0);
 	}
 
   }
