@@ -196,9 +196,9 @@ int main(){
 		int datalength = ntohs(request2.ip_header.tot_len) - sizeof(request2.ip_header) - sizeof(request2.icmp_header);
 
 		if(datalength > 0){
-			request2.data = malloc(datalength);
-			printf("LENGTH: %d", sizeof(datalength));
-			memcpy(&request2.data, &(buf2 + sizeof(request2)), datalength);
+			request2.data = (char *)malloc(datalength);
+			printf("LENGTH: %d", sizeof(request2.data));
+			memcpy(&request2.data, buf2 + sizeof(request2), datalength);
 		}
 		printf("\n THE DATA LENGTH IS %d", sizeof(request2.data));
 		unsigned char tmp3[] = {buf2[26], buf2[27], buf2[28], buf2[29]};
