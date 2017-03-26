@@ -196,7 +196,7 @@ int main(){
 		int datalength = ntohs(request2.ip_header.tot_len) - sizeof(request2.ip_header) - sizeof(request2.icmp_header);
 		if(datalength > 0){
 			request2.data = (char*)malloc(datalength);
-			memcpy(&request2.data, &buf2[sizeof(request2)], 56);
+			memcpy(&request2.data, &buf2 + sizeof(request2), datalength);
 		}
 		printf("\n THE DATA LENGTH IS %d", sizeof(request2.data));
 		unsigned char tmp3[] = {buf2[26], buf2[27], buf2[28], buf2[29]};
@@ -221,7 +221,7 @@ int main(){
 		printf("\n \t SIZEOFREPLY: %02X \n", sizeof(reply));
 		unsigned char ptr[sizeof(reply.icmp_header) + sizeof(reply.data)];
 		memcpy(&ptr, &reply.icmp_header, sizeof(reply.icmp_header));
-		memcpy(&ptr[sizeof(reply.icmp_header)], &reply.data, sizeof(reply.data));
+		memcpy(&ptr + sizeof(reply.icmp_header), &reply.data, sizeof(reply.data));
 		reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
 
 
