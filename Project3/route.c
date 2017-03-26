@@ -158,14 +158,14 @@ int main(){
 
 	char buf2[1500];
 	memcpy(buf2, buf, sizeof(buf));
-	request = ((struct aarp*)&buf2);
+	request = ((struct aarp*)&buf);
 
 	if(ntohs(request->eth_header.ether_type) == ETHERTYPE_ARP){
 		printf("WHY");	
-		//printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_dhost[0],
-		//			  request->eth_header.ether_dhost[1], request->eth_header.ether_dhost[2],
-		//			  request->eth_header.ether_dhost[3], request->eth_header.ether_dhost[4],
-		//			  request->eth_header.ether_dhost[5]);
+		printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_dhost[0],
+					  request->eth_header.ether_dhost[1], request->eth_header.ether_dhost[2],
+					  request->eth_header.ether_dhost[3], request->eth_header.ether_dhost[4],
+					  request->eth_header.ether_dhost[5]);
 		//printf("ETHER SRC: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_shost[0],
 		//			 request->eth_header.ether_shost[1], request->eth_header.ether_shost[2],
 		//			 request->eth_header.ether_shost[3], request->eth_header.ether_shost[4],
