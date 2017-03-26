@@ -274,6 +274,9 @@ void load_table(struct routing_table **rtable, char *filename){
 	int index = 0;
 	char c;
 	while ((c = fgetc(fp)) != EOF){
+		if (c == '.'){
+			c = ':';
+		}
 		item[index++] = c;
 		if (c == '/'){
 			item[--index] = '\0';
@@ -284,9 +287,8 @@ void load_table(struct routing_table **rtable, char *filename){
 			break;
 		}
 	}
-	printf("++++++++");
 	printf("------------%02X\n", (*rtable)->network); 
-	close(fp); 
+	fclose(fp); 
 }
 
 
