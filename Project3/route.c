@@ -253,7 +253,7 @@ int main(){
 		printf("\n\n");
 		unsigned char result[sizeof(reply) + datalength];
 		memcpy(result, &reply, sizeof(reply));
-		memcpy(result + sizeof(reply), &data, datalength);
+		memcpy(result + sizeof(reply), data, datalength);
 		
 		send(packet_socket, &result, sizeof(result), 0);
 	}
