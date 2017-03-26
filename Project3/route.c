@@ -176,10 +176,10 @@ int main(){
 		printf("ARP LEN HARD ADDR: %02X \n", request->arp_header.ea_hdr.ar_hln);
 		printf("ARP LEN PROTO ADDR: %02X \n", request->arp_header.ea_hdr.ar_pln);
 		printf("ARP OP: %02X \n", ntohs(request->arp_header.ea_hdr.ar_op));
-		printf("ARP SENDER HARD ADDR: %02X%02X%02X%02X%02X%02X \n", request->arp_header.arp_sha[0],
-									request->arp_header.arp_sha[1], request->arp_header.arp_sha[2],
-									request->arp_header.arp_sha[3], request->arp_header.arp_sha[4],
-									request->arp_header.arp_sha[5]);
+		//printf("ARP SENDER HARD ADDR: %02X%02X%02X%02X%02X%02X \n", request->arp_header.arp_sha[0],
+		//							request->arp_header.arp_sha[1], request->arp_header.arp_sha[2],
+		//							request->arp_header.arp_sha[3], request->arp_header.arp_sha[4],
+		//							request->arp_header.arp_sha[5]);
 		printf("ARP SENDER PROTO ADDR: %02X%02X%02X%02X \n", request->arp_header.arp_spa[0],
 							 request->arp_header.arp_spa[1], request->arp_header.arp_spa[2],
 							 request->arp_header.arp_spa[3]);
