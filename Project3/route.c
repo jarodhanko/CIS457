@@ -158,7 +158,7 @@ int main(){
 
 	char buf2[1500];
 	memcpy(buf2, buf, sizeof(buf));
-	request = ((struct aarp*)&buf);
+	request = ((struct aarp*)&buf2);
 
 	if(ntohs(request->eth_header.ether_type) == ETHERTYPE_ARP){
 		printf("WHY");	
