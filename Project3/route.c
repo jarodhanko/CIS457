@@ -170,12 +170,21 @@ int main(){
 	request = ((struct aarp*)&buf);
 
 	if(ntohs(request->eth_header.ether_type) == ETHERTYPE_ARP){
-
+		
 		// Print the request contents.	
 		print_ETHERTYPE_ARP(request);
 
 		// Create reply structure.
 		struct aarp reply = *request;
+
+		// IS THIS FOR US?
+		//if (request->eth_header.ether_dhost == our_IP){
+			
+		//}
+
+		
+
+
 
 		// Copy info to reply.
 		memcpy(reply.eth_header.ether_shost, request->eth_header.ether_dhost, ETH_ALEN);		
@@ -220,7 +229,7 @@ int main(){
 		reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
 		
 		// Print the reply contents.
-		print_ETHERTYPE_IP(reply);		
+		//print_ETHERTYPE_IP(reply);		
 
 		unsigned char result[sizeof(reply) + datalength];
 		memcpy(result, &reply, sizeof(reply));
@@ -250,7 +259,7 @@ void print_ETHERTYPE_ARP(struct aarp *request){
 				 request->eth_header.ether_shost[1], request->eth_header.ether_shost[2],
 				 request->eth_header.ether_shost[3], request->eth_header.ether_shost[4],
 				 request->eth_header.ether_shost[5]);
-	printf("ETHER TYPE: %02X \n", ntohs(request->eth_header.ether_type));
+	printf("ETHER TYPE: %02X \n\n", ntohs(request->eth_header.ether_type));
 	printf("ARP FORMAT HARD ADDR: %02X \n", ntohs(request->arp_header.ea_hdr.ar_hrd));
 	printf("ARP FORMAT PROTO ADDR: %02X \n", ntohs(request->arp_header.ea_hdr.ar_pro));
 	printf("ARP LEN HARD ADDR: %02X \n", request->arp_header.ea_hdr.ar_hln);
@@ -264,11 +273,11 @@ void print_ETHERTYPE_ARP(struct aarp *request){
 						 request->arp_header.arp_spa[1], request->arp_header.arp_spa[2],
 						 request->arp_header.arp_spa[3]);
 	printf("ARP TARGET HARD ADDR: %02X%02X%02X%02X \n", request->arp_header.arp_tha[0],
-								request->arp_header.arp_tha[1], request->arp_header.arp_tha[2],
-								request->arp_header.arp_tha[3]);
-	printf("ARP TARGET PROTO ADDR: %02X%02X%02X%02X \n",request->arp_header.arp_tpa[0],
-   	  				   request->arp_header.arp_tpa[1], request->arp_header.arp_tpa[2],
-					   request->arp_header.arp_tpa[3]);
+						request->arp_header.arp_tha[1], request->arp_header.arp_tha[2],
+						request->arp_header.arp_tha[3]);
+	printf("ARP TARGET PROTO ADDR: %02X%02X%02X%02X \n\n",request->arp_header.arp_tpa[0],
+   	  				   	  request->arp_header.arp_tpa[1], request->arp_header.arp_tpa[2],
+					      request->arp_header.arp_tpa[3]);
 }
 
 
