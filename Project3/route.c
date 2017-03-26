@@ -62,7 +62,7 @@ u_int16_t ip_checksum(void* vdata,size_t length) {
 
 
 unsigned short ip2_checksum(void *b, int len)
-{	unsigned short *buf = b;
+{	unsigned short *buf = ntoh(b);
 	unsigned int sum=0;
 	unsigned short result;
 
@@ -73,7 +73,7 @@ unsigned short ip2_checksum(void *b, int len)
 	sum = (sum >> 16) + (sum & 0xFFFF);
 	sum += (sum >> 16);
 	result = ~sum;
-	return result;
+	return htons(result);
 }
 
 
@@ -222,6 +222,13 @@ int main(){
 		unsigned char ptr[sizeof(reply.icmp_header) + datalength];
 		memcpy(&ptr, &reply.icmp_header, sizeof(reply.icmp_header));
 		memcpy(&ptr + sizeof(reply.icmp_header), data, datalength);
+		printf("\n\n");
+		for (i = 0; i < sizeof(reply.icmp_header) + datalength; i++)
+		{
+			if (i > 0) printf(":");
+			printf("%02X", ptr[i]);
+		}
+		printf("\n\n %02X %02X", ip_checksum(&ptr, sizeof(ptr)), ip2_checksum(&ptr, sizeof(ptr)));
 		reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
 
 
@@ -244,13 +251,7 @@ int main(){
 		printf("ICMP TYPE: %02X \n", reply.icmp_header.type);
 		printf("ICMP CODE: %02X \n", reply.icmp_header.code);
 		printf("ICMP CHECKSUM: %02X \n", ntohs(reply.icmp_header.checksum));
-		printf("\n\n");
-		for (i = 0; i < datalength; i++)
-		{
-			if (i > 0) printf(":");
-			printf("%02X", data[i]);
-		}
-		printf("\n\n");
+		
 		unsigned char result[sizeof(reply) + datalength];
 		memcpy(result, &reply, sizeof(reply));
 		memcpy(result + sizeof(reply), data, datalength);
