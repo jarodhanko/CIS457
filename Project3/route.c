@@ -207,6 +207,7 @@ int main(int argc, char **argv){
 		memcpy(reply.arp_header.arp_spa, request->arp_header.arp_spa, 4);
 		memcpy(reply.arp_header.arp_tha, request->arp_header.arp_sha, ETH_ALEN);
 		memcpy(reply.arp_header.arp_tpa, request->arp_header.arp_spa, 4);
+		printf("SEG ---------");
 		
 		// Send the reply packet.	
 		send(packet_socket, &reply, sizeof(reply), 0);
@@ -275,7 +276,7 @@ void load_table(struct routing_table **rtable, char *filename){
 	char c;
 	while ((c = fgetc(fp)) != EOF){
 		if (c == '.'){
-			c = '.';
+			c = ':';
 		}
 		item[index++] = c;
 		if (c == '/'){
