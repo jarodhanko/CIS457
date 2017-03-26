@@ -200,7 +200,7 @@ int main(){
 			data = (char *)malloc(datalength);
 			memcpy(data, buf2 + sizeof(request2), datalength);
 		}
-		printf("\n THE DATA LENGTH IS %d", sizeof(data));
+		printf("\n THE DATA LENGTH IS %d", sizeof(&data));
 		unsigned char tmp3[] = {buf2[26], buf2[27], buf2[28], buf2[29]};
 		unsigned char tmp4[] = {buf2[30], buf2[31], buf2[32], buf2[33]};
 		
@@ -216,12 +216,12 @@ int main(){
 
 		reply.icmp_header.type = ICMP_ECHOREPLY;
 		reply.icmp_header.checksum = 0;
-		printf("\n \t \t THE SIZE IS: %d \n", sizeof(request2));
+		printf("\n \t \t THE SIZE IS: %d \n", datalength);
 		printf("\n \t SIZEOFREPLY: %02X \n", sizeof(reply));
 
-		unsigned char ptr[sizeof(reply.icmp_header) + sizeof(data)];
+		unsigned char ptr[sizeof(reply.icmp_header) + datalength];
 		memcpy(&ptr, &reply.icmp_header, sizeof(reply.icmp_header));
-		memcpy(&ptr + sizeof(reply.icmp_header), &data, sizeof(data));
+		memcpy(&ptr + sizeof(reply.icmp_header), &data, datalength);
 		reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
 
 
@@ -245,15 +245,15 @@ int main(){
 		printf("ICMP CODE: %02X \n", reply.icmp_header.code);
 		printf("ICMP CHECKSUM: %02X \n", ntohs(reply.icmp_header.checksum));
 		printf("\n\n");
-		for (i = 0; i < sizeof(data); i++)
+		for (i = 0; i < datalength; i++)
 		{
 			if (i > 0) printf(":");
 			printf("%02X", data[i]);
 		}
 		printf("\n\n");
-		unsigned char result[sizeof(reply) + sizeof(data)];
+		unsigned char result[sizeof(reply) + datalength];
 		memcpy(&result, &reply, sizeof(reply));
-		memcpy(&result + sizeof(reply), data, sizeof(data));
+		memcpy(&result + sizeof(reply), data, datalength);
 		
 		send(packet_socket, &result, sizeof(result), 0);
 	}
