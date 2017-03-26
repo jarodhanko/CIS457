@@ -180,9 +180,9 @@ int main(){
 		//							request->arp_header.arp_sha[1], request->arp_header.arp_sha[2],
 		//							request->arp_header.arp_sha[3], request->arp_header.arp_sha[4],
 		//							request->arp_header.arp_sha[5]);
-		printf("ARP SENDER PROTO ADDR: %02X%02X%02X%02X \n", request->arp_header.arp_spa[0],
-							 request->arp_header.arp_spa[1], request->arp_header.arp_spa[2],
-							 request->arp_header.arp_spa[3]);
+		//printf("ARP SENDER PROTO ADDR: %02X%02X%02X%02X \n", request->arp_header.arp_spa[0],
+		//					 request->arp_header.arp_spa[1], request->arp_header.arp_spa[2],
+		//					 request->arp_header.arp_spa[3]);
 		//printf("ARP TARGET HARD ADDR: %02X%02X%02X%02X%02X%02X \n", request->arp_header.arp_tha[0],
 		//							request->arp_header.arp_tha[1], request->arp_header.arp_tha[2],
 		//							request->arp_header.arp_tha[3]);
