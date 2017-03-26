@@ -197,7 +197,7 @@ int main(){
 		//memcpy(reply.eth_header.ether_shost, tmp, ETH_ALEN);
 		//memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
 		printf("WHY");		
-		memcpy(reply.eth_header.ether_shost, request->eth_header.ether_dhost, ETH_ALEN);
+		//memcpy(reply.eth_header.ether_shost, request->eth_header.ether_dhost, ETH_ALEN);
 		printf("WHY");		
 		memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
 		printf("WHY");
