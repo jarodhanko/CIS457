@@ -215,12 +215,10 @@ int main(){
 		reply.icmp_header.type = ICMP_ECHOREPLY;
 		reply.icmp_header.checksum = 0;
 		printf("\n \t \t THE SIZE IS: %d \n", sizeof(request2));
-		printf("\n \t SIZEOFHEADER: %02X \n", sizeof(reply.icmp_header));
+		printf("\n \t SIZEOFREPLY: %02X \n", sizeof(reply));
 		unsigned char ptr[sizeof(reply.icmp_header) + sizeof(reply.data)];
 		memcpy(&ptr, &reply.icmp_header, sizeof(reply.icmp_header));
-		printf("THIS WORKED");
 		memcpy(&ptr[sizeof(reply.icmp_header)], &reply.data, sizeof(reply.data));
-		printf("THIS FAILED");
 		reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
 
 
