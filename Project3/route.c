@@ -197,7 +197,7 @@ int main(){
 
 		if(datalength > 0){
 			request2.data = (char*)malloc(datalength);
-			memcpy(&request2.data, buf2 + sizeof(request2), datalength);
+			//memcpy(&request2.data, buf2 + sizeof(request2), datalength);
 		}
 		printf("\n THE DATA LENGTH IS %d", sizeof(request2.data));
 		unsigned char tmp3[] = {buf2[26], buf2[27], buf2[28], buf2[29]};
@@ -209,8 +209,8 @@ int main(){
 		memcpy(&reply.data, &request2.data, sizeof(request2.data));
 
 		u_int8_t tmp[6] = {0xa2, 0x22, 0xdd, 0xfc, 0x5c, 0x89};
-		memcpy(reply.eth_header.ether_shost, tmp, ETH_ALEN);
-		memcpy(reply.eth_header.ether_dhost, request2.eth_header.ether_shost, ETH_ALEN);
+		memcpy(&reply.eth_header.ether_shost, tmp, ETH_ALEN);
+		memcpy(&reply.eth_header.ether_dhost, request2.eth_header.ether_shost, ETH_ALEN);
 
 
 		memcpy(&reply.ip_header.daddr, tmp3, 4);
@@ -221,8 +221,8 @@ int main(){
 		printf("\n \t \t THE SIZE IS: %d \n", sizeof(request2));
 		printf("\n \t SIZEOFREPLY: %02X \n", sizeof(reply));
 		unsigned char ptr[sizeof(reply.icmp_header) + sizeof(reply.data)];
-		memcpy(&ptr, &reply.icmp_header, sizeof(reply.icmp_header));
-		memcpy(&ptr + sizeof(reply.icmp_header), &reply.data, sizeof(reply.data));
+		//memcpy(&ptr, &reply.icmp_header, sizeof(reply.icmp_header));
+		//memcpy(&ptr + sizeof(reply.icmp_header), &reply.data, sizeof(reply.data));
 		reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
 
 
