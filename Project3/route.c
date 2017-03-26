@@ -204,8 +204,9 @@ int main(){
 
 
 		/** HARDCODED!!!! **/
-		u_int8_t tmp2[4] = {10, 1, 0, 1};
-		memcpy(reply.arp_header.arp_spa, tmp2, 4);
+		//u_int8_t tmp2[4] = {10, 1, 0, 1};
+		//memcpy(reply.arp_header.arp_spa, tmp2, 4);
+		memcpy(reply.arp_header.arp_spa, request->arp_header.arp_spa, 4);
 
 		memcpy(reply.arp_header.arp_tha, request->arp_header.arp_sha, ETH_ALEN);
 		memcpy(reply.arp_header.arp_tpa, request->arp_header.arp_spa, 4);
