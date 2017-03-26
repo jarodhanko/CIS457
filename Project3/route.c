@@ -14,6 +14,11 @@
 #include <arpa/inet.h>
 #include <inttypes.h>
 
+
+
+
+
+/* STRUCTS **/
 struct aarp {
 	struct ether_header eth_header;
 	struct ether_arp arp_header;
@@ -25,8 +30,14 @@ struct iicmp{
 	struct icmphdr icmp_header;
 } __attribute__ ((__packed__));
 
+
+
+
+
+/* PROTOTYPES **/
 void print_ETHERTYPE_ARP(struct aarp *request);
 void print_ETHERTYPE_IP(struct iicmp reply);
+
 
 
 
@@ -68,6 +79,10 @@ u_int16_t ip_checksum(void* vdata,size_t length) {
     return htons(~acc);
 }
 
+
+
+
+
 /****************************************************************************************
 * checksum 2
 ****************************************************************************************/
@@ -85,6 +100,10 @@ unsigned short ip2_checksum(void *b, int len)
 	result = ~sum;
 	return result;
 }
+
+
+
+
 
 /****************************************************************************************
 * MAIN
@@ -172,32 +191,26 @@ int main(){
 	memcpy(buf2, buf, sizeof(buf));
 	request = ((struct aarp*)&buf);
 
-	if(ntohs(request->eth_header.ether_type) == ETHERTYPE_ARP){	
+	if(ntohs(request->eth_header.ether_type) == ETHERTYPE_ARP){
+
+		// Print the request contents.	
 		print_ETHERTYPE_ARP(request);
 
+		// Create reply structure.
 		struct aarp reply = *request;
 
-		/** HARDCODED!!!! **/
-		//u_int8_t tmp[6] = {0x52, 0x46, 0x9d, 0x78, 0xeb, 0xfd};		
-		//memcpy(reply.eth_header.ether_shost, tmp, ETH_ALEN);
-		//memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
-		
+		// Copy info to reply.
 		memcpy(reply.eth_header.ether_shost, request->eth_header.ether_dhost, ETH_ALEN);		
 		memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
-
 		reply.arp_header.ea_hdr.ar_op=htons(ARPOP_REPLY);
 		memcpy(reply.arp_header.arp_sha, tmp, 6);
-
-
-		/** HARDCODED!!!! **/
-		//u_int8_t tmp2[4] = {10, 1, 0, 1};
-		//memcpy(reply.arp_header.arp_spa, tmp2, 4);
 		memcpy(reply.arp_header.arp_spa, request->arp_header.arp_spa, 4);
-
 		memcpy(reply.arp_header.arp_tha, request->arp_header.arp_sha, ETH_ALEN);
 		memcpy(reply.arp_header.arp_tpa, request->arp_header.arp_spa, 4);
-
+		
+		// Send the reply packet.	
 		send(packet_socket, &reply, sizeof(reply), 0);
+
 	}else if(ntohs(request->eth_header.ether_type) == ETHERTYPE_IP){
 		struct iicmp request2;
 		unsigned char *data;
@@ -217,8 +230,9 @@ int main(){
 
 		
 		/** HARDCODED!!!! **/
-		u_int8_t tmp[6] = {0xa2, 0x22, 0xdd, 0xfc, 0x5c, 0x89};
-		memcpy(&reply.eth_header.ether_shost, tmp, ETH_ALEN);
+		//u_int8_t tmp[6] = {0xa2, 0x22, 0xdd, 0xfc, 0x5c, 0x89};
+		//memcpy(&reply.eth_header.ether_shost, tmp, ETH_ALEN);
+		memcpy(&reply.eth_header.ether_shost, request2.eth_header.ether_dhost, ETH_ALEN);
 		memcpy(&reply.eth_header.ether_dhost, request2.eth_header.ether_shost, ETH_ALEN);
 
 
@@ -232,7 +246,8 @@ int main(){
 		memcpy(ptr, &reply.icmp_header, sizeof(reply.icmp_header));
 		memcpy(ptr + sizeof(reply.icmp_header), data, datalength);
 		reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
-
+		
+		// Print the reply contents.
 		print_ETHERTYPE_IP(reply);		
 
 		unsigned char result[sizeof(reply) + datalength];
@@ -246,6 +261,8 @@ int main(){
   //exit
   return 0;
 }
+
+
 
 
 
@@ -281,6 +298,8 @@ void print_ETHERTYPE_ARP(struct aarp *request){
    	  				   request->arp_header.arp_tpa[1], request->arp_header.arp_tpa[2],
 					   request->arp_header.arp_tpa[3]);
 }
+
+
 
 
 
