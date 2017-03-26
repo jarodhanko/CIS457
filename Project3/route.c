@@ -245,7 +245,7 @@ int main(){
 		printf("ICMP CODE: %02X \n", reply.icmp_header.code);
 		printf("ICMP CHECKSUM: %02X \n", ntohs(reply.icmp_header.checksum));
 		printf("\n\n");
-		for (i = 0; i < n; i++)
+		for (i = 0; i < sizeof(data); i++)
 		{
 			if (i > 0) printf(":");
 			printf("%02X", data[i]);
