@@ -197,6 +197,7 @@ int main(){
 
 		if(datalength > 0){
 			request2.data = malloc(datalength);
+			printf("BUFFERLENGTH: %d", sizeof(buf2));
 			memcpy(&request2.data, buf2 + sizeof(request2), datalength);
 		}
 		printf("\n THE DATA LENGTH IS %d", sizeof(request2.data));
