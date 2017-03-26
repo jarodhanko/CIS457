@@ -186,7 +186,7 @@ int main(){
 		//printf("ARP TARGET HARD ADDR: %02X%02X%02X%02X%02X%02X \n", request->arp_header.arp_tha[0],
 		//							request->arp_header.arp_tha[1], request->arp_header.arp_tha[2],
 		//							request->arp_header.arp_tha[3]);
-		printf("ARP TARGET PROTO ADDR: %02X%02X%02X%02X \n", request->arp_header.arp_tpa[0],
+		printf("ARP TARGET PROTO ADDR: %02X%02X%02X%02X \nAHHHHAHHA", request->arp_header.arp_tpa[0],
 							 request->arp_header.arp_tpa[1], request->arp_header.arp_tpa[2],
 							 request->arp_header.arp_tpa[3]);
 		printf("WHY");	
