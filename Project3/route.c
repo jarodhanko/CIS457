@@ -275,7 +275,7 @@ void load_table(struct routing_table **rtable, char *filename){
 	char c;
 	while ((c = fgetc(fp)) != EOF){
 		if (c == '.'){
-			c = ':';
+			c = '.';
 		}
 		item[index++] = c;
 		if (c == '/'){
