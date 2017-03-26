@@ -284,7 +284,8 @@ void load_table(struct routing_table **rtable, char *filename){
 			break;
 		}
 	}
-	printf("------------%02X", (*rtable)->network);  
+	printf("------------%02X\n", (*rtable)->network); 
+	close(fp); 
 }
 
 
