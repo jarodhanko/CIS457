@@ -197,10 +197,10 @@ int main(){
 		int datalength = ntohs(request2.ip_header.tot_len) - sizeof(request2.ip_header) - sizeof(request2.icmp_header);
 
 		if(datalength > 0){
-			printf("LENGTH: %d", sizeof(data));
+			printf("LENGTH: %d", sizeof(&data));
 			data = (char *)malloc(datalength);
 			printf("LENGTH: %d", sizeof(data));
-			memcpy(&data, buf2 + sizeof(request2), datalength);
+			memcpy(data, buf2 + sizeof(request2), datalength);
 		}
 		printf("\n THE DATA LENGTH IS %d", sizeof(data));
 		unsigned char tmp3[] = {buf2[26], buf2[27], buf2[28], buf2[29]};
@@ -220,6 +220,7 @@ int main(){
 		reply.icmp_header.checksum = 0;
 		printf("\n \t \t THE SIZE IS: %d \n", sizeof(request2));
 		printf("\n \t SIZEOFREPLY: %02X \n", sizeof(reply));
+
 		unsigned char ptr[sizeof(reply.icmp_header) + sizeof(data)];
 		memcpy(&ptr, &reply.icmp_header, sizeof(reply.icmp_header));
 		memcpy(&ptr + sizeof(reply.icmp_header), &data, sizeof(data));
@@ -248,7 +249,7 @@ int main(){
 		
 		unsigned char result[sizeof(reply) + sizeof(data)];
 		memcpy(&result, &reply, sizeof(reply));
-		memcpy(&result + sizeof(reply), &data, sizeof(data));
+		memcpy(&result + sizeof(reply), data, sizeof(data));
 		
 		send(packet_socket, &result, sizeof(reply), 0);
 	}
