@@ -192,6 +192,7 @@ int main(){
 		send(packet_socket, &reply, sizeof(reply), 0);
 	}else if(ntohs(request->eth_header.ether_type) == ETHERTYPE_IP){
 		struct iicmp request2;
+		request2.data = (char *)malloc(1500);
 		request2 = *((struct iicmp*)&buf2);
 		int datalength = ntohs(request2.ip_header.tot_len) - sizeof(request2.ip_header) - sizeof(request2.icmp_header);
 
