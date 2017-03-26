@@ -197,8 +197,8 @@ int main(){
 
 		if(datalength > 0){
 			request2.data = malloc(datalength);
-			printf("BUFFERLENGTH: %d", sizeof(buf2));
-			memcpy(&request2.data, buf2 + sizeof(request2), datalength);
+			printf("LENGTH: %d", sizeof(datalength));
+			memcpy(request2.data, buf2 + sizeof(request2), datalength);
 		}
 		printf("\n THE DATA LENGTH IS %d", sizeof(request2.data));
 		unsigned char tmp3[] = {buf2[26], buf2[27], buf2[28], buf2[29]};
