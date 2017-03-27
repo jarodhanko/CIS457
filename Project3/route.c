@@ -364,14 +364,14 @@ void load_table(struct routing_table **rtable, char *filename){
 		if (c == '/'){
 			item[--index] = '\0';
 			//struct sockaddr_in sa;
-			//inet_pton(AF_INET, item, &(sa.sin_addr));
+			inet_pton(AF_INET, item, &(*rtable)->network);
 			(*rtable)->network = (u_int32_t)atoi(item);
 			//inet_ntop(AF_INET, &(sa.sin_addr), (*rtable)->network, INET_ADDRSTRLEN);
 			index = 0;
 			break;
 		}
 	}
-	printf("------------%p\n", &(*rtable)->network); 
+	printf("------------%02X\n", (*rtable)->network); 
 	fclose(fp); 
 }
 
