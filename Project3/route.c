@@ -369,7 +369,7 @@ void load_table(struct routing_table **rtable, char *filename){
     	exit(1);
 	}
 
-	struct routing_table *tempRtable, *prevRtable;
+	struct routing_table *tempRtable, *prevRtable = NULL;
 	int caseNum = 0;
 	int i;
 	char item[9];
