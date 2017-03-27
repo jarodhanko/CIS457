@@ -139,7 +139,7 @@ int main(int argc, char **argv){
 				}
 				prevInterface = tempInterface;
 			}
-			if (!haveInterface){
+			if (haveInterface == 0){
 				tempInterface = malloc(sizeof(struct interface));
 				tempInterface->name = tmp->ifa_name;
 				tempInterface->next = NULL;
@@ -178,6 +178,14 @@ int main(int argc, char **argv){
 				if(bind(packet_socket,tmp->ifa_addr,sizeof(struct sockaddr_ll))==-1){
 	  				perror("bind");
 				}
+
+				struct timeval tv;
+				tv.tv_sec = 0;
+				tv.tv_usec = 1000;
+				if(setsockopt(packet_socket,SOL_SOCKET,SO_RCVTIMEO,&tv,sizeof(tv))<0){
+					perror("Error");
+				}
+
 				// Put the packet socket into the interface.
 				tempInterface->packet_socket = packet_socket;
 
