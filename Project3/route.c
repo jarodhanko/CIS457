@@ -110,7 +110,6 @@ u_int16_t ip_checksum(void* vdata,size_t length) {
 * MAIN
 ****************************************************************************************/
 int main(int argc, char **argv){
-  	int packet_socket;
  	u_int8_t mac[6];
   	u_int32_t ip_ra;
 	//get list of interfaces (actually addresses)
@@ -152,13 +151,9 @@ int main(int argc, char **argv){
 				}
 			}
 			if (tmp->ifa_addr->sa_family == AF_INET){
-				//tempInterface->ip_addrs = ((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr;
-				//u_int32_t temp = ((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr;
-				//tempInterface->ip_addrs[0] = (temp & 0x000000ff);
-				//tempInterface->ip_addrs[1] = (temp & 0x000000ff);
-				//tempInterface->ip_addrs[2] = (temp & 0x000000ff);
-				//tempInterface->ip_addrs[3] = (temp & 0x000000ff); 
-				memcpy(tempInterface->ip_addrs, &((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr, sizeof(((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr));           			
+				// Store the ip address into the interface.
+				memcpy(tempInterface->ip_addrs, &((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr, 
+										sizeof(((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr));		
 			}
 			else if (tmp->ifa_addr->sa_family == AF_PACKET){
 				//create a packet socket
@@ -167,6 +162,7 @@ int main(int argc, char **argv){
 				//could also use SOCK_DGRAM to cut off link layer header
 				//ETH_P_ALL indicates we want all (upper layer) protocols
 				//we could specify just a specific one
+				int packet_socket;
 				packet_socket = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
 				if(packet_socket<0){
 	 	 			perror("socket");
@@ -181,8 +177,10 @@ int main(int argc, char **argv){
 				if(bind(packet_socket,tmp->ifa_addr,sizeof(struct sockaddr_ll))==-1){
 	  				perror("bind");
 				}
-			
+				// Put the packet socket into the interface.
 				tempInterface->packet_socket = packet_socket;
+
+				// Store the mac address into the interface.
 				int index;
 	  			for (index = 0; index < 6; index++){
 		 		 	tempInterface->mac_addrs[index] = ((struct sockaddr_ll*) tmp->ifa_addr)->sll_addr[index];
@@ -201,17 +199,18 @@ int main(int argc, char **argv){
   	load_table(&rtable, argv[1]);
 
 	struct interface *tempInterface = interfaceList;
+	printf("-----------\n");
 	while(tempInterface != NULL){
 	
-		printf("\n\n%s \n", tempInterface->name);
-		printf("%s \n", ether_ntoa((struct ether_addr*)tempInterface->mac_addrs));
-		printf("%02X.%02X.%02X.%02X \n\n",tempInterface->ip_addrs[0], tempInterface->ip_addrs[1],
-										  tempInterface->ip_addrs[2], tempInterface->ip_addrs[3]);
+		printf("\n");
+		printf("Interface: %s \n", tempInterface->name);
+		printf("MAC  addr: %s \n", ether_ntoa((struct ether_addr*)tempInterface->mac_addrs));
+		printf("IP   addr: %02X.%02X.%02X.%02X \n",tempInterface->ip_addrs[0], tempInterface->ip_addrs[1],
+										  			 tempInterface->ip_addrs[2], tempInterface->ip_addrs[3]);
 		printf("-----------\n");
 		tempInterface = tempInterface->next;
 	}
 
-	printf("FINISHED");
 
 
   	printf("Ready to recieve now\n");
@@ -224,7 +223,7 @@ int main(int argc, char **argv){
     	//this packet is incoming or outgoing (when using ETH_P_ALL, we
     	//see packets in both directions. Only outgoing can be seen when
     	//using a packet socket with some specific protocol)
-    	int n = recvfrom(packet_socket, buf, 1500,0,(struct sockaddr*)&recvaddr, &recvaddrlen);
+    	int n = recvfrom(tempInterface->packet_socket, buf, 1500,0,(struct sockaddr*)&recvaddr, &recvaddrlen);
     	//ignore outgoing packets (we can't disable some from being sent
     	//by the OS automatically, for example ICMP port unreachable
     	//messages, so we will just ignore them here)
@@ -274,7 +273,7 @@ int main(int argc, char **argv){
 		memcpy(reply.arp_header.arp_tpa, request->arp_header.arp_spa, 4);
 		
 		// Send the reply packet.	
-		send(packet_socket, &reply, sizeof(reply), 0);
+		send(tempInterface->packet_socket, &reply, sizeof(reply), 0);
 
 	}else if(ntohs(request->eth_header.ether_type) == ETHERTYPE_IP){
 		struct iicmp request2;
@@ -313,7 +312,7 @@ int main(int argc, char **argv){
 		memcpy(result, &reply, sizeof(reply));
 		memcpy(result + sizeof(reply), data, datalength);
 		
-		send(packet_socket, &result, sizeof(result), 0);
+		send(tempInterface->packet_socket, &result, sizeof(result), 0);
 	}
 
   }
