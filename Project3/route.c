@@ -47,7 +47,7 @@ struct routing_table {
 struct interface {
 	char *name;
 	u_int8_t mac_addrs[6];
-	u_int32_t ip_addrs;
+	uint32_t ip_addrs;
 	int packet_socket;
 	struct interface *next;
 };
@@ -152,7 +152,7 @@ int main(int argc, char **argv){
 				}
 			}
 			if (tmp->ifa_addr->sa_family == AF_INET){
-				tempInterface->ip_addrs = htons(((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr);
+				tempInterface->ip_addrs = ((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr;
 			}
 			else if (tmp->ifa_addr->sa_family == AF_PACKET){
 				//create a packet socket
