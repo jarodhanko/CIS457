@@ -371,7 +371,7 @@ void load_table(struct routing_table **rtable, char *filename){
 			break;
 		}
 	}
-	printf("------------%02X\n", (*rtable)->network); 
+	printf("------------%p\n", &(*rtable)->network); 
 	fclose(fp); 
 }
 
