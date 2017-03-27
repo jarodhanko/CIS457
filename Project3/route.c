@@ -109,7 +109,7 @@ u_int16_t ip_checksum(void* vdata,size_t length) {
 * MAIN
 ****************************************************************************************/
 int main(int argc, char **argv){
-	struct interface interfaceList;
+	struct interface *interfaceList;
   	int packet_socket;
  	u_int8_t mac[6];
   	u_int32_t ip_ra;
@@ -129,10 +129,10 @@ int main(int argc, char **argv){
     	//of our own IP addresses
 		
 		// All the eth-# interfaces.
-		if (strcmp(tmp->ifa_name, "lo") != 0)
+		if (strcmp(tmp->ifa_name, "lo") != 0){
 			
 			// Look to see if we already have the interface.
-			struct interface *tempInterface, *prevInterface;
+			struct interface *tempInterface, *prevInterface = NULL;
 			int haveInterface = 0;
 			tempInterface = interfaceList;
 			while(tempInterface != NULL){
@@ -146,12 +146,12 @@ int main(int argc, char **argv){
 			if (!haveInterface){
 				tempInterface = malloc(sizeof(struct interface));
 				tempInterface->name = tmp->ifa_name;
-				tempInterface->next = null;
-				if (interfaceList == NULL)}
+				tempInterface->next = NULL;
+				if (interfaceList == NULL){
 					interfaceList = tempInterface;
 				}
 				else {
-					prevInterface-> = tempInterface;
+					prevInterface->next = tempInterface;
 				}
 			}
 			if (tmp->ifa_addr->sa_family == AF_INET){
@@ -181,52 +181,10 @@ int main(int argc, char **argv){
 			}
 			tempInterface->packet_socket = packet_socket;
 			int index;
-	  		for (i = 0; i < 6;i++){
-		 	 	tempInterface = ((struct sockaddr_ll*) tmp->ifa_addr)->sll_addr[i];
+	  		for (index = 0; index < 6; index++){
+		 	 	tempInterface->mac_addr[index] = ((struct sockaddr_ll*) tmp->ifa_addr)->sll_addr[index];
 	  		}
-
-
-
-
-
-
-
-
-		if(tmp->ifa_addr->sa_family==AF_INET){
-			if (strcmp(tmp->ifa_name, "r1-eth1") == 0)
-			ip_ra = ((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr;
-		}
-    	if(tmp->ifa_addr->sa_family==AF_PACKET){  
-        	printf("Interface: %s\n",tmp->ifa_name);
-      		//create a packet socket on interface r?-eth1
-      		if(!strncmp(&(tmp->ifa_name[3]),"eth1",4)){
-				printf("Creating Socket on interface %s\n",tmp->ifa_name);
-				//create a packet socket
-				//AF_PACKET makes it a packet socket
-				//SOCK_RAW makes it so we get the entire packet
-				//could also use SOCK_DGRAM to cut off link layer header
-				//ETH_P_ALL indicates we want all (upper layer) protocols
-				//we could specify just a specific one
-				packet_socket = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
-				if(packet_socket<0){
-	 	 			perror("socket");
-	  				return 2;
-				}
-				//Bind the socket to the address, so we only get packets
-				//recieved on this specific interface. For packet sockets, the
-				//address structure is a struct sockaddr_ll (see the man page
-				//for "packet"), but of course bind takes a struct sockaddr.
-				//Here, we can use the sockaddr we got from getifaddrs (which
-				//we could convert to sockaddr_ll if we needed to)
-				if(bind(packet_socket,tmp->ifa_addr,sizeof(struct sockaddr_ll))==-1){
-	  				perror("bind");
-				}
-				int i;
-	  			for (i = 0; i < 6;i++){
-		 	 		mac[i] = ((struct sockaddr_ll*) tmp->ifa_addr)->sll_addr[i];
-	  			}
-      		}
-    	}
+      	}
   	}
   	//free the interface list when we don't need it anymore
   	freeifaddrs(ifaddr);
