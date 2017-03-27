@@ -113,13 +113,14 @@ int main(int argc, char **argv){
   	int packet_socket;
  	u_int8_t mac[6];
   	u_int32_t ip_ra;
-  	
+printf("_+_+_+_+_+_+_+_+_+_+_");
 	//get list of interfaces (actually addresses)
   	struct ifaddrs *ifaddr, *tmp;
   	if(getifaddrs(&ifaddr)==-1){
     	perror("getifaddrs");
     	return 1;
   	}
+printf("_+_+_+_+_+_+_+_+_+_+_");
   	//have the list, loop over the list
   	for(tmp = ifaddr; tmp!=NULL; tmp=tmp->ifa_next){
     	//Check if this is a packet address, there will be one per
@@ -130,7 +131,7 @@ int main(int argc, char **argv){
 		
 		// All the eth-# interfaces.
 		if (strcmp(tmp->ifa_name, "lo") != 0){
-			
+printf("_+_+_+_+_+_+_+_+_+_+_");		
 			// Look to see if we already have the interface.
 			struct interface *tempInterface, *prevInterface = NULL;
 			int haveInterface = 0;
@@ -143,6 +144,7 @@ int main(int argc, char **argv){
 				prevInterface->next = tempInterface;
 				tempInterface = tempInterface->next;
 			}
+printf("_+_+_+_+_+_+_+_+_+_+_");
 			if (!haveInterface){
 				tempInterface = malloc(sizeof(struct interface));
 				tempInterface->name = tmp->ifa_name;
@@ -154,6 +156,7 @@ int main(int argc, char **argv){
 					prevInterface->next = tempInterface;
 				}
 			}
+printf("_+_+_+_+_+_+_+_+_+_+_");
 			if (tmp->ifa_addr->sa_family == AF_INET){
 				tempInterface->ip_addr = ((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr;
 			}
@@ -169,6 +172,7 @@ int main(int argc, char **argv){
 	 	 			perror("socket");
 	  				return 2;
 				}
+printf("_+_+_+_+_+_+_+_+_+_+_");
 				//Bind the socket to the address, so we only get packets
 				//recieved on this specific interface. For packet sockets, the
 				//address structure is a struct sockaddr_ll (see the man page
@@ -184,6 +188,7 @@ int main(int argc, char **argv){
 	  		for (index = 0; index < 6; index++){
 		 	 	tempInterface->mac_addr[index] = ((struct sockaddr_ll*) tmp->ifa_addr)->sll_addr[index];
 	  		}
+printf("_+_+_+_+_+_+_+_+_+_+_");
       	}
   	}
   	//free the interface list when we don't need it anymore
