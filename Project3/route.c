@@ -365,7 +365,7 @@ void load_table(struct routing_table **rtable, char *filename){
 			item[--index] = '\0';
 			struct sockaddr_in sa;
 			inet_pton(AF_INET, item, &(sa.sin_addr));
-			(*rtable)->network = sa.sin_addr.s_addr;
+			(*rtable)->network = htons(sa.sin_addr.s_addr);
 			//inet_ntop(AF_INET, &(sa.sin_addr), (*rtable)->network, INET_ADDRSTRLEN);
 			index = 0;
 			break;
