@@ -164,6 +164,7 @@ int main(int argc, char **argv){
 				//we could specify just a specific one
 				int packet_socket;
 				packet_socket = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+				printf("packet_socket: %d \n", packet_socket);
 				if(packet_socket<0){
 	 	 			perror("socket");
 	  				return 2;
@@ -206,6 +207,7 @@ int main(int argc, char **argv){
 		printf("MAC  addr: %s \n", ether_ntoa((struct ether_addr*)tempInterface->mac_addrs));
 		printf("IP   addr: %02X.%02X.%02X.%02X \n",tempInterface->ip_addrs[0], tempInterface->ip_addrs[1],
 										  			 tempInterface->ip_addrs[2], tempInterface->ip_addrs[3]);
+		printf("sock_addr: %d \n", tempInterface->packet_socket);
 		printf("-----------\n");
 		tempInterface = tempInterface->next;
 	}
