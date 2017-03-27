@@ -118,7 +118,7 @@ int main(int argc, char **argv){
     //use the AF_INET addresses in this list for example to get a list
     //of our own IP addresses
 	if(tmp->ifa_addr->sa_family==AF_INET){
-		if (strcmp(tmp->ifa_name, "eth1"))
+		if (strcmp(tmp->ifa_name, "eth1") == 0)
 		ip_ra = ((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr;
 	}
     if(tmp->ifa_addr->sa_family==AF_PACKET){
