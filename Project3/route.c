@@ -42,8 +42,8 @@ struct routing_table {
 	u_int32_t network;
 	int prefix;
 	u_int32_t hop;
-	u_int32_t interface;
-	struct rtable *next;
+	char interface[8];
+	struct routing_table *next;
 };
 
 struct interface {
@@ -62,6 +62,7 @@ struct interface *interfaceList;
 void load_table(struct routing_table **rtable, char *filename);
 void print_ETHERTYPE_ARP(struct aarp *request);
 void print_ETHERTYPE_IP(struct iicmp reply);
+void clearArray(char *array);
 
 
 
@@ -355,28 +356,52 @@ void load_table(struct routing_table **rtable, char *filename){
     	printf("Could Not Open File");
     	exit(1);
 	}
-	//u_int8_t ip_addrs[4];
+
+	struct routing_table *tempRtable;
+	tempRtable = (*rtable);
+	int caseNum = 0;
+	int i;
 	char item[9];
 	int index = 0;
 	char c;
 	while ((c = fgetc(fp)) != EOF){
 		item[index++] = c;
-		if (c == '/'){
+		if (c == '/'){				// Network
 			item[--index] = '\0';
-			(*rtable)->network = (u_int32_t)atoi(item);			
-			//struct sockaddr_in sa;
-			//inet_pton(AF_INET, item, &(sa.sin_addr));
-			//(*rtable)->network = sa.sin_addr.s_addr;
-			//inet_ntop(AF_INET, &(sa.sin_addr), (*rtable)->network, INET_ADDRSTRLEN);
+			tempRtable->network = (u_int32_t)atoi(item);			
 			index = 0;
+			for(i = 0; i < 9; i++){
+				item[index] = '\0';
+			}
+			caseNum++;
 			break;
 		}
+		else if (c == ' '){
+			if(caseNum == 1){  		// Prefix
+				item[--index] = '\0';
+				tempRtable->network = atoi(item);
+				index = 0;
+			}
+			else if (caseNum == 2){ // Hop
+				item[--index] = '\0';
+				if(item[--index] == '-')
+					tempRtable->network = -1;
+				else 
+					tempRtable->network = (u_int32_t)atoi(item);
+				index = 0;
+			}
+		}
+		else if (c == '\n'){		 // Interface
+			item[--index] = '\0';
+			memcpy(&tempRtable->network, item, 8);
+			index = 0;
+			tempRtable = tempRtable->next;
+		}
 	}
-	if((*rtable)->network == (u_int32_t)atoi("10.0.0.0"))
-		printf("++++ SAME +++++");
-	printf("------------%02X\n", (*rtable)->network); 
+	
 	fclose(fp); 
 }
+
 
 
 
