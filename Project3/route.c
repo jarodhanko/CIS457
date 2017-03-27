@@ -229,11 +229,14 @@ int main(int argc, char **argv){
     		//this packet is incoming or outgoing (when using ETH_P_ALL, we
     		//see packets in both directions. Only outgoing can be seen when
     		//using a packet socket with some specific protocol)
-printf("Interface: %s \n", tempInterface->name);
-		printf("MAC  addr: %s \n", ether_ntoa((struct ether_addr*)tempInterface->mac_addrs));
-		printf("IP   addr: %02X.%02X.%02X.%02X \n",tempInterface->ip_addrs[0], tempInterface->ip_addrs[1],
+			printf("Interface: %s \n", tempInterface->name);
+			printf("MAC  addr: %s \n", ether_ntoa((struct ether_addr*)tempInterface->mac_addrs));
+			printf("IP   addr: %02X.%02X.%02X.%02X \n",tempInterface->ip_addrs[0], tempInterface->ip_addrs[1],
 										  			 tempInterface->ip_addrs[2], tempInterface->ip_addrs[3]);
-		printf("sock_addr: %d \n", tempInterface->packet_socket);
+			printf("sock_addr: %d \n", tempInterface->packet_socket);
+			if (tempInterface->next == NULL){
+				printf("NEXT IS NULL");
+			}
     		int n = recvfrom(tempInterface->packet_socket, buf, 1500,0,(struct sockaddr*)&recvaddr, &recvaddrlen);
     		//ignore outgoing packets (we can't disable some from being sent
     		//by the OS automatically, for example ICMP port unreachable
@@ -241,8 +244,9 @@ printf("Interface: %s \n", tempInterface->name);
     		if(recvaddr.sll_pkttype==PACKET_OUTGOING)
       			continue;
 			// Timed out.
-			if(n == -1)
+			if(n == -1){
 				continue;
+			}
     		//start processing all others
     		printf("Got a %d byte packet\n", n);
 		
