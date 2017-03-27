@@ -154,7 +154,7 @@ int main(int argc, char **argv){
 			if (tmp->ifa_addr->sa_family == AF_INET){
 				// Store the ip address into the interface.
 				memcpy(tempInterface->ip_addrs, &((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr, 
-										sizeof(((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr));		
+										  sizeof(((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr));		
 			}
 			else if (tmp->ifa_addr->sa_family == AF_PACKET){
 				//create a packet socket
@@ -216,7 +216,7 @@ int main(int argc, char **argv){
 		printf("MAC  addr: %s \n", ether_ntoa((struct ether_addr*)tempInterface->mac_addrs));
 		printf("IP   addr: %02X.%02X.%02X.%02X \n",tempInterface->ip_addrs[0], tempInterface->ip_addrs[1],
 										  			 tempInterface->ip_addrs[2], tempInterface->ip_addrs[3]);
-		printf("sock_addr: %d \n", tempInterface->packet_socket);
+		printf("pack_sock: %d \n", tempInterface->packet_socket);
 		printf("-----------\n");
 		tempInterface = tempInterface->next;
 	}
@@ -355,19 +355,17 @@ void load_table(struct routing_table **rtable, char *filename){
     	printf("Could Not Open File");
     	exit(1);
 	}
+	//u_int8_t ip_addrs[4];
 	char item[9];
 	int index = 0;
 	char c;
 	while ((c = fgetc(fp)) != EOF){
-		if (c == '.'){
-			c = ':';
-		}
 		item[index++] = c;
 		if (c == '/'){
 			item[--index] = '\0';
-			unsigned char tbuf[sizeof(struct in_addr)];
-			inet_pton(AF_INET, item, tbuf);
-			(*rtable)->network = *(u_int32_t *)&tbuf;
+			//struct sockaddr_in sa;
+			inet_pton(AF_INET, item, &(*rtable)->network);
+			//inet_ntop(AF_INET, &(sa.sin_addr), (*rtable)->network, INET_ADDRSTRLEN);
 			index = 0;
 			break;
 		}
