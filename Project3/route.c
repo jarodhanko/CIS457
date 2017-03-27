@@ -370,14 +370,18 @@ void load_table(struct routing_table **rtable, char *filename){
 	}
 
 	struct routing_table *tempRtable, *prevRtable;
-	tempRtable = NULL;
-	prevRtable = (*rtable);
 	int caseNum = 0;
 	int i;
 	char item[9];
 	int index = 0;
 	char c;
 	while ((c = fgetc(fp)) != EOF){
+
+		for(tempRtable = (*rtable); tempRtable != NULL; tempRtable = tempRtable->next){			
+			
+		}
+
+
 		item[index++] = c;
 		if (c == '/'){				// Network
 			item[--index] = '\0';
@@ -411,12 +415,12 @@ void load_table(struct routing_table **rtable, char *filename){
 			if ((*rtable) == NULL)
 				(*rtable) = tempRtable;
 			else {
-				prevRtable->next = tempRtable;
 			}
+			tempRtable->next = NULL;
 		}
 	}
-	tempRtable->next = NULL;
-	prevRtable->next = tempRtable;
+	
+
 	fclose(fp); 
 }
 
