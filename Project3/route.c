@@ -1,27 +1,29 @@
-#include <sys/socket.h> 
-#include <netpacket/packet.h> 
-#include <net/ethernet.h>
-#include <stdio.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <ifaddrs.h>
-#include <netinet/if_ether.h>
-#include <string.h>
-#include <netinet/ip.h>
-#include <netinet/ip_icmp.h>
-#include <stdlib.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
+#include <errno.h>
+
+#include <ifaddrs.h>
 #include <inttypes.h>
 
-
-#include <stdio.h>    //printf
-#include <string.h>   //strncpy
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <net/if.h>   //ifreq
-#include <unistd.h>   //close
 #include <netinet/ether.h>
+#include <netinet/if_ether.h>
+#include <netinet/in.h>
+#include <netinet/ip.h>
+#include <netinet/ip_icmp.h>
+#include <netpacket/packet.h> 
+#include <net/ethernet.h>
+#include <net/if.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h> 
+#include <sys/types.h>
+
+#include <unistd.h>
+
+
+
 
 
 /* STRUCTS **/
@@ -256,15 +258,13 @@ int main(int argc, char **argv){
    	 
 			
 	
-			if(ntohs(recvaddr.sll_protocol) == ETH_P_ARP && n > -1){
+			if((ntohs(recvaddr.sll_protocol) == ETH_P_ARP) && n > -1){
 				struct aarp *request;
 		
-				char buf2[1500];
-				memcpy(buf2, buf, sizeof(buf));
 				request = ((struct aarp*)&buf);
+				
 				// Print the request contents.	
 				print_ETHERTYPE_ARP(request);
-				printf("ANYTHING");
 
 				// Create reply structure.
 				struct aarp reply = *request;
@@ -288,8 +288,9 @@ int main(int argc, char **argv){
 		
 				// Send the reply packet.	
 				send(tempInterface->packet_socket, &reply, sizeof(reply), 0);
+				printf("Sent ARP reply");
 
-			}else if(ntohs(recvaddr.sll_protocol) == ETH_P_IP && n > -1){
+			}else if((ntohs(recvaddr.sll_protocol) == ETH_P_IP) && n > -1){
 				
 		
 				char buf2[1500];
@@ -314,7 +315,7 @@ int main(int argc, char **argv){
 
 				// Copy info to reply.
 				memcpy(&reply, &request2, sizeof(request2));
-				memcpy(&reply.eth_header.ether_shost, request2.eth_header.ether_dhost, ETH_ALEN);
+				memcpy(&reply.eth_header.ether_shost, tempInterface->mac_addrs, ETH_ALEN);
 				memcpy(&reply.eth_header.ether_dhost, request2.eth_header.ether_shost, ETH_ALEN);
 				memcpy(&reply.ip_header.daddr, tmp3, 4);
 				memcpy(&reply.ip_header.saddr, tmp4, 4);
@@ -326,7 +327,7 @@ int main(int argc, char **argv){
 				reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
 		
 				// Print the reply contents.
-				//print_ETHERTYPE_IP(reply);		
+				print_ETHERTYPE_IP(reply);		
 	
 				unsigned char result[sizeof(reply) + datalength];
 				memcpy(result, &reply, sizeof(reply));
@@ -380,7 +381,7 @@ void load_table(struct routing_table **rtable, char *filename){
 
 
 /****************************************************************************************
-* print_ETHERTYPE_IP
+* print_ETHERTYPE_ARP
 ****************************************************************************************/
 void print_ETHERTYPE_ARP(struct aarp *request){
 	printf("ETHER DEST: %02X%02X%02X%02X%02X%02X \n", request->eth_header.ether_dhost[0],
