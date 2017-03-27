@@ -369,8 +369,9 @@ void load_table(struct routing_table **rtable, char *filename){
     	exit(1);
 	}
 
-	struct routing_table *tempRtable;
-	tempRtable = (*rtable);
+	struct routing_table *tempRtable, *prevRtable;
+	tempRtable = NULL;
+	prevRtable = (*rtable);
 	int caseNum = 0;
 	int i;
 	char item[9];
@@ -407,10 +408,15 @@ void load_table(struct routing_table **rtable, char *filename){
 			item[--index] = '\0';
 			memcpy(&tempRtable->network, item, 8);
 			index = 0;
-			tempRtable = tempRtable->next;
+			if ((*rtable) == NULL)
+				(*rtable) = tempRtable;
+			else {
+				prevRtable->next = tempRtable;
+			}
 		}
 	}
-	
+	tempRtable->next = NULL;
+	prevRtable->next = tempRtable;
 	fclose(fp); 
 }
 
