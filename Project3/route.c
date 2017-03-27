@@ -222,6 +222,8 @@ int main(int argc, char **argv){
 		tempInterface = tempInterface->next;
 	}
 	struct routing_table *tempRtable = rtable;
+	if(tempRtable == NULL)
+		printf("NO TABLE");
 	while(tempRtable != NULL){
 	
 		printf("Network  : %X \n", tempRtable->network);
