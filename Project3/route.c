@@ -45,8 +45,8 @@ struct routing_table {
 
 struct interface {
 	char *name;
-	u_int8_t mac_addr[6];
-	u_int32_t ip_addr;
+	u_int8_t mac_addrs[6];
+	u_int32_t ip_addrs;
 	int packet_socket;
 	struct interface *next;
 };
@@ -159,7 +159,7 @@ printf("_+_+_+_+_+_+_+_+_+_+_");
 			}
 printf("_+_+_+_+_+_+_+_+_+_+_");
 			if (tmp->ifa_addr->sa_family == AF_INET){
-				tempInterface->ip_addr = ((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr;
+				tempInterface->ip_addrs = ((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr;
 			}
 			else if (tmp->ifa_addr->sa_family == AF_PACKET){
 				//create a packet socket
@@ -183,12 +183,13 @@ printf("_+_+_+_+_+_+_+_+_+_+_");
 				if(bind(packet_socket,tmp->ifa_addr,sizeof(struct sockaddr_ll))==-1){
 	  				perror("bind");
 				}
+			
+				tempInterface->packet_socket = packet_socket;
+				int index;
+	  			for (index = 0; index < 6; index++){
+		 		 	tempInterface->mac_addrs[index] = ((struct sockaddr_ll*) tmp->ifa_addr)->sll_addr[index];
+	  			}
 			}
-			tempInterface->packet_socket = packet_socket;
-			int index;
-	  		for (index = 0; index < 6; index++){
-		 	 	tempInterface->mac_addr[index] = ((struct sockaddr_ll*) tmp->ifa_addr)->sll_addr[index];
-	  		}
 printf("_+_+_+_+_+_+_+_+_+_+_");
       	}
   	}
