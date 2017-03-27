@@ -15,7 +15,12 @@
 #include <inttypes.h>
 
 
-
+#include <stdio.h>    //printf
+#include <string.h>   //strncpy
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <net/if.h>   //ifreq
+#include <unistd.h>   //close
 
 
 /* STRUCTS **/
@@ -195,19 +200,33 @@ int main(int argc, char **argv){
 			
 		//}
 
-		
+		int fd;
+    struct ifreq ifr;
+    char *iface = "eth0";
+    unsigned char *mac;
+     
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+ 
+    ifr.ifr_addr.sa_family = AF_INET;
+    strncpy(ifr.ifr_name , iface , IFNAMSIZ-1);
+ 
+    ioctl(fd, SIOCGIFHWADDR, &ifr);
+ 
+    close(fd);
+     
+    mac = (unsigned char *)ifr.ifr_hwaddr.sa_data;
 
 
 
 		// Copy info to reply.
 		printf("SEG ---------\n");
-		memcpy(reply.eth_header.ether_shost, tmp->ifa_addr, ETH_ALEN);
+		memcpy(reply.eth_header.ether_shost, mac, ETH_ALEN);
 printf("SEG ---------\n");		
 		memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
 printf("SEG ---------\n");
 		reply.arp_header.ea_hdr.ar_op=htons(ARPOP_REPLY);
 printf("SEG ---------\n");
-		//memcpy(reply.arp_header.arp_sha, tmp->ifa_addr, 6);
+		//memcpy(reply.arp_header.arp_sha, tmp, 6);
 printf("SEG ---------\n");
 		memcpy(reply.arp_header.arp_spa, request->arp_header.arp_spa, 4);
 printf("SEG ---------\n");
