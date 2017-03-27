@@ -255,9 +255,9 @@ printf("NEXT \n");
       			continue;
 printf("NEXT \n");
 			// Timed out.
-			//if(n == -1){
-			//	continue;
-			//}
+			if(n != -1){
+				continue;
+			}
     		//start processing all others
     		printf("Got a %d byte packet\n", n);
 		
