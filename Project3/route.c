@@ -43,6 +43,14 @@ struct routing_table {
 	struct rtable *next;
 };
 
+struct interface {
+	char *name;
+	u_int8_t mac_addr[6];
+	u_int32_t ip_addr;
+	int packet_socket;
+	struct interface *next;
+};
+
 
 
 
@@ -101,100 +109,166 @@ u_int16_t ip_checksum(void* vdata,size_t length) {
 * MAIN
 ****************************************************************************************/
 int main(int argc, char **argv){
-  int packet_socket;
-  u_int8_t mac[6];
-  u_int32_t ip_ra;
-  //get list of interfaces (actually addresses)
-  struct ifaddrs *ifaddr, *tmp;
-  if(getifaddrs(&ifaddr)==-1){
-    perror("getifaddrs");
-    return 1;
-  }
-  //have the list, loop over the list
-  for(tmp = ifaddr; tmp!=NULL; tmp=tmp->ifa_next){
-    //Check if this is a packet address, there will be one per
-    //interface.  There are IPv4 and IPv6 as well, but we don't care
-    //about those for the purpose of enumerating interfaces. We can
-    //use the AF_INET addresses in this list for example to get a list
-    //of our own IP addresses
-	if(tmp->ifa_addr->sa_family==AF_INET){
-		if (strcmp(tmp->ifa_name, "r1-eth1") == 0)
-		ip_ra = ((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr;
-	}
-    if(tmp->ifa_addr->sa_family==AF_PACKET){
-	  
-      printf("Interface: %s\n",tmp->ifa_name);
-      //create a packet socket on interface r?-eth1
-      if(!strncmp(&(tmp->ifa_name[3]),"eth1",4)){
-	printf("Creating Socket on interface %s\n",tmp->ifa_name);
-	//create a packet socket
-	//AF_PACKET makes it a packet socket
-	//SOCK_RAW makes it so we get the entire packet
-	//could also use SOCK_DGRAM to cut off link layer header
-	//ETH_P_ALL indicates we want all (upper layer) protocols
-	//we could specify just a specific one
-	packet_socket = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
-	if(packet_socket<0){
-	  perror("socket");
-	  return 2;
-	}
-	//Bind the socket to the address, so we only get packets
-	//recieved on this specific interface. For packet sockets, the
-	//address structure is a struct sockaddr_ll (see the man page
-	//for "packet"), but of course bind takes a struct sockaddr.
-	//Here, we can use the sockaddr we got from getifaddrs (which
-	//we could convert to sockaddr_ll if we needed to)
-	if(bind(packet_socket,tmp->ifa_addr,sizeof(struct sockaddr_ll))==-1){
-	  perror("bind");
-	}
-int i;
-	  for (i = 0; i < 6;i++){
-		  mac[i] = ((struct sockaddr_ll*) tmp->ifa_addr)->sll_addr[i];
-	  }
-      }
-    }
-  }
-  //free the interface list when we don't need it anymore
-  freeifaddrs(ifaddr);
+	struct interface interfaceList;
+  	int packet_socket;
+ 	u_int8_t mac[6];
+  	u_int32_t ip_ra;
+  	
+	//get list of interfaces (actually addresses)
+  	struct ifaddrs *ifaddr, *tmp;
+  	if(getifaddrs(&ifaddr)==-1){
+    	perror("getifaddrs");
+    	return 1;
+  	}
+  	//have the list, loop over the list
+  	for(tmp = ifaddr; tmp!=NULL; tmp=tmp->ifa_next){
+    	//Check if this is a packet address, there will be one per
+    	//interface.  There are IPv4 and IPv6 as well, but we don't care
+    	//about those for the purpose of enumerating interfaces. We can
+    	//use the AF_INET addresses in this list for example to get a list
+    	//of our own IP addresses
+		
+		// All the eth-# interfaces.
+		if (strcmp(tmp->ifa_name, "lo") != 0)
+			
+			// Look to see if we already have the interface.
+			struct interface *tempInterface, *prevInterface;
+			int haveInterface = 0;
+			tempInterface = interfaceList;
+			while(tempInterface != NULL){
+				if (strcmp(tempInterface->name, tmp->ifa_name)==0){
+					haveInterface = 1;
+					break;
+				}
+				prevInterface->next = tempInterface;
+				tempInterface = tempInterface->next;
+			}
+			if (!haveInterface){
+				tempInterface = malloc(sizeof(struct interface));
+				tempInterface->name = tmp->ifa_name;
+				tempInterface->next = null;
+				if (interfaceList == NULL)}
+					interfaceList = tempInterface;
+				}
+				else {
+					prevInterface-> = tempInterface;
+				}
+			}
+			if (tmp->ifa_addr->sa_family == AF_INET){
+				tempInterface->ip_addr = ((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr;
+			}
+			else if (tmp->ifa_addr->sa_family == AF_PACKET){
+				//create a packet socket
+				//AF_PACKET makes it a packet socket
+				//SOCK_RAW makes it so we get the entire packet
+				//could also use SOCK_DGRAM to cut off link layer header
+				//ETH_P_ALL indicates we want all (upper layer) protocols
+				//we could specify just a specific one
+				packet_socket = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+				if(packet_socket<0){
+	 	 			perror("socket");
+	  				return 2;
+				}
+				//Bind the socket to the address, so we only get packets
+				//recieved on this specific interface. For packet sockets, the
+				//address structure is a struct sockaddr_ll (see the man page
+				//for "packet"), but of course bind takes a struct sockaddr.
+				//Here, we can use the sockaddr we got from getifaddrs (which
+				//we could convert to sockaddr_ll if we needed to)
+				if(bind(packet_socket,tmp->ifa_addr,sizeof(struct sockaddr_ll))==-1){
+	  				perror("bind");
+				}
+			}
+			tempInterface->packet_socket = packet_socket;
+			int index;
+	  		for (i = 0; i < 6;i++){
+		 	 	tempInterface = ((struct sockaddr_ll*) tmp->ifa_addr)->sll_addr[i];
+	  		}
 
-  //loop and recieve packets. We are only looking at one interface,
-  //for the project you will probably want to look at more (to do so,
-  //a good way is to have one socket per interface and use select to
-  //see which ones have data)
-  struct routing_table *rtable = malloc(sizeof(struct routing_table));
-  load_table(&rtable, argv[1]);
-  printf("Ready to recieve now\n");
-  while(1){
-    char buf[1500];
-    struct sockaddr_ll recvaddr;
-    socklen_t recvaddrlen=sizeof(struct sockaddr_ll);
-    //we can use recv, since the addresses are in the packet, but we
-    //use recvfrom because it gives us an easy way to determine if
-    //this packet is incoming or outgoing (when using ETH_P_ALL, we
-    //see packets in both directions. Only outgoing can be seen when
-    //using a packet socket with some specific protocol)
-    int n = recvfrom(packet_socket, buf, 1500,0,(struct sockaddr*)&recvaddr, &recvaddrlen);
-    //ignore outgoing packets (we can't disable some from being sent
-    //by the OS automatically, for example ICMP port unreachable
-    //messages, so we will just ignore them here)
-    if(recvaddr.sll_pkttype==PACKET_OUTGOING)
-      continue;
-    //start processing all others
-    printf("Got a %d byte packet\n", n);
+
+
+
+
+
+
+
+		if(tmp->ifa_addr->sa_family==AF_INET){
+			if (strcmp(tmp->ifa_name, "r1-eth1") == 0)
+			ip_ra = ((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr;
+		}
+    	if(tmp->ifa_addr->sa_family==AF_PACKET){  
+        	printf("Interface: %s\n",tmp->ifa_name);
+      		//create a packet socket on interface r?-eth1
+      		if(!strncmp(&(tmp->ifa_name[3]),"eth1",4)){
+				printf("Creating Socket on interface %s\n",tmp->ifa_name);
+				//create a packet socket
+				//AF_PACKET makes it a packet socket
+				//SOCK_RAW makes it so we get the entire packet
+				//could also use SOCK_DGRAM to cut off link layer header
+				//ETH_P_ALL indicates we want all (upper layer) protocols
+				//we could specify just a specific one
+				packet_socket = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+				if(packet_socket<0){
+	 	 			perror("socket");
+	  				return 2;
+				}
+				//Bind the socket to the address, so we only get packets
+				//recieved on this specific interface. For packet sockets, the
+				//address structure is a struct sockaddr_ll (see the man page
+				//for "packet"), but of course bind takes a struct sockaddr.
+				//Here, we can use the sockaddr we got from getifaddrs (which
+				//we could convert to sockaddr_ll if we needed to)
+				if(bind(packet_socket,tmp->ifa_addr,sizeof(struct sockaddr_ll))==-1){
+	  				perror("bind");
+				}
+				int i;
+	  			for (i = 0; i < 6;i++){
+		 	 		mac[i] = ((struct sockaddr_ll*) tmp->ifa_addr)->sll_addr[i];
+	  			}
+      		}
+    	}
+  	}
+  	//free the interface list when we don't need it anymore
+  	freeifaddrs(ifaddr);
+
+  	//loop and recieve packets. We are only looking at one interface,
+  	//for the project you will probably want to look at more (to do so,
+  	//a good way is to have one socket per interface and use select to
+  	//see which ones have data)
+  	struct routing_table *rtable = malloc(sizeof(struct routing_table));
+  	load_table(&rtable, argv[1]);
+  	printf("Ready to recieve now\n");
+  	while(1){
+  		char buf[1500];
+    	struct sockaddr_ll recvaddr;
+    	socklen_t recvaddrlen=sizeof(struct sockaddr_ll);
+    	//we can use recv, since the addresses are in the packet, but we
+    	//use recvfrom because it gives us an easy way to determine if
+    	//this packet is incoming or outgoing (when using ETH_P_ALL, we
+    	//see packets in both directions. Only outgoing can be seen when
+    	//using a packet socket with some specific protocol)
+    	int n = recvfrom(packet_socket, buf, 1500,0,(struct sockaddr*)&recvaddr, &recvaddrlen);
+    	//ignore outgoing packets (we can't disable some from being sent
+    	//by the OS automatically, for example ICMP port unreachable
+    	//messages, so we will just ignore them here)
+    	if(recvaddr.sll_pkttype==PACKET_OUTGOING)
+      		continue;
+    	//start processing all others
+    	printf("Got a %d byte packet\n", n);
 	
-	int i;
-	for (i = 0; i < n; i++)
-	{
-		if (i > 0) printf(":");
-		printf("%02X", buf[i]);
-	}
-	printf("\n");
+		int i;
+		for (i = 0; i < n; i++){
+			if (i > 0) 
+				printf(":");
+			printf("%02X", buf[i]);
+		}
+		printf("\n");
     
-	struct aarp *request;
+		struct aarp *request;
 
-	char buf2[1500];
-	memcpy(buf2, buf, sizeof(buf));
-	request = ((struct aarp*)&buf);
+		char buf2[1500];
+		memcpy(buf2, buf, sizeof(buf));
+		request = ((struct aarp*)&buf);
 
 	if(ntohs(request->eth_header.ether_type) == ETHERTYPE_ARP){
 		
