@@ -118,10 +118,6 @@ int main(int argc, char **argv){
     //of our own IP addresses
     if(tmp->ifa_addr->sa_family==AF_PACKET){
 	  
-	  int i;
-	  for (i = 0; i < 6;i++){
-		  mac[i] = ((struct sockaddr_ll*) tmp->ifa_addr)->sll_addr[i];
-	  }
       printf("Interface: %s\n",tmp->ifa_name);
       //create a packet socket on interface r?-eth1
       if(!strncmp(&(tmp->ifa_name[3]),"eth1",4)){
@@ -146,6 +142,10 @@ int main(int argc, char **argv){
 	if(bind(packet_socket,tmp->ifa_addr,sizeof(struct sockaddr_ll))==-1){
 	  perror("bind");
 	}
+int i;
+	  for (i = 0; i < 6;i++){
+		  mac[i] = ((struct sockaddr_ll*) tmp->ifa_addr)->sll_addr[i];
+	  }
       }
     }
   }
@@ -209,21 +209,13 @@ int main(int argc, char **argv){
 
 
 		// Copy info to reply.
-		printf("SEG ---------\n");
-		memcpy(reply.eth_header.ether_shost, &mac, ETH_ALEN);
-printf("SEG ---------\n");		
+		memcpy(reply.eth_header.ether_shost, &mac, ETH_ALEN);		
 		memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
-printf("SEG ---------\n");
 		reply.arp_header.ea_hdr.ar_op=htons(ARPOP_REPLY);
-printf("SEG ---------\n");
-		//memcpy(reply.arp_header.arp_sha, tmp, 6);
-printf("SEG ---------\n");
+		memcpy(reply.arp_header.arp_sha, &mac, 6);
 		memcpy(reply.arp_header.arp_spa, request->arp_header.arp_tpa, 4);
-printf("SEG ---------\n");
 		memcpy(reply.arp_header.arp_tha, request->arp_header.arp_sha, ETH_ALEN);
-printf("SEG ---------\n");
 		memcpy(reply.arp_header.arp_tpa, request->arp_header.arp_spa, 4);
-		printf("SEG ---------");
 		
 		// Send the reply packet.	
 		send(packet_socket, &reply, sizeof(reply), 0);
