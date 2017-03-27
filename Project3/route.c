@@ -241,8 +241,8 @@ printf("Interface: %s \n", tempInterface->name);
     		if(recvaddr.sll_pkttype==PACKET_OUTGOING)
       			continue;
 			// Timed out.
-			if(n == -1)
-				continue;
+			//if(n == -1)
+			//	continue;
     		//start processing all others
     		printf("Got a %d byte packet\n", n);
 		
