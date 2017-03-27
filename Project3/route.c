@@ -199,7 +199,7 @@ int main(int argc, char **argv){
 	
 		printf("\n\n%s \n", tempInterface->name);
 		printf("%s \n", ether_ntoa((struct ether_addr*)tempInterface->mac_addrs));
-		printf("%02X \n", tempInterface->ip_addrs);
+		printf("%" PRIu32 "\n", tempInterface->ip_addrs);
 		printf("-----------\n");
 		tempInterface = tempInterface->next;
 	}
