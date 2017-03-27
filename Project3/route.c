@@ -221,6 +221,16 @@ int main(int argc, char **argv){
 		printf("-----------\n");
 		tempInterface = tempInterface->next;
 	}
+	struct routing_table *tempRtable = rtable;
+	while(tempRtable != NULL){
+	
+		printf("Network  : %X \n", tempRtable->network);
+		printf("Prefix   : %d \n", tempRtable->prefix);
+		printf("Hop      : %X \n", tempRtable->hop);
+		printf("Interface: %s \n", tempRtable->interface); 
+		printf("-----------\n");
+		tempRtable = tempRtable->next;
+	}
 
 
 
