@@ -205,7 +205,7 @@ int main(int argc, char **argv){
 
 		// Copy info to reply.
 		printf("SEG ---------\n");
-		memcpy(reply.eth_header.ether_shost, mac.ifa_addr, ETH_ALEN);
+		memcpy(reply.eth_header.ether_shost, mac.ifa_addr->sa_family, ETH_ALEN);
 printf("SEG ---------\n");		
 		memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
 printf("SEG ---------\n");
