@@ -109,6 +109,7 @@ u_int16_t ip_checksum(void* vdata,size_t length) {
 * MAIN
 ****************************************************************************************/
 int main(int argc, char **argv){
+printf("_+_+_+_+_+_+_+_+_+_+_");
 	struct interface *interfaceList;
   	int packet_socket;
  	u_int8_t mac[6];
