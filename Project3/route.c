@@ -103,6 +103,7 @@ u_int16_t ip_checksum(void* vdata,size_t length) {
 int main(int argc, char **argv){
   int packet_socket;
   u_int8_t mac[6];
+  u_int32_t ip_ra;
   //get list of interfaces (actually addresses)
   struct ifaddrs *ifaddr, *tmp;
   if(getifaddrs(&ifaddr)==-1){
@@ -116,6 +117,9 @@ int main(int argc, char **argv){
     //about those for the purpose of enumerating interfaces. We can
     //use the AF_INET addresses in this list for example to get a list
     //of our own IP addresses
+	if(tmp->ifa_addr->sa_family==AF_INET){
+		ip_ra = ((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr;
+	}
     if(tmp->ifa_addr->sa_family==AF_PACKET){
 	  
       printf("Interface: %s\n",tmp->ifa_name);
@@ -213,7 +217,7 @@ int i;
 		memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
 		reply.arp_header.ea_hdr.ar_op=htons(ARPOP_REPLY);
 		memcpy(reply.arp_header.arp_sha, &mac, 6);
-		memcpy(reply.arp_header.arp_spa, request->arp_header.arp_tpa, 4);
+		memcpy(reply.arp_header.arp_spa, &ip_ra, 4);
 		memcpy(reply.arp_header.arp_tha, request->arp_header.arp_sha, ETH_ALEN);
 		memcpy(reply.arp_header.arp_tpa, request->arp_header.arp_spa, 4);
 		
