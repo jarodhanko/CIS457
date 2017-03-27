@@ -202,7 +202,6 @@ int main(int argc, char **argv){
 	printf("-----------\n");
 	while(tempInterface != NULL){
 	
-		printf("\n");
 		printf("Interface: %s \n", tempInterface->name);
 		printf("MAC  addr: %s \n", ether_ntoa((struct ether_addr*)tempInterface->mac_addrs));
 		printf("IP   addr: %02X.%02X.%02X.%02X \n",tempInterface->ip_addrs[0], tempInterface->ip_addrs[1],
@@ -215,109 +214,115 @@ int main(int argc, char **argv){
 
   	printf("Ready to recieve now\n");
   	while(1){
-  		char buf[1500];
-    	struct sockaddr_ll recvaddr;
-    	socklen_t recvaddrlen=sizeof(struct sockaddr_ll);
-    	//we can use recv, since the addresses are in the packet, but we
-    	//use recvfrom because it gives us an easy way to determine if
-    	//this packet is incoming or outgoing (when using ETH_P_ALL, we
-    	//see packets in both directions. Only outgoing can be seen when
-    	//using a packet socket with some specific protocol)
-    	int n = recvfrom(tempInterface->packet_socket, buf, 1500,0,(struct sockaddr*)&recvaddr, &recvaddrlen);
-    	//ignore outgoing packets (we can't disable some from being sent
-    	//by the OS automatically, for example ICMP port unreachable
-    	//messages, so we will just ignore them here)
-    	if(recvaddr.sll_pkttype==PACKET_OUTGOING)
-      		continue;
-    	//start processing all others
-    	printf("Got a %d byte packet\n", n);
+		
+		// Loop through all interfaces for packets.
+		struct interface *tempInterface;		
+		for(tempInterface = interfaceList; tempInterface != NULL; tempInterface = tempInterface->next){		
+
+  			char buf[1500];
+    		struct sockaddr_ll recvaddr;
+    		socklen_t recvaddrlen=sizeof(struct sockaddr_ll);
+    		//we can use recv, since the addresses are in the packet, but we
+    		//use recvfrom because it gives us an easy way to determine if
+    		//this packet is incoming or outgoing (when using ETH_P_ALL, we
+    		//see packets in both directions. Only outgoing can be seen when
+    		//using a packet socket with some specific protocol)
+    		int n = recvfrom(tempInterface->packet_socket, buf, 1500,0,(struct sockaddr*)&recvaddr, &recvaddrlen);
+    		//ignore outgoing packets (we can't disable some from being sent
+    		//by the OS automatically, for example ICMP port unreachable
+    		//messages, so we will just ignore them here)
+    		if(recvaddr.sll_pkttype==PACKET_OUTGOING)
+      			continue;
+    		//start processing all others
+    		printf("Got a %d byte packet\n", n);
+		
+			int i;
+			for (i = 0; i < n; i++){
+				if (i > 0) 
+					printf(":");
+				printf("%02X", buf[i]);
+			}
+			printf("\n");
+   	 
+			struct aarp *request;
+		
+			char buf2[1500];
+			memcpy(buf2, buf, sizeof(buf));
+			request = ((struct aarp*)&buf);
 	
-		int i;
-		for (i = 0; i < n; i++){
-			if (i > 0) 
-				printf(":");
-			printf("%02X", buf[i]);
+			if(ntohs(request->eth_header.ether_type) == ETHERTYPE_ARP){
+		
+				// Print the request contents.	
+				print_ETHERTYPE_ARP(request);
+				printf("ANYTHING");
+
+				// Create reply structure.
+				struct aarp reply = *request;
+	
+				// IS THIS FOR US?
+				//int our_IP = 0;
+				//if (request->eth_header.ether_dhost == our_IP){
+				
+				//}
+
+
+
+				// Copy info to reply.
+				memcpy(reply.eth_header.ether_shost, &mac, ETH_ALEN);		
+				memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
+				reply.arp_header.ea_hdr.ar_op=htons(ARPOP_REPLY);
+				memcpy(reply.arp_header.arp_sha, &mac, 6);
+				memcpy(reply.arp_header.arp_spa, &ip_ra, 4);
+				memcpy(reply.arp_header.arp_tha, request->arp_header.arp_sha, ETH_ALEN);
+				memcpy(reply.arp_header.arp_tpa, request->arp_header.arp_spa, 4);
+		
+				// Send the reply packet.	
+				send(tempInterface->packet_socket, &reply, sizeof(reply), 0);
+
+			}else if(ntohs(request->eth_header.ether_type) == ETHERTYPE_IP){
+				struct iicmp request2;
+				unsigned char *data;
+				request2 = *((struct iicmp*)&buf2);
+				int datalength = ntohs(request2.ip_header.tot_len) - sizeof(request2.ip_header) - 
+																	 sizeof(request2.icmp_header);
+
+				if(datalength > 0){
+					data = malloc(datalength);
+					memcpy(data, buf2 + sizeof(request2), datalength);
+				}
+				printf("\n THE DATA LENGTH IS %lu\n", sizeof(&data));
+				unsigned char tmp3[] = {buf2[26], buf2[27], buf2[28], buf2[29]};
+				unsigned char tmp4[] = {buf2[30], buf2[31], buf2[32], buf2[33]};
+		
+				// Create reply structure.
+				struct iicmp reply;
+
+				// Copy info to reply.
+				memcpy(&reply, &request2, sizeof(request2));
+				memcpy(&reply.eth_header.ether_shost, request2.eth_header.ether_dhost, ETH_ALEN);
+				memcpy(&reply.eth_header.ether_dhost, request2.eth_header.ether_shost, ETH_ALEN);
+				memcpy(&reply.ip_header.daddr, tmp3, 4);
+				memcpy(&reply.ip_header.saddr, tmp4, 4);
+				reply.icmp_header.type = ICMP_ECHOREPLY;
+				reply.icmp_header.checksum = 0;
+				unsigned char ptr[sizeof(reply.icmp_header) + datalength];
+				memcpy(ptr, &reply.icmp_header, sizeof(reply.icmp_header));
+				memcpy(ptr + sizeof(reply.icmp_header), data, datalength);
+				reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
+		
+				// Print the reply contents.
+				//print_ETHERTYPE_IP(reply);		
+	
+				unsigned char result[sizeof(reply) + datalength];
+				memcpy(result, &reply, sizeof(reply));
+				memcpy(result + sizeof(reply), data, datalength);
+		
+				send(tempInterface->packet_socket, &result, sizeof(result), 0);
+			}
 		}
-		printf("\n");
-    
-		struct aarp *request;
-
-		char buf2[1500];
-		memcpy(buf2, buf, sizeof(buf));
-		request = ((struct aarp*)&buf);
-
-	if(ntohs(request->eth_header.ether_type) == ETHERTYPE_ARP){
-		
-		// Print the request contents.	
-		print_ETHERTYPE_ARP(request);
-		printf("ANYTHING");
-
-		// Create reply structure.
-		struct aarp reply = *request;
-
-		// IS THIS FOR US?
-		//int our_IP = 0;
-		//if (request->eth_header.ether_dhost == our_IP){
-			
-		//}
-
-
-
-		// Copy info to reply.
-		memcpy(reply.eth_header.ether_shost, &mac, ETH_ALEN);		
-		memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
-		reply.arp_header.ea_hdr.ar_op=htons(ARPOP_REPLY);
-		memcpy(reply.arp_header.arp_sha, &mac, 6);
-		memcpy(reply.arp_header.arp_spa, &ip_ra, 4);
-		memcpy(reply.arp_header.arp_tha, request->arp_header.arp_sha, ETH_ALEN);
-		memcpy(reply.arp_header.arp_tpa, request->arp_header.arp_spa, 4);
-		
-		// Send the reply packet.	
-		send(tempInterface->packet_socket, &reply, sizeof(reply), 0);
-
-	}else if(ntohs(request->eth_header.ether_type) == ETHERTYPE_IP){
-		struct iicmp request2;
-		unsigned char *data;
-		request2 = *((struct iicmp*)&buf2);
-		int datalength = ntohs(request2.ip_header.tot_len) - sizeof(request2.ip_header) - sizeof(request2.icmp_header);
-
-		if(datalength > 0){
-			data = malloc(datalength);
-			memcpy(data, buf2 + sizeof(request2), datalength);
-		}
-		printf("\n THE DATA LENGTH IS %lu\n", sizeof(&data));
-		unsigned char tmp3[] = {buf2[26], buf2[27], buf2[28], buf2[29]};
-		unsigned char tmp4[] = {buf2[30], buf2[31], buf2[32], buf2[33]};
-		
-		// Create reply structure.
-		struct iicmp reply;
-
-		// Copy info to reply.
-		memcpy(&reply, &request2, sizeof(request2));
-		memcpy(&reply.eth_header.ether_shost, request2.eth_header.ether_dhost, ETH_ALEN);
-		memcpy(&reply.eth_header.ether_dhost, request2.eth_header.ether_shost, ETH_ALEN);
-		memcpy(&reply.ip_header.daddr, tmp3, 4);
-		memcpy(&reply.ip_header.saddr, tmp4, 4);
-		reply.icmp_header.type = ICMP_ECHOREPLY;
-		reply.icmp_header.checksum = 0;
-		unsigned char ptr[sizeof(reply.icmp_header) + datalength];
-		memcpy(ptr, &reply.icmp_header, sizeof(reply.icmp_header));
-		memcpy(ptr + sizeof(reply.icmp_header), data, datalength);
-		reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
-		
-		// Print the reply contents.
-		//print_ETHERTYPE_IP(reply);		
-
-		unsigned char result[sizeof(reply) + datalength];
-		memcpy(result, &reply, sizeof(reply));
-		memcpy(result + sizeof(reply), data, datalength);
-		
-		send(tempInterface->packet_socket, &result, sizeof(result), 0);
-	}
-
-  }
-  //exit
-  return 0;
+  	}
+  	// Exit main
+  	return 0;
 }
 
 
