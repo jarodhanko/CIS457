@@ -102,9 +102,9 @@ u_int16_t ip_checksum(void* vdata,size_t length) {
 ****************************************************************************************/
 int main(int argc, char **argv){
   int packet_socket;
+  u_int8_t mac[6];
   //get list of interfaces (actually addresses)
   struct ifaddrs *ifaddr, *tmp;
-	int mac = 0;
   if(getifaddrs(&ifaddr)==-1){
     perror("getifaddrs");
     return 1;
@@ -117,7 +117,11 @@ int main(int argc, char **argv){
     //use the AF_INET addresses in this list for example to get a list
     //of our own IP addresses
     if(tmp->ifa_addr->sa_family==AF_PACKET){
-	  mac = tmp->ifa_addr->sa_family;
+	  
+	  int i;
+	  for (i = 0; i < 6;i++){
+		  mac[i] = ((struct sockaddr_ll*) tmp->ifa_addr)->sll_addr[i];
+	  }
       printf("Interface: %s\n",tmp->ifa_name);
       //create a packet socket on interface r?-eth1
       if(!strncmp(&(tmp->ifa_name[3]),"eth1",4)){
