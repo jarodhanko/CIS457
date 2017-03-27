@@ -229,11 +229,11 @@ int main(int argc, char **argv){
     		//this packet is incoming or outgoing (when using ETH_P_ALL, we
     		//see packets in both directions. Only outgoing can be seen when
     		//using a packet socket with some specific protocol)
-			printf("Interface: %s \n", tempInterface->name);
-			printf("MAC  addr: %s \n", ether_ntoa((struct ether_addr*)tempInterface->mac_addrs));
-			printf("IP   addr: %02X.%02X.%02X.%02X \n",tempInterface->ip_addrs[0], tempInterface->ip_addrs[1],
+			printf("--Interface: %s \n", tempInterface->name);
+			printf("--MAC  addr: %s \n", ether_ntoa((struct ether_addr*)tempInterface->mac_addrs));
+			printf("--IP   addr: %02X.%02X.%02X.%02X \n",tempInterface->ip_addrs[0], tempInterface->ip_addrs[1],
 										  			 tempInterface->ip_addrs[2], tempInterface->ip_addrs[3]);
-			printf("sock_addr: %d \n", tempInterface->packet_socket);
+			printf("--sock_addr: %d \n", tempInterface->packet_socket);
 			//if (tempInterface->next == NULL){
 			//	printf("NEXT IS NULL");
 			//}
