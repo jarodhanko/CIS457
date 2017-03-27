@@ -103,7 +103,7 @@ u_int16_t ip_checksum(void* vdata,size_t length) {
 int main(int argc, char **argv){
   int packet_socket;
   //get list of interfaces (actually addresses)
-  struct ifaddrs *ifaddr, *tmp;
+  struct ifaddrs *ifaddr, *tmp, mac;
   if(getifaddrs(&ifaddr)==-1){
     perror("getifaddrs");
     return 1;
@@ -116,6 +116,7 @@ int main(int argc, char **argv){
     //use the AF_INET addresses in this list for example to get a list
     //of our own IP addresses
     if(tmp->ifa_addr->sa_family==AF_PACKET){
+	  mac = *tmp;
       printf("Interface: %s\n",tmp->ifa_name);
       //create a packet socket on interface r?-eth1
       if(!strncmp(&(tmp->ifa_name[3]),"eth1",4)){
@@ -200,27 +201,11 @@ int main(int argc, char **argv){
 			
 		//}
 
-		int fd;
-    struct ifreq ifr;
-    char *iface = "eth0";
-    unsigned char *mac;
-     
-    fd = socket(AF_INET, SOCK_DGRAM, 0);
- 
-    ifr.ifr_addr.sa_family = AF_INET;
-    strncpy(ifr.ifr_name , iface , IFNAMSIZ-1);
- 
-    ioctl(fd, SIOCGIFHWADDR, &ifr);
- 
-    close(fd);
-     
-    mac = (unsigned char *)ifr.ifr_hwaddr.sa_data;
-
 
 
 		// Copy info to reply.
 		printf("SEG ---------\n");
-		memcpy(reply.eth_header.ether_shost, &mac, ETH_ALEN);
+		memcpy(reply.eth_header.ether_shost, mac.ifa_addr, ETH_ALEN);
 printf("SEG ---------\n");		
 		memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
 printf("SEG ---------\n");
