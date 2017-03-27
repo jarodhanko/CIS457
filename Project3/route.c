@@ -103,7 +103,8 @@ u_int16_t ip_checksum(void* vdata,size_t length) {
 int main(int argc, char **argv){
   int packet_socket;
   //get list of interfaces (actually addresses)
-  struct ifaddrs *ifaddr, *tmp, mac;
+  struct ifaddrs *ifaddr, *tmp;
+	int mac = 0;
   if(getifaddrs(&ifaddr)==-1){
     perror("getifaddrs");
     return 1;
@@ -116,7 +117,7 @@ int main(int argc, char **argv){
     //use the AF_INET addresses in this list for example to get a list
     //of our own IP addresses
     if(tmp->ifa_addr->sa_family==AF_PACKET){
-	  mac = *tmp;
+	  mac = tmp->ifa_addr->sa_family;
       printf("Interface: %s\n",tmp->ifa_name);
       //create a packet socket on interface r?-eth1
       if(!strncmp(&(tmp->ifa_name[3]),"eth1",4)){
@@ -205,7 +206,7 @@ int main(int argc, char **argv){
 
 		// Copy info to reply.
 		printf("SEG ---------\n");
-		memcpy(reply.eth_header.ether_shost, mac.ifa_addr->sa_family, ETH_ALEN);
+		memcpy(reply.eth_header.ether_shost, &mac, ETH_ALEN);
 printf("SEG ---------\n");		
 		memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
 printf("SEG ---------\n");
