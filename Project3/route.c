@@ -241,27 +241,21 @@ printf("Interface: %s \n", tempInterface->name);
     		if(recvaddr.sll_pkttype==PACKET_OUTGOING)
       			continue;
 			// Timed out.
-			//if(n == -1)
-			//	continue;
+			if(n == -1)
+				continue;
     		//start processing all others
     		printf("Got a %d byte packet\n", n);
 		
-			int i;
-			for (i = 0; i < n; i++){
-				if (i > 0) 
-					printf(":");
-				printf("%02X", buf[i]);
-			}
-			printf("\n");
+			
    	 
-			struct aarp *request;
-		
-			char buf2[1500];
-			memcpy(buf2, buf, sizeof(buf));
-			request = ((struct aarp*)&buf);
+			
 	
-			if(ntohs(request->eth_header.ether_type) == ETHERTYPE_ARP){
+			if(ntohs(recvaddr.sll_protocol) == ETH_P_ARP){
+				struct aarp *request;
 		
+				char buf2[1500];
+				memcpy(buf2, buf, sizeof(buf));
+				request = ((struct aarp*)&buf);
 				// Print the request contents.	
 				print_ETHERTYPE_ARP(request);
 				printf("ANYTHING");
@@ -289,7 +283,12 @@ printf("Interface: %s \n", tempInterface->name);
 				// Send the reply packet.	
 				send(tempInterface->packet_socket, &reply, sizeof(reply), 0);
 
-			}else if(ntohs(request->eth_header.ether_type) == ETHERTYPE_IP){
+			}else if(ntohs(recvaddr.sll_protocol) == ETH_P_IP){
+				
+		
+				char buf2[1500];
+				memcpy(buf2, buf, sizeof(buf));
+		
 				struct iicmp request2;
 				unsigned char *data;
 				request2 = *((struct iicmp*)&buf2);
