@@ -233,6 +233,9 @@ int main(int argc, char **argv){
     		//messages, so we will just ignore them here)
     		if(recvaddr.sll_pkttype==PACKET_OUTGOING)
       			continue;
+			// Timed out.
+			if(n == -1)
+				continue;
     		//start processing all others
     		printf("Got a %d byte packet\n", n);
 		
