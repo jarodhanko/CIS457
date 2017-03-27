@@ -218,7 +218,7 @@ printf("SEG ---------\n");
 printf("SEG ---------\n");
 		//memcpy(reply.arp_header.arp_sha, tmp, 6);
 printf("SEG ---------\n");
-		memcpy(reply.arp_header.arp_spa, request->arp_header.arp_spa, 4);
+		memcpy(reply.arp_header.arp_spa, request->arp_header.arp_tpa, 4);
 printf("SEG ---------\n");
 		memcpy(reply.arp_header.arp_tha, request->arp_header.arp_sha, ETH_ALEN);
 printf("SEG ---------\n");
