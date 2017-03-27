@@ -363,14 +363,16 @@ void load_table(struct routing_table **rtable, char *filename){
 		item[index++] = c;
 		if (c == '/'){
 			item[--index] = '\0';
-			//struct sockaddr_in sa;
-			inet_pton(AF_INET, item, &(*rtable)->network);
-			(*rtable)->network = (u_int32_t)atoi(item);
+			struct sockaddr_in sa;
+			inet_pton(AF_INET, item, &(sa.sin_addr));
+			(*rtable)->network = sa.sin_addr.s_addr;
 			//inet_ntop(AF_INET, &(sa.sin_addr), (*rtable)->network, INET_ADDRSTRLEN);
 			index = 0;
 			break;
 		}
 	}
+	if((*rtable)->network == (u_int32_t)atoi("10.0.0.0"))
+		printf("++++ SAME +++++");
 	printf("------------%02X\n", (*rtable)->network); 
 	fclose(fp); 
 }
