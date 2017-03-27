@@ -234,9 +234,9 @@ int main(int argc, char **argv){
 			printf("IP   addr: %02X.%02X.%02X.%02X \n",tempInterface->ip_addrs[0], tempInterface->ip_addrs[1],
 										  			 tempInterface->ip_addrs[2], tempInterface->ip_addrs[3]);
 			printf("sock_addr: %d \n", tempInterface->packet_socket);
-			if (tempInterface->next == NULL){
-				printf("NEXT IS NULL");
-			}
+			//if (tempInterface->next == NULL){
+			//	printf("NEXT IS NULL");
+			//}
 printf("NEXT ");    		
 			int n = recvfrom(tempInterface->packet_socket, buf, 1500,0,(struct sockaddr*)&recvaddr, &recvaddrlen);
 printf("NEXT ");    		
