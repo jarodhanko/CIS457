@@ -237,15 +237,15 @@ int main(int argc, char **argv){
 			//if (tempInterface->next == NULL){
 			//	printf("NEXT IS NULL");
 			//}
-printf("NEXT ");    		
+printf("NEXT \n");    		
 			int n = recvfrom(tempInterface->packet_socket, buf, 1500,0,(struct sockaddr*)&recvaddr, &recvaddrlen);
-printf("NEXT ");    		
+printf("NEXT \n");    		
 			//ignore outgoing packets (we can't disable some from being sent
     		//by the OS automatically, for example ICMP port unreachable
     		//messages, so we will just ignore them here)
     		if(recvaddr.sll_pkttype==PACKET_OUTGOING)
       			continue;
-printf("NEXT ");
+printf("NEXT \n");
 			// Timed out.
 			if(n == -1){
 				continue;
