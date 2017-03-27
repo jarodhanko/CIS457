@@ -135,14 +135,13 @@ printf("_+_+_+_+_+_+_+_+_+_+_");
 			// Look to see if we already have the interface.
 			struct interface *tempInterface, *prevInterface = NULL;
 			int haveInterface = 0;
-			tempInterface = interfaceList;
-			while(tempInterface != NULL){
+			for(tempInterface = interfaceList; tempInterface != NULL; tempInterface = tempInterface->next){
+			
 				if (strcmp(tempInterface->name, tmp->ifa_name)==0){
 					haveInterface = 1;
 					break;
 				}
-				prevInterface->next = tempInterface;
-				tempInterface = tempInterface->next;
+				prevInterface = tempInterface;
 			}
 printf("_+_+_+_+_+_+_+_+_+_+_");
 			if (!haveInterface){
