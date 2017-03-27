@@ -21,6 +21,7 @@
 #include <sys/ioctl.h>
 #include <net/if.h>   //ifreq
 #include <unistd.h>   //close
+#include <netinet/ether.h>
 
 
 /* STRUCTS **/
@@ -109,18 +110,15 @@ u_int16_t ip_checksum(void* vdata,size_t length) {
 * MAIN
 ****************************************************************************************/
 int main(int argc, char **argv){
-printf("_+_+_+_+_+_+_+_+_+_+_");
   	int packet_socket;
  	u_int8_t mac[6];
   	u_int32_t ip_ra;
-printf("_+_+_+_+_+_+_+_+_+_+_");
 	//get list of interfaces (actually addresses)
   	struct ifaddrs *ifaddr, *tmp;
   	if(getifaddrs(&ifaddr)==-1){
     	perror("getifaddrs");
     	return 1;
   	}
-printf("_+_+_+_+_+_+_+_+_+_+_");
   	//have the list, loop over the list
   	for(tmp = ifaddr; tmp!=NULL; tmp=tmp->ifa_next){
     	//Check if this is a packet address, there will be one per
@@ -130,8 +128,7 @@ printf("_+_+_+_+_+_+_+_+_+_+_");
     	//of our own IP addresses
 		
 		// All the eth-# interfaces.
-		if (strcmp(tmp->ifa_name, "lo") != 0){
-printf("_+_+_+_+_+_+_+_+_+_+_");		
+		if (strcmp(tmp->ifa_name, "lo") != 0){	
 			// Look to see if we already have the interface.
 			struct interface *tempInterface, *prevInterface = NULL;
 			int haveInterface = 0;
@@ -143,7 +140,6 @@ printf("_+_+_+_+_+_+_+_+_+_+_");
 				}
 				prevInterface = tempInterface;
 			}
-printf("_+_+_+_+_+_+_+_+_+_+_");
 			if (!haveInterface){
 				tempInterface = malloc(sizeof(struct interface));
 				tempInterface->name = tmp->ifa_name;
@@ -155,7 +151,6 @@ printf("_+_+_+_+_+_+_+_+_+_+_");
 					prevInterface->next = tempInterface;
 				}
 			}
-printf("_+_+_+_+_+_+_+_+_+_+_");
 			if (tmp->ifa_addr->sa_family == AF_INET){
 				tempInterface->ip_addrs = ((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr;
 			}
@@ -171,7 +166,6 @@ printf("_+_+_+_+_+_+_+_+_+_+_");
 	 	 			perror("socket");
 	  				return 2;
 				}
-printf("_+_+_+_+_+_+_+_+_+_+_");
 				//Bind the socket to the address, so we only get packets
 				//recieved on this specific interface. For packet sockets, the
 				//address structure is a struct sockaddr_ll (see the man page
@@ -188,7 +182,6 @@ printf("_+_+_+_+_+_+_+_+_+_+_");
 		 		 	tempInterface->mac_addrs[index] = ((struct sockaddr_ll*) tmp->ifa_addr)->sll_addr[index];
 	  			}
 			}
-printf("_+_+_+_+_+_+_+_+_+_+_");
       	}
   	}
   	//free the interface list when we don't need it anymore
@@ -200,6 +193,20 @@ printf("_+_+_+_+_+_+_+_+_+_+_");
   	//see which ones have data)
   	struct routing_table *rtable = malloc(sizeof(struct routing_table));
   	load_table(&rtable, argv[1]);
+
+	struct interface *tempInterface = interfaceList;
+	while(tempInterface != NULL){
+	
+		printf("\n\n%s \n", tempInterface->name);
+		printf("%s \n", ether_ntoa((struct ether_addr*)tempInterface->mac_addrs));
+		printf("%02X \n", tempInterface->ip_addrs);
+		printf("-----------\n");
+		tempInterface = tempInterface->next;
+	}
+
+	printf("FINISHED");
+
+
   	printf("Ready to recieve now\n");
   	while(1){
   		char buf[1500];
