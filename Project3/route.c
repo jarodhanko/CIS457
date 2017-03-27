@@ -129,7 +129,7 @@ int main(int argc, char **argv){
 		// All the eth-# interfaces.
 		if (strcmp(tmp->ifa_name, "lo") != 0){	
 			// Look to see if we already have the interface.
-			struct interface *tempInterface, *prevInterface = NULL;
+			struct interface *tempInterface, *prevInterface;
 			int haveInterface = 0;
 			for(tempInterface = interfaceList; tempInterface != NULL; tempInterface = tempInterface->next){
 			
