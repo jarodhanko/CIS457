@@ -110,8 +110,7 @@ u_int16_t ip_checksum(void* vdata,size_t length) {
 * MAIN
 ****************************************************************************************/
 int main(int argc, char **argv){
- 	u_int8_t mac[6];
-  	u_int32_t ip_ra;
+ 	
 	//get list of interfaces (actually addresses)
   	struct ifaddrs *ifaddr, *tmp;
   	if(getifaddrs(&ifaddr)==-1){
@@ -237,23 +236,15 @@ int main(int argc, char **argv){
     		//this packet is incoming or outgoing (when using ETH_P_ALL, we
     		//see packets in both directions. Only outgoing can be seen when
     		//using a packet socket with some specific protocol)
-			printf("--Interface: %s \n", tempInterface->name);
-			printf("--MAC  addr: %s \n", ether_ntoa((struct ether_addr*)tempInterface->mac_addrs));
-			printf("--IP   addr: %02X.%02X.%02X.%02X \n",tempInterface->ip_addrs[0], tempInterface->ip_addrs[1],
-										  			 tempInterface->ip_addrs[2], tempInterface->ip_addrs[3]);
-			printf("--sock_addr: %d \n", tempInterface->packet_socket);
-			//if (tempInterface->next == NULL){
-			//	printf("NEXT IS NULL");
-			//}
-printf("NEXT \n");    		
+   		
 			int n = recvfrom(tempInterface->packet_socket, buf, 1500,0,(struct sockaddr*)&recvaddr, &recvaddrlen);
-printf("NEXT \n");    		
+ 		
 			//ignore outgoing packets (we can't disable some from being sent
     		//by the OS automatically, for example ICMP port unreachable
     		//messages, so we will just ignore them here)
     		if(recvaddr.sll_pkttype==PACKET_OUTGOING)
       			continue;
-printf("NEXT \n");
+
 			// Timed out.
 			if(n == -1){
 				continue;
@@ -287,11 +278,11 @@ printf("NEXT \n");
 
 
 				// Copy info to reply.
-				memcpy(reply.eth_header.ether_shost, &mac, ETH_ALEN);		
+				memcpy(reply.eth_header.ether_shost, tempInterface->mac_addrs, ETH_ALEN);		
 				memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
 				reply.arp_header.ea_hdr.ar_op=htons(ARPOP_REPLY);
-				memcpy(reply.arp_header.arp_sha, &mac, 6);
-				memcpy(reply.arp_header.arp_spa, &ip_ra, 4);
+				memcpy(reply.arp_header.arp_sha, tempInterface->mac_addrs, 6);
+				memcpy(reply.arp_header.arp_spa, tempInterface->ip_addrs, 4);
 				memcpy(reply.arp_header.arp_tha, request->arp_header.arp_sha, ETH_ALEN);
 				memcpy(reply.arp_header.arp_tpa, request->arp_header.arp_spa, 4);
 		
