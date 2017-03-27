@@ -50,7 +50,7 @@ struct interface {
 	int packet_socket;
 	struct interface *next;
 };
-
+struct interface *interfaceList;
 
 
 
@@ -110,7 +110,6 @@ u_int16_t ip_checksum(void* vdata,size_t length) {
 ****************************************************************************************/
 int main(int argc, char **argv){
 printf("_+_+_+_+_+_+_+_+_+_+_");
-	struct interface *interfaceList;
   	int packet_socket;
  	u_int8_t mac[6];
   	u_int32_t ip_ra;
