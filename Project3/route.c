@@ -255,7 +255,7 @@ printf("NEXT \n");
       			continue;
 printf("NEXT \n");
 			// Timed out.
-			if(n != -1){
+			if(n == -1){
 				continue;
 			}
     		//start processing all others
@@ -265,7 +265,7 @@ printf("NEXT \n");
    	 
 			
 	
-			if(ntohs(recvaddr.sll_protocol) == ETH_P_ARP){
+			if(ntohs(recvaddr.sll_protocol) == ETH_P_ARP && n > -1){
 				struct aarp *request;
 		
 				char buf2[1500];
@@ -298,7 +298,7 @@ printf("NEXT \n");
 				// Send the reply packet.	
 				send(tempInterface->packet_socket, &reply, sizeof(reply), 0);
 
-			}else if(ntohs(recvaddr.sll_protocol) == ETH_P_IP){
+			}else if(ntohs(recvaddr.sll_protocol) == ETH_P_IP && n > -1){
 				
 		
 				char buf2[1500];
