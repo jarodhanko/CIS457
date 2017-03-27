@@ -47,7 +47,7 @@ struct routing_table {
 struct interface {
 	char *name;
 	u_int8_t mac_addrs[6];
-	uint32_t ip_addrs;
+	u_int8_t ip_addrs[4];
 	int packet_socket;
 	struct interface *next;
 };
@@ -152,7 +152,13 @@ int main(int argc, char **argv){
 				}
 			}
 			if (tmp->ifa_addr->sa_family == AF_INET){
-				tempInterface->ip_addrs = ntohs(((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr);
+				//tempInterface->ip_addrs = ((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr;
+				//u_int32_t temp = ((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr;
+				//tempInterface->ip_addrs[0] = (temp & 0x000000ff);
+				//tempInterface->ip_addrs[1] = (temp & 0x000000ff);
+				//tempInterface->ip_addrs[2] = (temp & 0x000000ff);
+				//tempInterface->ip_addrs[3] = (temp & 0x000000ff); 
+				memcpy(tempInterface->ip_addrs, &((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr, sizeof(((struct sockaddr_in*) tmp->ifa_addr)->sin_addr.s_addr));           			
 			}
 			else if (tmp->ifa_addr->sa_family == AF_PACKET){
 				//create a packet socket
@@ -199,7 +205,8 @@ int main(int argc, char **argv){
 	
 		printf("\n\n%s \n", tempInterface->name);
 		printf("%s \n", ether_ntoa((struct ether_addr*)tempInterface->mac_addrs));
-		printf("%" PRIu32 "\n", tempInterface->ip_addrs);
+		printf("%02X.%02X.%02X.%02X \n\n",tempInterface->ip_addrs[0], tempInterface->ip_addrs[1],
+										  tempInterface->ip_addrs[2], tempInterface->ip_addrs[3]);
 		printf("-----------\n");
 		tempInterface = tempInterface->next;
 	}
