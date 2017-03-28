@@ -372,8 +372,8 @@ void load_table(struct routing_table **rtable, char *filename){
 	(*rtable)->next = NULL;
 	struct routing_table *tempRtable, *tmpRtable, *prevRT;
 	tempRtable = NULL;
-	int first = 1;
-	tempRtable = (*rtable);
+	int dothing = 1;
+	//tempRtable = (*rtable);
 	//tempRtable = malloc(sizeof(struct routing_table));
 	tmpRtable = NULL;
 	int caseNum = 0;
@@ -382,8 +382,11 @@ void load_table(struct routing_table **rtable, char *filename){
 	int index = 0;
 	char c;
 	while ((c = fgetc(fp)) != EOF){
-
-		
+		//if(dothing == 1){		
+		//	for(tempRtable = (*rtable); tmpRtable != NULL; tmpRtable = tmpRtable->next){
+		//		prevRT = tmpRtable;
+		//	}
+		//}
 
 
 		item[index++] = c;
@@ -432,7 +435,7 @@ void load_table(struct routing_table **rtable, char *filename){
 
 			
 			for(tempRtable = (*rtable); tmpRtable != NULL; tmpRtable = tmpRtable->next){
-				prevRT = tmpRtable;
+				prevRT = tempRtable;
 			}
 			//if(first == 1){
 			//	(*rtable) = tempRtable;
