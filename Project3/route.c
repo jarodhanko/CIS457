@@ -276,7 +276,7 @@ int main(int argc, char **argv){
    	 		struct aarp *tempArp = ((struct aarp*)&buf);
 			struct iicmp *tempIcmp = ((struct iicmp*)&buf);
 			
-	
+			//limit based on mac address and ip address
 			if((ntohs(recvaddr.sll_protocol) == ETH_P_ARP) && n > -1 && tempArp->arp_header.ea_hdr.ar_pro == ARPOP_REQUEST){
 				struct aarp *request;
 		
@@ -380,7 +380,8 @@ int main(int argc, char **argv){
 							memcpy(request->arp_header.arp_sha, tempInterface->mac_addrs, 6); //NOTE
 							memcpy(request->arp_header.arp_spa, tempInterface->ip_addrs, 4);
 							memcpy(request->arp_header.arp_tha, &broadcast, 6);
-							memcpy(request->arp_header.arp_tpa,&iip->ip_header.daddr,4);						
+							memcpy(request->arp_header.arp_tpa,&iip->ip_header.daddr,4);		
+							printf("IPADDR: %s", inet_ntoa(*((struct in_addr*) &iip->ip_header.daddr)));				
 						skip = 1;
 						break;					
 					}
