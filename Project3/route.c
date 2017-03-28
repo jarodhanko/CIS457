@@ -372,7 +372,7 @@ int main(int argc, char **argv){
 					memcpy(chars, &tempRtable->network, 4);
 					if((tempRtable->prefix == 24 && 
 						(tempRtable->network >> 8) | 
-						(iip->ip_header.daddr >> 8)) == 0){	
+						(ntonl(iip->ip_header.daddr) >> 8)) == 0){	
 						struct interface *iList = interfaceList;
 						while(iList != NULL){
 							if(strcmp(iList->name, tempRtable->interface) == 0){									
@@ -412,7 +412,7 @@ int main(int argc, char **argv){
 					memcpy(chars, &tempRtable->network, 4);
 					if((tempRtable->prefix == 16 && 
 						(tempRtable->network >> 16) | 
-						(iip->ip_header.daddr >> 16)) == 0){	
+						(ntohl(iip->ip_header.daddr) >> 16)) == 0){	
 						struct interface *iList = interfaceList;
 						while(iList != NULL){
 							if(strcmp(iList->name, tempRtable->interface) == 0){									
@@ -423,6 +423,7 @@ int main(int argc, char **argv){
 								memcpy(request->eth_header.ether_dhost, &broadcast, 6);
 								request->arp_header.ea_hdr.ar_hrd = htons(ARPHRD_ETHER);
 								request->arp_header.ea_hdr.ar_pro = htons(0x800);
+								send(iList->packet_socket, request, sizeof(struct aarp), 0);	
 								request->arp_header.ea_hdr.ar_hln = sizeof(iList->mac_addrs); //6
 								request->arp_header.ea_hdr.ar_pln = sizeof(iList->ip_addrs);
 								request->arp_header.ea_hdr.ar_op = htons(ARPOP_REQUEST);
