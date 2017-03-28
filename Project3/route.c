@@ -226,10 +226,10 @@ int main(int argc, char **argv){
 		printf("NO TABLE");
 	while(tempRtable != NULL){
 	
-		printf("Network  : %X \n", tempRtable->network);
-		printf("Prefix   : %d \n", tempRtable->prefix);
-		printf("Hop      : %X \n", tempRtable->hop);
-		printf("Interface: %s \n", tempRtable->interface); 
+		printf("Network  : %02X \n", tempRtable->network);
+		printf("Prefix   : %d   \n", tempRtable->prefix);
+		printf("Hop      : %02X \n", tempRtable->hop);
+		printf("Interface: %s   \n", tempRtable->interface); 
 		printf("-----------\n");
 		tempRtable = tempRtable->next;
 	}
@@ -433,8 +433,11 @@ void load_table(struct routing_table **rtable, char *filename){
 			if(tmpRtable == NULL)
 				tmpRtable = tempRtable;
 			else{
-				for(prevRT = tmpRtable; prevRT != NULL; prevRT = prevRT->next){
-
+				for(prevRT = tmpRtable; prevRT->next != NULL; prevRT = prevRT->next){
+					if(prevRT->next != NULL){
+						prevRT->next = tempRtable;
+						break;
+					}
 				}
 				prevRT = tempRtable;	
 			}
