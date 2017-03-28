@@ -370,9 +370,9 @@ int main(int argc, char **argv){
 				while(tempRtable != NULL){	
 					char chars[4];
 					memcpy(chars, &tempRtable->network, 4);
-					if(tempRtable->prefix == 24 && 
+					if((tempRtable->prefix == 24 && 
 						(tempRtable->network >> 8) | 
-						(ntohl(iip->ip_header.daddr) >> 8) == 0){	
+						(iip->ip_header.daddr >> 8)) == 0){	
 						struct interface *iList = interfaceList;
 						while(iList != NULL){
 							if(strcmp(iList->name, tempRtable->interface) == 0){									
@@ -410,9 +410,9 @@ int main(int argc, char **argv){
 					while(tempRtable != NULL){	
 					char chars[4];
 					memcpy(chars, &tempRtable->network, 4);
-					if(tempRtable->prefix == 16 && 
+					if((tempRtable->prefix == 16 && 
 						(tempRtable->network >> 16) | 
-						(ntohl(iip->ip_header.daddr) >> 16) == 0){	
+						(iip->ip_header.daddr >> 16)) == 0){	
 						struct interface *iList = interfaceList;
 						while(iList != NULL){
 							if(strcmp(iList->name, tempRtable->interface) == 0){									
