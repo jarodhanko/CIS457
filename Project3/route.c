@@ -371,7 +371,7 @@ void load_table(struct routing_table **rtable, char *filename){
 	
 	(*rtable)->next = NULL;
 	struct routing_table *tempRtable, *tmpRtable = NULL;
-	tempRtable = (*rtable);
+	tempRtable = malloc(sizeof(struct routing_table));
 	
 	int caseNum = 0;
 	int i;
@@ -398,7 +398,7 @@ void load_table(struct routing_table **rtable, char *filename){
 			if(caseNum == 1){  		// Prefix
 				printf("NEW PREFIX\n");
 				item[--index] = '\0';
-				(*rtable)->network = atoi(item);
+				(*rtable)->prefix = atoi(item);
 				index = 0;
 				caseNum++;
 			}
@@ -406,9 +406,9 @@ void load_table(struct routing_table **rtable, char *filename){
 				printf("NEW HOP\n");
 				item[--index] = '\0';
 				if(item[--index] == '-')
-					(*rtable)->network = -1;
+					(*rtable)->hop = -1;
 				else 
-					(*rtable)->network = (u_int32_t)atoi(item);
+					(*rtable)->hop = (u_int32_t)atoi(item);
 				index = 0;
 				caseNum++;
 			}
@@ -416,19 +416,21 @@ void load_table(struct routing_table **rtable, char *filename){
 		else if (c == '\n' || c == EOF){		 // Interface
 			printf("NEW LINE\n");
 			item[--index] = '\0';
-			memcpy(&tempRtable->network, item, 8);
+			memcpy(&tempRtable->interface, item, 8);
 			index = 0;
 			if ((*rtable) == NULL)
 				(*rtable) = tempRtable;
 			else {
 			}
 			(*rtable)->next = NULL;
-			//tmpRtable = tempRtable;
+			tmpRtable = tempRtable;
+			tempRtable = tempRtable->next;
 			caseNum = 0;
 		}
 	}
 	
-
+	(*rtable) = tmpRtable;
+	free(tempRtable);
 	fclose(fp); 
 }
 
