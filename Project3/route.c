@@ -231,7 +231,6 @@ int main(int argc, char **argv){
 		printf("NO TABLE");
 	while(tempRtable != NULL){	
 		printf("Network  : %s \n", inet_ntoa(*((struct in_addr*)&tempRtable->network)));
-		printf("Prefix   : %u \n", inet_ntoa(*((struct in_addr*)&tempRtable->prefix)));
 		printf("Prefix   : %d \n", tempRtable->prefix);
 		printf("Hop      : %s \n", inet_ntoa(*((struct in_addr*)&tempRtable->hop)));
 		printf("Interface: %s \n", tempRtable->interface); 
@@ -390,7 +389,7 @@ int main(int argc, char **argv){
 								memcpy(request->arp_header.arp_sha, iList->mac_addrs, 6); //NOTE
 								memcpy(request->arp_header.arp_spa, iList->ip_addrs, 4);
 								memcpy(request->arp_header.arp_tha, &broadcast2, 6);
-								if(tempRtable->hop > 0){
+								if(tempRtable->hop < 0xffffffff){
 										memcpy(request->arp_header.arp_tpa, &tempRtable->hop, 4);
 									}else{						
 										memcpy(request->arp_header.arp_tpa,&iip->ip_header.daddr,4);						
@@ -430,7 +429,7 @@ int main(int argc, char **argv){
 									memcpy(request->arp_header.arp_sha, iList->mac_addrs, 6); //NOTE
 									memcpy(request->arp_header.arp_spa, iList->ip_addrs, 4);
 									memcpy(request->arp_header.arp_tha, &broadcast2, 6);
-									if(tempRtable->hop > 0){
+									if(tempRtable->hop < 0xffffffff){
 										memcpy(request->arp_header.arp_tpa, &tempRtable->hop, 4);
 									}else{						
 										memcpy(request->arp_header.arp_tpa,&iip->ip_header.daddr,4);						
