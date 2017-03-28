@@ -280,6 +280,8 @@ int main(int argc, char **argv){
 
 			printf("ARP? %d \n", ntohs(tempArp->arp_header.ea_hdr.ar_op)); 
 			printf("ICMP? %d \n", tempIcmp->eth_header.ether_type);
+
+			u_int32_t interfaceIP = tempInterface->ip_addrs[0] | (tempInterface->ip_addrs[1] << 8) | (tempInterface->ip_addrs[2] << 16) | (tempInterface->ip_addrs[3] << 24);
 			
 			//limit based on mac address and ip address
 			if((ntohs(recvaddr.sll_protocol) == ETH_P_ARP) && n > -1 && ntohs(tempArp->arp_header.ea_hdr.ar_op) == ARPOP_REQUEST){
@@ -314,7 +316,7 @@ int main(int argc, char **argv){
 				send(tempInterface->packet_socket, &reply, sizeof(reply), 0);
 				printf("Sent ARP reply");
 
-			}else if((ntohs(recvaddr.sll_protocol) == ETH_P_IP) && n > -1 && tempIcmp->icmp_header.type == ICMP_ECHO){
+			}else if((ntohs(recvaddr.sll_protocol) == ETH_P_IP) && n > -1 && tempIcmp->icmp_header.type == ICMP_ECHO && tempIcmp->ip_header.daddr == interfaceIP){
 				
 		
 				char buf2[1500];
