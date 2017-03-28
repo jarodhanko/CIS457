@@ -226,7 +226,7 @@ int main(int argc, char **argv){
 		printf("NO TABLE");
 	while(tempRtable != NULL){
 	
-		printf("Network  : %02X \n", tempRtable->network);
+		printf("Network  : %s \n", inet_ntoa(*((struct in_addr*)&tempRtable->network)));
 		printf("Prefix   : %d   \n", tempRtable->prefix);
 		printf("Hop      : %02X \n", tempRtable->hop);
 		printf("Interface: %s   \n", tempRtable->interface); 
