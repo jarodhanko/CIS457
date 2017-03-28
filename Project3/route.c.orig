@@ -224,10 +224,14 @@ int main(int argc, char **argv){
 	struct routing_table *tempRtable = rtable;
 	if(tempRtable == NULL)
 		printf("NO TABLE");
-	while(tempRtable != NULL){	
+	while(tempRtable != NULL){
+	
 		printf("Network  : %s \n", inet_ntoa(*((struct in_addr*)&tempRtable->network)));
+<<<<<<< HEAD
 		printf("Prefix   : %u \n", inet_ntoa(*((struct in_addr*)&tempRtable->prefix)));
+=======
 		printf("Prefix   : %d \n", tempRtable->prefix);
+>>>>>>> 1364cab1f6f6c9ae50bcf4bc302d46e48a3e2963
 		printf("Hop      : %s \n", inet_ntoa(*((struct in_addr*)&tempRtable->hop)));
 		printf("Interface: %s \n", tempRtable->interface); 
 		printf("-----------\n");
@@ -268,11 +272,11 @@ int main(int argc, char **argv){
     		printf("Got a %d byte packet\n", n);
 		
 			
-   	 		struct aarp *tempArp = ((struct aarp*)&buf);
-			struct iicmp *tempIcmp = ((struct iicmp*)&buf);
+   	 		struct aarp tempArp = ((struct aarp*)&buf);
+			struct iicmp tempIcmp = ((struct iicmp*)&buf);
 			
 	
-			if((ntohs(recvaddr.sll_protocol) == ETH_P_ARP) && n > -1 && tempArp->arp_header.ea_hdr.ar_pro == ARPOP_REQUEST){
+			if((ntohs(recvaddr.sll_protocol) == ETH_P_ARP) && n > -1 && tempArp.arp_header == ARPOP_REQUEST){
 				struct aarp *request;
 		
 				request = ((struct aarp*)&buf);
@@ -304,7 +308,7 @@ int main(int argc, char **argv){
 				send(tempInterface->packet_socket, &reply, sizeof(reply), 0);
 				printf("Sent ARP reply");
 
-			}else if((ntohs(recvaddr.sll_protocol) == ETH_P_IP) && n > -1 && tempIcmp->icmp_header.type == ICMP_ECHO){
+			}else if((ntohs(recvaddr.sll_protocol) == ETH_P_IP) && n > -1 && tempIcmp.icmp_header.type == ICMP_ECHO){
 				
 		
 				char buf2[1500];
