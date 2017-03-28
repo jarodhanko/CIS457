@@ -127,7 +127,7 @@ int main(int argc, char **argv){
     	//about those for the purpose of enumerating interfaces. We can
     	//use the AF_INET addresses in this list for example to get a list
     	//of our own IP addresses
-		
+		 
 		// All the eth-# interfaces.
 		if (strcmp(tmp->ifa_name, "lo") != 0){	
 			// Look to see if we already have the interface.
