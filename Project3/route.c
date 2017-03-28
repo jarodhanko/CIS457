@@ -278,8 +278,6 @@ int main(int argc, char **argv){
 			struct iicmp *tempIcmp;
 			tempIcmp = ((struct iicmp*)&buf);
 
-			printf("ARP? %d \n", ntohs(tempArp->arp_header.ea_hdr.ar_op)); 
-			printf("ICMP? %d \n", tempIcmp->eth_header.ether_type);
 
 			u_int32_t interfaceIP = tempInterface->ip_addrs[0] | (tempInterface->ip_addrs[1] << 8) | (tempInterface->ip_addrs[2] << 16) | (tempInterface->ip_addrs[3] << 24);
 			
@@ -353,7 +351,7 @@ int main(int argc, char **argv){
 				reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
 		
 				// Print the reply contents.
-				print_ETHERTYPE_IP(reply);		
+				//print_ETHERTYPE_IP(reply);		
 	
 				unsigned char result[sizeof(reply) + datalength];
 				memcpy(result, &reply, sizeof(reply));
@@ -394,7 +392,7 @@ int main(int argc, char **argv){
 								memcpy(request->arp_header.arp_tha, &broadcast2, 6);
 								memcpy(request->arp_header.arp_tpa,&iip->ip_header.daddr,4);		
 								printf("IPADDR: %s", inet_ntoa(*((struct in_addr*) &iip->ip_header.daddr)));			
-								print_ETHERTYPE_ARP(request);
+								//print_ETHERTYPE_ARP(request);
 								send(iList->packet_socket, request, sizeof(struct aarp), 0);	
 							}
 							iList = iList->next;
@@ -430,7 +428,7 @@ int main(int argc, char **argv){
 									memcpy(request->arp_header.arp_tha, &broadcast2, 6);
 									memcpy(request->arp_header.arp_tpa,&iip->ip_header.daddr,4);						
 									printf("IPADDR: %s", inet_ntoa(*((struct in_addr*) &iip->ip_header.daddr)));								
-									print_ETHERTYPE_ARP(request);
+									//print_ETHERTYPE_ARP(request);
 									send(iList->packet_socket, request, sizeof(struct aarp), 0);	
 								}
 								iList = iList->next;
