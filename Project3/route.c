@@ -386,6 +386,7 @@ void load_table(char *filename){
 			for(tempRtable = rtable; tempRtable != NULL; tempRtable = tempRtable->next){
 				prevRT = tempRtable;
 			}
+			tempRtable = malloc(sizeof(struct routing_table));
 			if(rtable == NULL){
 				rtable = tempRtable;
 			}
