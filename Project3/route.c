@@ -371,7 +371,7 @@ void load_table(struct routing_table **rtable, char *filename){
 	
 	(*rtable)->next = NULL;
 	struct routing_table *tempRtable, *tmpRtable = NULL;
-	tempRtable = malloc(sizeof(struct routing_table));
+	tempRtable = NULL;
 	int caseNum = 0;
 	int i;
 	char item[9];
@@ -408,7 +408,7 @@ void load_table(struct routing_table **rtable, char *filename){
 				index = 0;
 			}
 		}
-		else if (c == '\n'){		 // Interface
+		else if (c == '\n' || c == EOF){		 // Interface
 			item[--index] = '\0';
 			memcpy(&tempRtable->network, item, 8);
 			index = 0;
@@ -420,10 +420,14 @@ void load_table(struct routing_table **rtable, char *filename){
 			for(tmpRtable = (*rtable); tmpRtable->next != NULL; tmpRtable = tmpRtable->next){			
 			
 			}
-			if(tmpRtable == NULL)
+			if(tmpRtable == NULL){
 				tmpRtable = tempRtable;
-			else
+				printf("FIRST NODE");			
+			}
+			else {
 				tmpRtable->next = tempRtable;
+				printf("NEW NODE");
+			}
 		}
 	}
 	
