@@ -371,7 +371,7 @@ void load_table(struct routing_table **rtable, char *filename){
 	
 	(*rtable)->next = NULL;
 	struct routing_table *tempRtable, *tmpRtable, *prevRT;
-	tempRtable = malloc(sizeof(struct routing_table));
+	tempRtable = (*rtable);
 	tmpRtable = malloc(sizeof(struct routing_table));
 	tmpRtable = NULL;
 	int caseNum = 0;
@@ -427,17 +427,9 @@ void load_table(struct routing_table **rtable, char *filename){
 			index = 0;
 			
 			tempRtable->next = NULL;
-			if((*rtable) == NULL)
-				(*rtable) = tempRtable;
-			else{
-				for(prevRT = (*rtable); prevRT->next != NULL; prevRT = prevRT->next){
-					if(prevRT->next != NULL){
-						prevRT->next = tempRtable;
-						break;
-					}
-				}
-	
-			}
+			prevRT = tempRtable;
+			tempRtable->next = tempRtable;			
+
 			caseNum = 0;
 			for(i = 0; i < 9; i++){
 				item[index] = '\0';
