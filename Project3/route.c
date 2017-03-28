@@ -400,6 +400,9 @@ void load_table(struct routing_table **rtable, char *filename){
 				item[--index] = '\0';
 				(*rtable)->prefix = atoi(item);
 				index = 0;
+				for(i = 0; i < 9; i++){
+				item[index] = '\0';
+				}
 				caseNum++;
 			}
 			else if (caseNum == 2){ // Hop
@@ -410,6 +413,9 @@ void load_table(struct routing_table **rtable, char *filename){
 				else 
 					(*rtable)->hop = (u_int32_t)atoi(item);
 				index = 0;
+				for(i = 0; i < 9; i++){
+				item[index] = '\0';
+				}
 				caseNum++;
 			}
 		}
@@ -426,6 +432,9 @@ void load_table(struct routing_table **rtable, char *filename){
 			tmpRtable = tempRtable;
 			tempRtable = tempRtable->next;
 			caseNum = 0;
+			for(i = 0; i < 9; i++){
+				item[index] = '\0';
+			}
 		}
 	}
 	
