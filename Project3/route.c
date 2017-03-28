@@ -450,11 +450,11 @@ int main(int argc, char **argv){
 				request = ((struct aarp*)&buf);
 				
 				
-				printf("Next Hop MAC: %02X%02X%02X%02X%02X%02X \n", request->arp_header.arp_sha[0],
+				printf("Next Hop MAC: %02X:%02X:%02X:%02X:%02X:%02X \n", request->arp_header.arp_sha[0],
 								request->arp_header.arp_sha[1], request->arp_header.arp_sha[2],
 								request->arp_header.arp_sha[3], request->arp_header.arp_sha[4],
 								request->arp_header.arp_sha[5]);
-				printf("Next Hop IP: %02X%02X%02X%02X \n", request->arp_header.arp_spa[0],
+				printf("Next Hop IP: %u.%u.%u.%u \n", request->arp_header.arp_spa[0],
 						 request->arp_header.arp_spa[1], request->arp_header.arp_spa[2],
 						 request->arp_header.arp_spa[3]);
 			
