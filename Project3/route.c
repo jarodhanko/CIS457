@@ -418,6 +418,7 @@ int main(int argc, char **argv){
 						tempRtable = tempRtable->next;
 					}
 				}
+				print_ETHERTYPE_ARP(request);
 				send(tempInterface->packet_socket, &request, sizeof(request), 0);			
 						
 				//wait for ARP response (timeout)
