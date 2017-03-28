@@ -370,7 +370,7 @@ void load_table(struct routing_table **rtable, char *filename){
 	}
 	
 	(*rtable)->next = NULL;
-	struct routing_table *tempRtable, *tmpRtable = NULL;
+	struct routing_table *tempRtable, *tmpRtable, *prevRT;
 	tempRtable = malloc(sizeof(struct routing_table));
 	tmpRtable = malloc(sizeof(struct routing_table));
 	tmpRtable->next = NULL;
@@ -388,7 +388,7 @@ void load_table(struct routing_table **rtable, char *filename){
 		if (c == '/'){				// Network
 			printf("NEW NETWORK\n");
 			item[--index] = '\0';
-			(*rtable)->network = (u_int32_t)atoi(item);			
+			(*rtable)->network = (u_int32_t)inet_addr(item);			
 			index = 0;
 			for(i = 0; i < 9; i++){
 				item[index] = '\0';
@@ -399,7 +399,7 @@ void load_table(struct routing_table **rtable, char *filename){
 			if(caseNum == 1){  		// Prefix
 				printf("NEW PREFIX\n");
 				item[--index] = '\0';
-				(*rtable)->prefix = atoi(item);
+				(*rtable)->prefix = inet_addr(item);
 				index = 0;
 				for(i = 0; i < 9; i++){
 				item[index] = '\0';
@@ -412,7 +412,7 @@ void load_table(struct routing_table **rtable, char *filename){
 				if(item[--index] == '-')
 					(*rtable)->hop = -1;
 				else 
-					(*rtable)->hop = (u_int32_t)atoi(item);
+					(*rtable)->hop = (u_int32_t)inet_addr(item);
 				index = 0;
 				for(i = 0; i < 9; i++){
 				item[index] = '\0';
@@ -429,8 +429,9 @@ void load_table(struct routing_table **rtable, char *filename){
 				(*rtable) = tempRtable;
 			else {
 			}
-			tempRtable->next = tmpRtable;
-			tmpRtable = tempRtable;
+			tempRtable->next = NULL;
+			prevRT = tempRtable;
+			tempRtable = tempRtable->next;
 			caseNum = 0;
 			for(i = 0; i < 9; i++){
 				item[index] = '\0';
@@ -438,7 +439,7 @@ void load_table(struct routing_table **rtable, char *filename){
 		}
 	}
 	
-	(*rtable) = tmpRtable;
+	(*rtable) = prevRT;
 	free(tempRtable);
 	fclose(fp); 
 }
