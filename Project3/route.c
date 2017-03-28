@@ -444,6 +444,20 @@ int main(int argc, char **argv){
 				
 				
 				//print
+			}else if((ntohs(recvaddr.sll_protocol) == ETH_P_ARP) && n > -1 && ntohs(tempArp->arp_header.ea_hdr.ar_op) == ARPOP_REPLY){
+				struct aarp *request;
+		
+				request = ((struct aarp*)&buf);
+				
+				
+				printf("Next Hop MAC: %02X%02X%02X%02X%02X%02X \n", request->arp_header.arp_sha[0],
+								request->arp_header.arp_sha[1], request->arp_header.arp_sha[2],
+								request->arp_header.arp_sha[3], request->arp_header.arp_sha[4],
+								request->arp_header.arp_sha[5]);
+				printf("Next Hop IP: %02X%02X%02X%02X \n", request->arp_header.arp_spa[0],
+						 request->arp_header.arp_spa[1], request->arp_header.arp_spa[2],
+						 request->arp_header.arp_spa[3]);
+			
 			}
 		}
   	}
