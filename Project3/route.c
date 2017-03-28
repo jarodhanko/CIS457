@@ -206,7 +206,7 @@ int main(int argc, char **argv){
   	//for the project you will probably want to look at more (to do so,
   	//a good way is to have one socket per interface and use select to
   	//see which ones have data)
-  	struct routing_table *rtable = NULL;
+  	struct routing_table *rtable = malloc(sizeof(struct routing_table));
   	load_table(&rtable, argv[1]);
 
 	struct interface *tempInterface = interfaceList;
@@ -368,7 +368,8 @@ void load_table(struct routing_table **rtable, char *filename){
     	printf("Could Not Open File");
     	exit(1);
 	}
-
+	
+	(*rtable)->next = NULL;
 	struct routing_table *tempRtable = NULL;
 	int caseNum = 0;
 	int i;
