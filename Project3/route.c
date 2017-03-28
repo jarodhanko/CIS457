@@ -417,10 +417,13 @@ void load_table(struct routing_table **rtable, char *filename){
 			else {
 			}
 			tempRtable->next = NULL;
-			for(tmpRtable = (*rtable); tmpRtable != NULL; tmpRtable = tmpRtable->next){			
+			for(tmpRtable = (*rtable); tmpRtable->next != NULL; tmpRtable = tmpRtable->next){			
 			
 			}
-			tmpRtable = tempRtable;
+			if(tmpRtable == NULL)
+				tmpRtable = tempRtable;
+			else
+				tmpRtable->next = tempRtable;
 		}
 	}
 	
