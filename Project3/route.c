@@ -438,6 +438,7 @@ void load_table(struct routing_table **rtable, char *filename){
 	}
 	
 	(*rtable) = tmpRtable;
+	(*rtable)->next = NULL;
 	free(tempRtable);
 	fclose(fp); 
 }
