@@ -376,7 +376,7 @@ int main(int argc, char **argv){
 						(iip->ip_header.daddr >> 8) == 0){
 							memcpy(request->eth_header.ether_shost, tempInterface->mac_addrs, 6);
 							char broadcast[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-							char broadcast2[6] = {0,0,0,0,0,0}
+							char broadcast2[6] = {0,0,0,0,0,0};
 							memcpy(request->eth_header.ether_dhost, &broadcast, 6);
 							request->arp_header.ea_hdr.ar_hrd = htons(ARPHRD_ETHER);
 							request->arp_header.ea_hdr.ar_pro = htons(0x800);
@@ -403,7 +403,7 @@ int main(int argc, char **argv){
 							(iip->ip_header.daddr >> 16) == 0){
 							memcpy(request->eth_header.ether_shost, tempInterface->mac_addrs, 6);
 							char broadcast[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-							char broadcast2[6] = {0,0,0,0,0,0}
+							char broadcast2[6] = {0,0,0,0,0,0};
 							memcpy(request->eth_header.ether_dhost, &broadcast, 6);
 							request->arp_header.ea_hdr.ar_hrd = htons(ARPHRD_ETHER);
 							request->arp_header.ea_hdr.ar_pro = htons(0x800);
