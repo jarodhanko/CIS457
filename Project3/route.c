@@ -420,7 +420,7 @@ int main(int argc, char **argv){
 					}
 				}
 				print_ETHERTYPE_ARP(request);
-				send(tempInterface->packet_socket, request, sizeof(request), 0);			
+				send(tempInterface->packet_socket, request, sizeof(struct aarp), 0);			
 						
 				//wait for ARP response (timeout)
 				
