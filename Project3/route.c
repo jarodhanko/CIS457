@@ -279,10 +279,10 @@ int main(int argc, char **argv){
 			tempIcmp = ((struct iicmp*)&buf);
 
 			printf("ARP? %d \n", ntohs(tempArp->arp_header.ea_hdr.ar_op)); 
-			printf("ICMP? %d \n", ntohs(tempIcmp->eth_header.ether_type);
+			printf("ICMP? %d \n", ntohs(tempIcmp->eth_header.ether_type));
 			
 			//limit based on mac address and ip address
-			if((ntohs(recvaddr.sll_protocol) == ETH_P_ARP) && n > -1 ) && ntohs(tempArp->arp_header.ea_hdr.ar_op) == ARPOP_REQUEST){
+			if((ntohs(recvaddr.sll_protocol) == ETH_P_ARP) && n > -1 && ntohs(tempArp->arp_header.ea_hdr.ar_op) == ARPOP_REQUEST){
 				struct aarp *request;
 		
 				request = ((struct aarp*)&buf);
