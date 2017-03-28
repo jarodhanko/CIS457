@@ -425,15 +425,12 @@ void load_table(struct routing_table **rtable, char *filename){
 			item[--index] = '\0';
 			memcpy(&tempRtable->interface, item, 8);
 			index = 0;
-			//if ((*rtable) == NULL)
-			//	(*rtable) = tempRtable;
-			//else {
-			//}
+			
 			tempRtable->next = NULL;
-			if(tmpRtable == NULL)
-				tmpRtable = tempRtable;
+			if((*rtable) == NULL)
+				(*rtable) = tempRtable;
 			else{
-				for(prevRT = tmpRtable; prevRT->next != NULL; prevRT = prevRT->next){
+				for(prevRT = (*rtable); prevRT->next != NULL; prevRT = prevRT->next){
 					if(prevRT->next != NULL){
 						prevRT->next = tempRtable;
 						break;
@@ -448,8 +445,8 @@ void load_table(struct routing_table **rtable, char *filename){
 		}
 	}
 	
-	(*rtable) = tmpRtable;
-	free(tempRtable);
+	//(*rtable) = tmpRtable;
+	//free(tempRtable);
 	fclose(fp); 
 }
 
