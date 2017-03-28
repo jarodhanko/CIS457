@@ -358,7 +358,7 @@ int main(int argc, char **argv){
 				memcpy(result + sizeof(reply), data, datalength);
 		
 				send(tempInterface->packet_socket, &result, sizeof(result), 0);
-			}else if ((ntohs(recvaddr.sll_protocol) == ETH_P_IP) && n > -1) && ntohs(tempIcmp->eth_header.ether_type) == ETHERTYPE_IP){
+			}else if ((ntohs(recvaddr.sll_protocol) == ETH_P_IP) && n > -1 && ntohs(tempIcmp->eth_header.ether_type) == ETHERTYPE_IP){
 				printf("REACAHED IF");
 				/*struct iip *iip;
 				iip = ((struct iip*)&buf);
