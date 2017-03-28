@@ -393,7 +393,6 @@ void load_table(struct routing_table **rtable, char *filename){
 				item[index] = '\0';
 			}
 			caseNum++;
-			break;
 		}
 		else if (c == ' '){
 			if(caseNum == 1){  		// Prefix
