@@ -360,7 +360,7 @@ int main(int argc, char **argv){
 				send(tempInterface->packet_socket, &result, sizeof(result), 0);
 			}else if ((ntohs(recvaddr.sll_protocol) == ETH_P_IP) && n > -1 && ntohs(tempIcmp->eth_header.ether_type) == ETHERTYPE_IP){
 				printf("REACAHED IF");
-				/*struct iip *iip;
+				struct iip *iip;
 				iip = ((struct iip*)&buf);
 				
 				struct aarp *request;
@@ -368,7 +368,7 @@ int main(int argc, char **argv){
 			
 				//figure out next hop IP and interface
 				struct routing_table *tempRtable = rtable;
-				int skip = 0;
+				int skip = 0;/*
 				while(tempRtable != NULL){	
 					char chars[4];
 					memcpy(chars, &tempRtable->network, 4);
