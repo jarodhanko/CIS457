@@ -373,8 +373,8 @@ void load_table(struct routing_table **rtable, char *filename){
 	struct routing_table *tempRtable, *tmpRtable, *prevRT;
 	tempRtable = NULL;
 	int first = 1;
-	//tempRtable = (*rtable);
-	tempRtable = malloc(sizeof(struct routing_table));
+	tempRtable = (*rtable);
+	//tempRtable = malloc(sizeof(struct routing_table));
 	tmpRtable = NULL;
 	int caseNum = 0;
 	int i;
@@ -431,17 +431,17 @@ void load_table(struct routing_table **rtable, char *filename){
 			tempRtable->next = NULL;
 
 			
-			for(tmpRtable = (*rtable); tmpRtable != NULL; tmpRtable = tmpRtable->next){
+			for(tmpRtable = tempRtable; tmpRtable != NULL; tmpRtable = tmpRtable->next){
 				prevRT = tmpRtable;
 			}
-			if(first == 1){
-				(*rtable) = tempRtable;
-				first = 0;
-			}
-			else {
+			//if(first == 1){
+			//	(*rtable) = tempRtable;
+			//	first = 0;
+			//}
+			//else {
 
 				prevRT->next = tempRtable;
-			}
+			//}
 
 
 
