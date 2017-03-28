@@ -372,7 +372,7 @@ int main(int argc, char **argv){
 					memcpy(chars, &tempRtable->network, 4);
 					if((tempRtable->prefix == 24 && 
 						(tempRtable->network >> 8) | 
-						(ntonl(iip->ip_header.daddr) >> 8)) == 0){	
+						(ntohl(iip->ip_header.daddr) >> 8)) == 0){	
 						struct interface *iList = interfaceList;
 						while(iList != NULL){
 							if(strcmp(iList->name, tempRtable->interface) == 0){									
