@@ -279,10 +279,10 @@ int main(int argc, char **argv){
 			tempIcmp = ((struct iicmp*)&buf);
 
 			printf("ARP? %d \n", ntohs(tempArp->arp_header.ea_hdr.ar_op)); 
-			printf("ICMP? %d %d \n", ntohs(recvaddr.sll_protocol), ETH_P_IP);
+			printf("ICMP? %d \n", ntohs(tempIcmp->eth_header.ether_type);
 			
 			//limit based on mac address and ip address
-			if((ntohs(recvaddr.sll_protocol) == ETH_P_ARP) && n > -1 ){//&& tempArp->arp_header.ea_hdr.ar_op == ARPOP_REQUEST){
+			if((ntohs(recvaddr.sll_protocol) == ETH_P_ARP) && n > -1 ) && ntohs(tempArp->arp_header.ea_hdr.ar_op) == ARPOP_REQUEST){
 				struct aarp *request;
 		
 				request = ((struct aarp*)&buf);
@@ -358,7 +358,7 @@ int main(int argc, char **argv){
 				memcpy(result + sizeof(reply), data, datalength);
 		
 				send(tempInterface->packet_socket, &result, sizeof(result), 0);
-			}else if ((ntohs(recvaddr.sll_protocol) == ETH_P_IP) && n > -1 && tempIcmp->eth_header.ether_type == ETHERTYPE_IP){
+			}else if ((ntohs(recvaddr.sll_protocol) == ETH_P_IP) && n > -1 && ntohs(tempIcmp->eth_header.ether_type) == ETHERTYPE_IP){
 				printf("REACAHED IF");
 				struct iip *iip;
 				iip = ((struct iip*)&buf);
