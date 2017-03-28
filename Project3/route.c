@@ -369,11 +369,11 @@ void load_table(char *filename){
     	exit(1);
 	}
 	
-	rtable->next = NULL;
+	//rtable->next = NULL;
 	struct routing_table *tempRtable, *tmpRtable, *prevRT;
 	tempRtable = NULL;
 	int dothing = 1;
-	tempRtable = rtable;
+	//tempRtable = rtable;
 	//tempRtable = malloc(sizeof(struct routing_table));
 	tmpRtable = NULL;
 	int caseNum = 0;
@@ -382,11 +382,18 @@ void load_table(char *filename){
 	int index = 0;
 	char c;
 	while ((c = fgetc(fp)) != EOF){
-		//if(dothing == 1){		
-		//	for(tempRtable = (*rtable); tmpRtable != NULL; tmpRtable = tmpRtable->next){
-		//		prevRT = tmpRtable;
-		//	}
-		//}
+		if(dothing == 1){		
+			for(tempRtable = rtable; tempRtable != NULL; tempRtable = tempRtable->next){
+				prevRT = tempRtable;
+			}
+			if(rtable == NULL){
+				rtable = tempRtable;
+			}
+			else {
+				prevRT->next = tempRtable;
+			}
+			dothing = 0;
+		}
 
 
 		item[index++] = c;
@@ -433,17 +440,17 @@ void load_table(char *filename){
 			
 			tempRtable->next = NULL;
 
-			
-			for(tempRtable = rtable; tempRtable != NULL; tempRtable = tempRtable->next){
-				prevRT = tempRtable;
-			}
+			dothing = 1;
+			//for(tempRtable = rtable; tempRtable != NULL; tempRtable = tempRtable->next){
+			//	prevRT = tempRtable;
+			//}
 			//if(first == 1){
 			//	(*rtable) = tempRtable;
 			//	first = 0;
 			//}
 			//else {
 
-			prevRT->next = tempRtable;
+			//prevRT->next = tempRtable;
 			//}
 
 
