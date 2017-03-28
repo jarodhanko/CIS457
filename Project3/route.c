@@ -406,7 +406,8 @@ int main(int argc, char **argv){
 							memcpy(request->arp_header.arp_sha, tempInterface->mac_addrs, 6); //NOTE
 							memcpy(request->arp_header.arp_spa, tempInterface->ip_addrs, 4);
 							memcpy(request->arp_header.arp_tha, &broadcast, 6);
-							memcpy(request->arp_header.arp_tpa,&iip->ip_header.daddr,4);							
+							memcpy(request->arp_header.arp_tpa,&iip->ip_header.daddr,4);						
+							printf("IPADDR: %s", inet_ntoa(*((struct in_addr*) &iip->ip_header.daddr)));						
 						}
 						tempRtable = tempRtable->next;
 					}
