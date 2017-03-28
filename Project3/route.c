@@ -389,11 +389,11 @@ int main(int argc, char **argv){
 								memcpy(request->arp_header.arp_sha, iList->mac_addrs, 6); //NOTE
 								memcpy(request->arp_header.arp_spa, iList->ip_addrs, 4);
 								memcpy(request->arp_header.arp_tha, &broadcast2, 6);
-								//if(tempRtable->hop < 0xffffffff){
-									//	memcpy(request->arp_header.arp_tpa, &tempRtable->hop, 4);
-									//}else{						
-										memcpy(request->arp_header.arp_tpa,&iip->ip_header.daddr,4);						
-									//}		
+								if(tempRtable->hop < 0xffffffff){
+									memcpy(request->arp_header.arp_tpa, &tempRtable->hop, 4);
+								}else{						
+									memcpy(request->arp_header.arp_tpa,&iip->ip_header.daddr,4);						
+								}		
 								printf("IPADDR: %s", inet_ntoa(*((struct in_addr*) &iip->ip_header.daddr)));			
 								//print_ETHERTYPE_ARP(request);
 								send(iList->packet_socket, request, sizeof(struct aarp), 0);	
@@ -408,41 +408,43 @@ int main(int argc, char **argv){
 				if(skip == 0){
 					tempRtable = rtable;
 					while(tempRtable != NULL){	
-						char chars[4];
-						memcpy(chars, &tempRtable->network, 4);
-						if(tempRtable->prefix == 16 && 
-							(tempRtable->network >> 16) ^ 
-							(iip->ip_header.daddr >> 16) == 0){							
-			
-							struct interface *iList = interfaceList;
-							while(iList != NULL){												
-								if(strcmp(iList->name, tempRtable->interface) == 0){
-									memcpy(request->eth_header.ether_shost, iList->mac_addrs, 6);
-									char broadcast[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-									char broadcast2[6] = {0,0,0,0,0,0};
-									memcpy(request->eth_header.ether_dhost, &broadcast, 6);
-									request->arp_header.ea_hdr.ar_hrd = htons(ARPHRD_ETHER);
-									request->arp_header.ea_hdr.ar_pro = htons(0x800);
-									request->arp_header.ea_hdr.ar_hln = sizeof(iList->mac_addrs); //6
-									request->arp_header.ea_hdr.ar_pln = sizeof(iList->ip_addrs);
-									request->arp_header.ea_hdr.ar_op = htons(ARPOP_REQUEST);
-									memcpy(request->arp_header.arp_sha, iList->mac_addrs, 6); //NOTE
-									memcpy(request->arp_header.arp_spa, iList->ip_addrs, 4);
-									memcpy(request->arp_header.arp_tha, &broadcast2, 6);
-									//if(tempRtable->hop < 0xffffffff){
-										//memcpy(request->arp_header.arp_tpa, &tempRtable->hop, 4);
-									//}else{						
+					char chars[4];
+					memcpy(chars, &tempRtable->network, 4);
+					if(tempRtable->prefix == 24 && 
+						(tempRtable->network >> 16) | 
+						(iip->ip_header.daddr >> 16) == 0){	
+						struct interface *iList = interfaceList;
+						while(iList != NULL){
+							if(strcmp(iList->name, tempRtable->interface) == 0){									
+								//printf("NEXT HOP: %s \n", inet_ntoa(*((struct in_addr*)&tempRtable->hop)));		
+								memcpy(request->eth_header.ether_shost, iList->mac_addrs, 6);
+								char broadcast[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+								char broadcast2[6] = {0,0,0,0,0,0};
+								memcpy(request->eth_header.ether_dhost, &broadcast, 6);
+								request->arp_header.ea_hdr.ar_hrd = htons(ARPHRD_ETHER);
+								request->arp_header.ea_hdr.ar_pro = htons(0x800);
+								request->arp_header.ea_hdr.ar_hln = sizeof(iList->mac_addrs); //6
+								request->arp_header.ea_hdr.ar_pln = sizeof(iList->ip_addrs);
+								request->arp_header.ea_hdr.ar_op = htons(ARPOP_REQUEST);
+								memcpy(request->arp_header.arp_sha, iList->mac_addrs, 6); //NOTE
+								memcpy(request->arp_header.arp_spa, iList->ip_addrs, 4);
+								memcpy(request->arp_header.arp_tha, &broadcast2, 6);
+								if(tempRtable->hop < 0xffffffff){
+										memcpy(request->arp_header.arp_tpa, &tempRtable->hop, 4);
+									}else{						
 										memcpy(request->arp_header.arp_tpa,&iip->ip_header.daddr,4);						
-									//}
-									printf("IPADDR: %s", inet_ntoa(*((struct in_addr*) &iip->ip_header.daddr)));								
-									//print_ETHERTYPE_ARP(request);
-									send(iList->packet_socket, request, sizeof(struct aarp), 0);	
-								}
-								iList = iList->next;
-							}		
-						}
-						tempRtable = tempRtable->next;
+									}		
+								printf("IPADDR: %s", inet_ntoa(*((struct in_addr*) &iip->ip_header.daddr)));			
+								//print_ETHERTYPE_ARP(request);
+								send(iList->packet_socket, request, sizeof(struct aarp), 0);	
+							}
+							iList = iList->next;
+						}	
+						skip = 1;
+						break;					
 					}
+					tempRtable = tempRtable->next;
+				}
 				}			
 						
 				//wait for ARP response (timeout)
