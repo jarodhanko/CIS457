@@ -428,9 +428,8 @@ void load_table(struct routing_table **rtable, char *filename){
 				(*rtable) = tempRtable;
 			else {
 			}
-			(*rtable)->next = NULL;
+			tempRtable->next = tmpRtable;
 			tmpRtable = tempRtable;
-			tempRtable = tempRtable->next;
 			caseNum = 0;
 			for(i = 0; i < 9; i++){
 				item[index] = '\0';
