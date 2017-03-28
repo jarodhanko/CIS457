@@ -368,7 +368,7 @@ int main(int argc, char **argv){
 			
 				//figure out next hop IP and interface
 				struct routing_table *tempRtable = rtable;
-				int skip = 0;/*
+				int skip = 0;
 				while(tempRtable != NULL){	
 					char chars[4];
 					memcpy(chars, &tempRtable->network, 4);
@@ -422,7 +422,7 @@ int main(int argc, char **argv){
 						
 				//wait for ARP response (timeout)
 				
-				*/
+				
 				//print
 			}
 		}
