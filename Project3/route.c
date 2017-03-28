@@ -277,7 +277,7 @@ int main(int argc, char **argv){
 			struct iicmp *tempIcmp = ((struct iicmp*)&buf);
 			
 			//limit based on mac address and ip address
-			if((ntohs(recvaddr.sll_protocol) == ETH_P_ARP) && n > -1 && tempArp->arp_header.ea_hdr.ar_pro == ARPOP_REQUEST){
+			if((ntohs(recvaddr.sll_protocol) == ETH_P_ARP) && n > -1 ){//&& tempArp->arp_header.ea_hdr.ar_pro == ARPOP_REQUEST){
 				struct aarp *request;
 		
 				request = ((struct aarp*)&buf);
