@@ -278,7 +278,7 @@ int main(int argc, char **argv){
 			struct iicmp *tempIcmp;
 			tempIcmp = ((struct iicmp*)&buf);
 
-			printf("ARP? %d \n", tempArp->arp_header.ea_hdr.ar_op); 
+			printf("ARP? %d \n", ntohs(tempArp->arp_header.ea_hdr.ar_op)); 
 			printf("ICMP? %d %d \n", ntohs(recvaddr.sll_protocol), ETH_P_IP);
 			
 			//limit based on mac address and ip address
