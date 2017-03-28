@@ -389,11 +389,11 @@ int main(int argc, char **argv){
 								memcpy(request->arp_header.arp_sha, iList->mac_addrs, 6); //NOTE
 								memcpy(request->arp_header.arp_spa, iList->ip_addrs, 4);
 								memcpy(request->arp_header.arp_tha, &broadcast2, 6);
-								if(tempRtable->hop < 0xffffffff){
-										memcpy(request->arp_header.arp_tpa, &tempRtable->hop, 4);
-									}else{						
+								//if(tempRtable->hop < 0xffffffff){
+									//	memcpy(request->arp_header.arp_tpa, &tempRtable->hop, 4);
+									//}else{						
 										memcpy(request->arp_header.arp_tpa,&iip->ip_header.daddr,4);						
-									}		
+									//}		
 								printf("IPADDR: %s", inet_ntoa(*((struct in_addr*) &iip->ip_header.daddr)));			
 								//print_ETHERTYPE_ARP(request);
 								send(iList->packet_socket, request, sizeof(struct aarp), 0);	
@@ -429,11 +429,11 @@ int main(int argc, char **argv){
 									memcpy(request->arp_header.arp_sha, iList->mac_addrs, 6); //NOTE
 									memcpy(request->arp_header.arp_spa, iList->ip_addrs, 4);
 									memcpy(request->arp_header.arp_tha, &broadcast2, 6);
-									if(tempRtable->hop < 0xffffffff){
-										memcpy(request->arp_header.arp_tpa, &tempRtable->hop, 4);
-									}else{						
+									//if(tempRtable->hop < 0xffffffff){
+										//memcpy(request->arp_header.arp_tpa, &tempRtable->hop, 4);
+									//}else{						
 										memcpy(request->arp_header.arp_tpa,&iip->ip_header.daddr,4);						
-									}
+									//}
 									printf("IPADDR: %s", inet_ntoa(*((struct in_addr*) &iip->ip_header.daddr)));								
 									//print_ETHERTYPE_ARP(request);
 									send(iList->packet_socket, request, sizeof(struct aarp), 0);	
