@@ -226,10 +226,10 @@ int main(int argc, char **argv){
 		printf("NO TABLE");
 	while(tempRtable != NULL){
 	
-		printf("Network  : %s  \n", inet_ntoa(*((struct in_addr*)&tempRtable->network)));
-		printf("Prefix   : %d  \n", tempRtable->prefix);
-		printf("Hop      : %s  \n", inet_ntoa(*((struct in_addr*)&tempRtable->hop)));
-		printf("Interface: %s  \n", tempRtable->interface); 
+		printf("Network  : %s \n", inet_ntoa(*((struct in_addr*)&tempRtable->network)));
+		printf("Prefix   : %02X \n", inet_ntoa(*((struct in_addr*)&tempRtable->prefix)));
+		printf("Hop      : %s \n", inet_ntoa(*((struct in_addr*)&tempRtable->hop)));
+		printf("Interface: %s   \n", tempRtable->interface); 
 		printf("-----------\n");
 		tempRtable = tempRtable->next;
 	}
@@ -420,7 +420,7 @@ void load_table(char *filename){
 			if(caseNum == 1){ // Prefix
 				printf("NEW PREFIX\n");
 				item[--index] = '\0';
-				tempRtable->prefix = atoi(item);
+				tempRtable->prefix = inet_addr(item);
 				index = 0;
 				for(i = 0; i < 9; i++){
 					item[i] = '\0';
