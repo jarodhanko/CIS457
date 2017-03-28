@@ -312,7 +312,7 @@ int main(int argc, char **argv){
 		
 				// Send the reply packet.	
 				send(tempInterface->packet_socket, &reply, sizeof(reply), 0);
-				printf("Sent ARP reply");
+				printf("Sent ARP reply \n");
 
 			}else if((ntohs(recvaddr.sll_protocol) == ETH_P_IP) && n > -1 && tempIcmp->icmp_header.type == ICMP_ECHO && tempIcmp->ip_header.daddr == interfaceIP){
 				
@@ -377,7 +377,7 @@ int main(int argc, char **argv){
 						struct interface *iList = interfaceList;
 						while(iList != NULL){
 							if(strcmp(iList->name, tempRtable->interface) == 0){									
-								printf("NEXT HOP: %s", inet_ntoa(*((struct in_addr*)&tempRtable->hop)));		
+								//printf("NEXT HOP: %s \n", inet_ntoa(*((struct in_addr*)&tempRtable->hop)));		
 								memcpy(request->eth_header.ether_shost, iList->mac_addrs, 6);
 								char broadcast[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 								char broadcast2[6] = {0,0,0,0,0,0};
