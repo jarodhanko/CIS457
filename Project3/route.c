@@ -373,7 +373,7 @@ void load_table(struct routing_table **rtable, char *filename){
 	struct routing_table *tempRtable, *tmpRtable, *prevRT;
 	tempRtable = malloc(sizeof(struct routing_table));
 	tmpRtable = malloc(sizeof(struct routing_table));
-	tmpRtable = NULL;
+	tmpRtable->next = NULL;
 	int caseNum = 0;
 	int i;
 	char item[9];
