@@ -364,7 +364,7 @@ int main(int argc, char **argv){
 				iip = ((struct iip*)&buf);
 				
 				struct aarp *request = malloc(sizeof(struct aarp));
-				request->eth_header.ether_type = ETHERTYPE_ARP;
+				request->eth_header.ether_type = htons(ETHERTYPE_ARP);
 			
 				//figure out next hop IP and interface
 				struct routing_table *tempRtable = rtable;
@@ -378,8 +378,8 @@ int main(int argc, char **argv){
 							memcpy(request->eth_header.ether_shost, tempInterface->mac_addrs, 6);
 							char broadcast[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 							memcpy(request->eth_header.ether_dhost, &broadcast, 6);
-							request->arp_header.ea_hdr.ar_hrd = ARPHRD_ETHER;
-							request->arp_header.ea_hdr.ar_pro = 0x800;
+							request->arp_header.ea_hdr.ar_hrd = htons(ARPHRD_ETHER);
+							request->arp_header.ea_hdr.ar_pro = htons(0x800);
 							request->arp_header.ea_hdr.ar_hln = sizeof(tempInterface->mac_addrs); //6
 							request->arp_header.ea_hdr.ar_pln = sizeof(tempInterface->ip_addrs);
 							request->arp_header.ea_hdr.ar_op = ARPOP_REQUEST;
@@ -404,8 +404,8 @@ int main(int argc, char **argv){
 							memcpy(request->eth_header.ether_shost, tempInterface->mac_addrs, 6);
 							char broadcast[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 							memcpy(request->eth_header.ether_dhost, &broadcast, 6);
-							request->arp_header.ea_hdr.ar_hrd = ARPHRD_ETHER;
-							request->arp_header.ea_hdr.ar_pro = 0x800;
+							request->arp_header.ea_hdr.ar_hrd = htons(ARPHRD_ETHER);
+							request->arp_header.ea_hdr.ar_pro = htons(0x800);
 							request->arp_header.ea_hdr.ar_hln = sizeof(tempInterface->mac_addrs); //6
 							request->arp_header.ea_hdr.ar_pln = sizeof(tempInterface->ip_addrs);
 							request->arp_header.ea_hdr.ar_op = ARPOP_REQUEST;
