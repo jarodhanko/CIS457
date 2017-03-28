@@ -227,8 +227,8 @@ int main(int argc, char **argv){
 	while(tempRtable != NULL){
 	
 		printf("Network  : %02X \n", inet_ntoa(*((struct in_addr*)&tempRtable->network)));
-		printf("Prefix   : %d   \n", tempRtable->prefix);
-		printf("Hop      : %02X \n", tempRtable->hop);
+		printf("Prefix   : %02X \n", inet_ntoa(*((struct in_addr*)&tempRtable->prefix)));
+		printf("Hop      : %02X \n", inet_ntoa(*((struct in_addr*)&tempRtable->hop)));
 		printf("Interface: %s   \n", tempRtable->interface); 
 		printf("-----------\n");
 		tempRtable = tempRtable->next;
