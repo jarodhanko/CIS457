@@ -374,6 +374,9 @@ int main(int argc, char **argv){
 					if(tempRtable->prefix == 24 && 
 						(tempRtable->network >> 8) | 
 						(iip->ip_header.daddr >> 8) == 0){
+							printf("NEXT HOP: %s", inet_ntoa(*((struct in_addr*)&tempRtable->hop)));
+							
+							
 							memcpy(request->eth_header.ether_shost, tempInterface->mac_addrs, 6);
 							char broadcast[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 							char broadcast2[6] = {0,0,0,0,0,0};
@@ -388,6 +391,14 @@ int main(int argc, char **argv){
 							memcpy(request->arp_header.arp_tha, &broadcast2, 6);
 							memcpy(request->arp_header.arp_tpa,&iip->ip_header.daddr,4);		
 							printf("IPADDR: %s", inet_ntoa(*((struct in_addr*) &iip->ip_header.daddr)));				
+						struct interface *iList = interfaceList;
+						while(iList != NULL){
+							if(strcmp(iList->name, tempRtable->interface)){
+								print_ETHERTYPE_ARP(request);
+								send(iList->packet_socket, request, sizeof(struct aarp), 0);	
+							}
+							iList = iList->next;
+						}	
 						skip = 1;
 						break;					
 					}
@@ -414,13 +425,20 @@ int main(int argc, char **argv){
 							memcpy(request->arp_header.arp_spa, tempInterface->ip_addrs, 4);
 							memcpy(request->arp_header.arp_tha, &broadcast2, 6);
 							memcpy(request->arp_header.arp_tpa,&iip->ip_header.daddr,4);						
-							printf("IPADDR: %s", inet_ntoa(*((struct in_addr*) &iip->ip_header.daddr)));						
+							printf("IPADDR: %s", inet_ntoa(*((struct in_addr*) &iip->ip_header.daddr)));				
+			
+							struct interface *iList = interfaceList;
+							while(iList != NULL){
+								if(strcmp(iList->name, tempRtable->interface)){								
+									print_ETHERTYPE_ARP(request);
+									send(iList->packet_socket, request, sizeof(struct aarp), 0);	
+								}
+								iList = iList->next;
+							}		
 						}
 						tempRtable = tempRtable->next;
 					}
-				}
-				print_ETHERTYPE_ARP(request);
-				send(tempInterface->packet_socket, request, sizeof(struct aarp), 0);			
+				}			
 						
 				//wait for ARP response (timeout)
 				
