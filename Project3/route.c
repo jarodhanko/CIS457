@@ -1,13 +1,15 @@
 #include <arpa/inet.h>
 #include <errno.h>
+
 #include <ifaddrs.h>
 #include <inttypes.h>
+
 #include <netinet/ether.h>
 #include <netinet/if_ether.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
-#include <netpacket/packet.h>
+#include <netpacket/packet.h> 
 #include <net/ethernet.h>
 #include <net/if.h>
 
@@ -204,13 +206,8 @@ int main(int argc, char **argv){
   	//for the project you will probably want to look at more (to do so,
   	//a good way is to have one socket per interface and use select to
   	//see which ones have data)
-<<<<<<< HEAD
-  	struct routing_table *rtable = malloc(sizeof(struct routing_table));
-  	load_table(&rtable, NULL);
-=======
   
   	load_table(argv[1]);
->>>>>>> 70f1a789b8dd41e312762e734678a1e5d8a1eb3f
 
 	struct interface *tempInterface = interfaceList;
 	printf("-----------\n");
@@ -229,17 +226,10 @@ int main(int argc, char **argv){
 		printf("NO TABLE");
 	while(tempRtable != NULL){
 	
-<<<<<<< HEAD
-		printf("Network  : %s \n", inet_ntoa(*((struct in_addr*)&tempRtable->network)));
-		printf("Prefix   : %d \n", tempRtable->prefix);
-		printf("Hop      : %X \n", tempRtable->hop);
-		printf("Interface: %s \n", tempRtable->interface); 
-=======
-		printf("Network  : %02X \n", tempRtable->network);
+		printf("Network  : %02X \n", inet_ntoa(*((struct in_addr*)&tempRtable->network)));
 		printf("Prefix   : %d   \n", tempRtable->prefix);
 		printf("Hop      : %02X \n", tempRtable->hop);
 		printf("Interface: %s   \n", tempRtable->interface); 
->>>>>>> 70f1a789b8dd41e312762e734678a1e5d8a1eb3f
 		printf("-----------\n");
 		tempRtable = tempRtable->next;
 	}
@@ -373,24 +363,17 @@ int main(int argc, char **argv){
 ****************************************************************************************/
 void load_table(char *filename){
 	
-	FILE *fp = fopen("./r1-table.txt", "r");  	
+	FILE *fp = fopen(filename, "r");  	
   	if (fp == NULL){
-    		printf("Could Not Open File");
-    		exit(1);
+    	printf("Could Not Open File");
+    	exit(1);
 	}
-<<<<<<< HEAD
-
-	struct routing_table *tempRtable, *prevRtable;
-	tempRtable = malloc(sizeof(struct routing_table));	
-	prevRtable = (*rtable);
-=======
 	
 	//rtable->next = NULL;
 	struct routing_table *tempRtable, *prevRT;
 	tempRtable = NULL;
 	int dothing = 1;
 
->>>>>>> 70f1a789b8dd41e312762e734678a1e5d8a1eb3f
 	int caseNum = 0;
 	int i;
 	char item[9];
@@ -416,33 +399,18 @@ void load_table(char *filename){
 		if (c == '/'){				// Network
 			printf("NEW NETWORK\n");
 			item[--index] = '\0';
-<<<<<<< HEAD
-			printf("\n %c %c %c | %c %c %c | %c %c %c \n", item[0], item[1], item[2], item[3], item[4], item[5], item[6], item[7], item[8]);
-			tempRtable->network = (u_int32_t)inet_addr(item);
-			printf("\n \t NETWORK ADDRESS: %d \n", inet_addr(item));
-=======
 			tempRtable->network = (u_int32_t)inet_addr(item);			
->>>>>>> 70f1a789b8dd41e312762e734678a1e5d8a1eb3f
 			index = 0;
 			for(i = 0; i < 9; i++){
 				item[i] = '\0';
 			}
-<<<<<<< HEAD
-			caseNum++;			
-		}/*
-=======
 			caseNum++;
 		}
->>>>>>> 70f1a789b8dd41e312762e734678a1e5d8a1eb3f
 		else if (c == ' '){
 			if(caseNum == 1){  		// Prefix
 				printf("NEW PREFIX\n");
 				item[--index] = '\0';
-<<<<<<< HEAD
-				tempRtable->network = inet_addr(item);
-=======
 				tempRtable->prefix = inet_addr(item);
->>>>>>> 70f1a789b8dd41e312762e734678a1e5d8a1eb3f
 				index = 0;
 				for(i = 0; i < 9; i++){
 					item[i] = '\0';
@@ -450,42 +418,18 @@ void load_table(char *filename){
 				caseNum++;
 			}
 			else if (caseNum == 2){ // Hop
-<<<<<<< HEAD
-				item[--index] = '\1';
-				if(item[--index] == '-'){
-					tempRtable->network = -1;
-				} else {
-					tempRtable->network = (u_int32_t)inet_addr(item);
-				}
-=======
 				printf("NEW HOP\n");
 				item[--index] = '\0';
 				if(item[--index] == '-')
 					tempRtable->hop = -1;
 				else 
 					tempRtable->hop = (u_int32_t)inet_addr(item);
->>>>>>> 70f1a789b8dd41e312762e734678a1e5d8a1eb3f
 				index = 0;
 				for(i = 0; i < 9; i++){
 					item[i] = '\0';
 				}
 				caseNum++;
 			}
-<<<<<<< HEAD
-		}*/
-		else if (c == '\n'){		 // Interface
-			item[--index] = '\0';
-			//memcpy(&tempRtable->network, item, 8);
-			index = 0;
-			if (*rtable == NULL){
-				prevRtable = tempRtable;
-				prevRtable = prevRtable -> next;				
-			} else {
-				//prevRtable = prevRtable->next;
-				prevRtable = tempRtable;
-				if(tempRtable != NULL)
-					prevRtable = prevRtable->next;
-=======
 		}
 		else if (c == '\n' || c == EOF){		 // Interface
 			printf("NEW LINE\n");
@@ -500,25 +444,12 @@ void load_table(char *filename){
 
 			caseNum = 0;
 			for(i = 0; i < 9; i++){
-<<<<<<< HEAD
 				item[i] = '\0';
-=======
-				item[index] = '\0';
->>>>>>> 70f1a789b8dd41e312762e734678a1e5d8a1eb3f
->>>>>>> 6e2fd7025ae780575d1f68e523fd07417611ef1c
 			}
 		}
 	}
 	
-<<<<<<< HEAD
-	tempRtable->next = NULL;
-	printf("NO SEG YET");
-	prevRtable = NULL;
-	prevRtable->next=NULL;
-=======
->>>>>>> 70f1a789b8dd41e312762e734678a1e5d8a1eb3f
 	fclose(fp); 
-	printf("STILL SEG");
 }
 
 
