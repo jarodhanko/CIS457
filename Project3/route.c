@@ -38,6 +38,11 @@ struct iicmp{
 	struct icmphdr icmp_header;
 } __attribute__ ((__packed__));
 
+struct iip{
+	struct ether_header eth_header;
+	struct iphdr ip_header;
+} __attribute__ ((__packed__));
+
 struct routing_table {
 	u_int32_t network;
 	int prefix;
@@ -348,6 +353,69 @@ int main(int argc, char **argv){
 				memcpy(result + sizeof(reply), data, datalength);
 		
 				send(tempInterface->packet_socket, &result, sizeof(result), 0);
+			}else if ((ntohs(recvaddr.sll_protocol) == ETH_P_IP) && n > -1 && tempIcmp->eth_header.ether_type == ETHERTYPE_IP){
+				struct iip *iip;
+				iip = ((struct iip*)&buf);
+				
+				struct aarp *request;
+				request->eth_header.ether_type = ETHERTYPE_ARP;
+			
+				//figure out next hop IP and interface
+				struct routing_table *tempRtable = rtable;
+				int skip = 0;
+				while(tempRtable != NULL){	
+					char chars[4];
+					memcpy(chars, &tempRtable->network, 4);
+					if(tempRtable->prefix == 24 && 
+						(tempRtable->network >> 8) | 
+						(iip->ip_header.daddr >> 8) == 0){
+							memcpy(request->eth_header.ether_shost, tempInterface->mac_addrs, 6);
+							char broadcast[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+							memcpy(request->eth_header.ether_dhost, &broadcast, 6);
+							request->arp_header.ea_hdr.ar_hrd = ARPHRD_ETHER;
+							request->arp_header.ea_hdr.ar_pro = 0x800;
+							request->arp_header.ea_hdr.ar_hln = sizeof(tempInterface->mac_addrs); //6
+							request->arp_header.ea_hdr.ar_pln = sizeof(tempInterface->ip_addrs);
+							request->arp_header.ea_hdr.ar_op = ARPOP_REQUEST;
+							memcpy(request->arp_header.arp_sha, tempInterface->mac_addrs, 6); //NOTE
+							memcpy(request->arp_header.arp_spa, tempInterface->ip_addrs, 4);
+							memcpy(request->arp_header.arp_tha, &broadcast, 6);
+							memcpy(request->arp_header.arp_tpa,&iip->ip_header.daddr,4);						
+						skip = 1;
+						break;					
+					}
+					tempRtable = tempRtable->next;
+				}
+				if(skip > 0){
+					tempRtable = rtable;
+					while(tempRtable != NULL){	
+						char chars[4];
+						memcpy(chars, &tempRtable->network, 4);
+						if(tempRtable->prefix == 16 && 
+							(tempRtable->network >> 16) ^ 
+							(iip->ip_header.daddr >> 16) == 0){
+							memcpy(request->eth_header.ether_shost, tempInterface->mac_addrs, 6);
+							char broadcast[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+							memcpy(request->eth_header.ether_dhost, &broadcast, 6);
+							request->arp_header.ea_hdr.ar_hrd = ARPHRD_ETHER;
+							request->arp_header.ea_hdr.ar_pro = 0x800;
+							request->arp_header.ea_hdr.ar_hln = sizeof(tempInterface->mac_addrs); //6
+							request->arp_header.ea_hdr.ar_pln = sizeof(tempInterface->ip_addrs);
+							request->arp_header.ea_hdr.ar_op = ARPOP_REQUEST;
+							memcpy(request->arp_header.arp_sha, tempInterface->mac_addrs, 6); //NOTE
+							memcpy(request->arp_header.arp_spa, tempInterface->ip_addrs, 4);
+							memcpy(request->arp_header.arp_tha, &broadcast, 6);
+							memcpy(request->arp_header.arp_tpa,&iip->ip_header.daddr,4);							
+						}
+						tempRtable = tempRtable->next;
+					}
+				}
+				send(tempInterface->packet_socket, &request, sizeof(request), 0);			
+						
+				//wait for ARP response (timeout)
+				
+				
+				//print
 			}
 		}
   	}
