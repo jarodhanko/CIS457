@@ -402,7 +402,7 @@ void load_table(char *filename){
 			tempRtable->network = (u_int32_t)inet_addr(item);			
 			index = 0;
 			for(i = 0; i < 9; i++){
-				item[index] = '\0';
+				item[i] = '\0';
 			}
 			caseNum++;
 		}
@@ -413,7 +413,7 @@ void load_table(char *filename){
 				tempRtable->prefix = inet_addr(item);
 				index = 0;
 				for(i = 0; i < 9; i++){
-				item[index] = '\0';
+					item[i] = '\0';
 				}
 				caseNum++;
 			}
@@ -426,7 +426,7 @@ void load_table(char *filename){
 					tempRtable->hop = (u_int32_t)inet_addr(item);
 				index = 0;
 				for(i = 0; i < 9; i++){
-				item[index] = '\0';
+					item[i] = '\0';
 				}
 				caseNum++;
 			}
@@ -444,7 +444,7 @@ void load_table(char *filename){
 
 			caseNum = 0;
 			for(i = 0; i < 9; i++){
-				item[index] = '\0';
+				item[i] = '\0';
 			}
 		}
 	}
