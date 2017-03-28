@@ -363,7 +363,7 @@ int main(int argc, char **argv){
 				struct iip *iip;
 				iip = ((struct iip*)&buf);
 				
-				struct aarp *request;
+				struct aarp *request = malloc(sizeof(struct aarp));
 				request->eth_header.ether_type = ETHERTYPE_ARP;
 			
 				//figure out next hop IP and interface
