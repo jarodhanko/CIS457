@@ -407,60 +407,66 @@ void load_table(char *filename){
 		if (c == '/'){ // Network
 
 			printf("NEW NETWORK\n");
+
 			item[--index] = '\0';
 			tempRtable->network = (u_int32_t)inet_addr(item);			
-			index = 0;
+			
 			for(i = 0; i < 9; i++){
 				item[i] = '\0';
 			}
+			index = 0;
 			caseNum++;
 		}
 		else if (c == ' '){
 
 			if(caseNum == 1){ // Prefix
 				printf("NEW PREFIX\n");
+				
 				item[--index] = '\0';
 				tempRtable->prefix = atoi(item);
-				index = 0;
+				
 				for(i = 0; i < 9; i++){
 					item[i] = '\0';
 				}
+				index = 0;
 				caseNum++;
 			}
 			else if (caseNum == 2){ // Hop
 
 				printf("NEW HOP\n");
 				item[--index] = '\0';
+				
 				if(item[--index] == '-')
 					tempRtable->hop = -1;
 				else 
 					tempRtable->hop = (u_int32_t)inet_addr(item);
-				index = 0;
+				
 				for(i = 0; i < 9; i++){
 					item[i] = '\0';
 				}
+				index = 0;
 				caseNum++;
 			}
 		}
 		else if (c == '\n' || c == EOF){ // Interface
 
 			printf("NEW LINE\n");
+
 			item[--index] = '\0';
 			memcpy(&tempRtable->interface, item, 8);
-			index = 0;
 			
 			tempRtable->next = NULL;
 
 			newRtable = 1;
 					
-
-			caseNum = 0;
 			for(i = 0; i < 9; i++){
 				item[i] = '\0';
 			}
+			index = 0;
+			caseNum = 0;
 		}
 	}
-	
+	// Close the file.
 	fclose(fp); 
 }
 
