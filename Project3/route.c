@@ -54,12 +54,12 @@ struct interface {
 	struct interface *next;
 };
 struct interface *interfaceList;
-
+struct routing_table *rtable;
 
 
 
 /* PROTOTYPES **/
-void load_table(struct routing_table **rtable, char *filename);
+void load_table(char *filename);
 void print_ETHERTYPE_ARP(struct aarp *request);
 void print_ETHERTYPE_IP(struct iicmp reply);
 void clearArray(char *array);
@@ -206,8 +206,8 @@ int main(int argc, char **argv){
   	//for the project you will probably want to look at more (to do so,
   	//a good way is to have one socket per interface and use select to
   	//see which ones have data)
-  	struct routing_table *rtable = malloc(sizeof(struct routing_table));
-  	load_table(&rtable, argv[1]);
+  
+  	load_table(argv[1]);
 
 	struct interface *tempInterface = interfaceList;
 	printf("-----------\n");
@@ -361,7 +361,7 @@ int main(int argc, char **argv){
 /****************************************************************************************
 * LOAD ROUTING TABLE  ---- FIX ME ---- 
 ****************************************************************************************/
-void load_table(struct routing_table **rtable, char *filename){
+void load_table(char *filename){
 	
 	FILE *fp = fopen(filename, "r");  	
   	if (fp == NULL){
@@ -369,11 +369,11 @@ void load_table(struct routing_table **rtable, char *filename){
     	exit(1);
 	}
 	
-	(*rtable)->next = NULL;
+	rtable->next = NULL;
 	struct routing_table *tempRtable, *tmpRtable, *prevRT;
 	tempRtable = NULL;
 	int dothing = 1;
-	tempRtable = (*rtable);
+	tempRtable = rtable;
 	//tempRtable = malloc(sizeof(struct routing_table));
 	tmpRtable = NULL;
 	int caseNum = 0;
@@ -434,7 +434,7 @@ void load_table(struct routing_table **rtable, char *filename){
 			tempRtable->next = NULL;
 
 			
-			for(tempRtable = (*rtable); tempRtable != NULL; tempRtable = tempRtable->next){
+			for(tempRtable = rtable; tempRtable != NULL; tempRtable = tempRtable->next){
 				prevRT = tempRtable;
 			}
 			//if(first == 1){
