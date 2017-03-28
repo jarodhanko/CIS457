@@ -439,7 +439,7 @@ void load_table(struct routing_table **rtable, char *filename){
 						break;
 					}
 				}
-				prevRT = tempRtable;	
+	
 			}
 			caseNum = 0;
 			for(i = 0; i < 9; i++){
