@@ -420,7 +420,7 @@ void load_table(char *filename){
 			if(caseNum == 1){ // Prefix
 				printf("NEW PREFIX\n");
 				item[--index] = '\0';
-				tempRtable->prefix = inet_addr(item);
+				tempRtable->prefix = atoi(item);
 				index = 0;
 				for(i = 0; i < 9; i++){
 					item[i] = '\0';
