@@ -283,10 +283,10 @@ int main(int argc, char **argv){
 				struct aarp reply = *request;
 	
 				// IS THIS FOR US?
-				//int our_IP = 0;
-				//if (request->eth_header.ether_dhost == our_IP){
+				if (request->arp_header.arp_spa == tempInterface->ip_addrs){
+					printf("YOU'VE GOT MAIL\n");
 				
-				//}
+				}
 
 
 
