@@ -402,7 +402,7 @@ int main(int argc, char **argv){
 					}
 					tempRtable = tempRtable->next;
 				}
-				if(skip > 0){
+				if(skip == 0){
 					tempRtable = rtable;
 					while(tempRtable != NULL){	
 						char chars[4];
