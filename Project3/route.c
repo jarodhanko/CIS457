@@ -273,8 +273,13 @@ int main(int argc, char **argv){
     		printf("Got a %d byte packet\n", n);
 		
 			
-   	 		struct aarp *tempArp = ((struct aarp*)&buf);
-			struct iicmp *tempIcmp = ((struct iicmp*)&buf);
+   	 		struct aarp *tempArp;
+			tempArp  = ((struct aarp*)&buf);
+			struct iicmp *tempIcmp;
+			tempIcmp = ((struct iicmp*)&buf);
+
+			printf("ARP? %d \n", tempArp->arp_header.ea_hdr.ar_pro); 
+			printf("ICMP? %d \n", tempIcmp->eth_header.ether_type);
 			
 			//limit based on mac address and ip address
 			if((ntohs(recvaddr.sll_protocol) == ETH_P_ARP) && n > -1 ){//&& tempArp->arp_header.ea_hdr.ar_pro == ARPOP_REQUEST){
@@ -354,6 +359,7 @@ int main(int argc, char **argv){
 		
 				send(tempInterface->packet_socket, &result, sizeof(result), 0);
 			}else if ((ntohs(recvaddr.sll_protocol) == ETH_P_IP) && n > -1 && tempIcmp->eth_header.ether_type == ETHERTYPE_IP){
+				printf("REACAHED IF");
 				struct iip *iip;
 				iip = ((struct iip*)&buf);
 				
