@@ -385,6 +385,7 @@ void load_table(struct routing_table **rtable, char *filename){
 
 		item[index++] = c;
 		if (c == '/'){				// Network
+			printf("NEW NETWORK\n");
 			item[--index] = '\0';
 			tempRtable->network = (u_int32_t)atoi(item);			
 			index = 0;
@@ -396,20 +397,25 @@ void load_table(struct routing_table **rtable, char *filename){
 		}
 		else if (c == ' '){
 			if(caseNum == 1){  		// Prefix
+				printf("NEW PREFIX\n");
 				item[--index] = '\0';
 				tempRtable->network = atoi(item);
 				index = 0;
+				caseNum++;
 			}
 			else if (caseNum == 2){ // Hop
+				printf("NEW HOP\n");
 				item[--index] = '\0';
 				if(item[--index] == '-')
 					tempRtable->network = -1;
 				else 
 					tempRtable->network = (u_int32_t)atoi(item);
 				index = 0;
+				caseNum++;
 			}
 		}
 		else if (c == '\n' || c == EOF){		 // Interface
+			printf("NEW LINE\n");
 			item[--index] = '\0';
 			memcpy(&tempRtable->network, item, 8);
 			index = 0;
@@ -422,8 +428,7 @@ void load_table(struct routing_table **rtable, char *filename){
 			
 			}
 			tmpRtable = tempRtable;
-			printf("NEW NODE");
-			
+			caseNum = 0;
 		}
 	}
 	
