@@ -422,6 +422,7 @@ void load_table(struct routing_table **rtable, char *filename){
 			
 			}
 			tmpRtable = tempRtable;
+			printf("NEW NODE");
 			
 		}
 	}
