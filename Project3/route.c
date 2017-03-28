@@ -374,7 +374,6 @@ void load_table(struct routing_table **rtable, char *filename){
 	tempRtable = malloc(sizeof(struct routing_table));
 	tmpRtable = malloc(sizeof(struct routing_table));
 	tmpRtable = NULL;
-	tmpRtable->next = NULL;
 	int caseNum = 0;
 	int i;
 	char item[9];
@@ -426,10 +425,10 @@ void load_table(struct routing_table **rtable, char *filename){
 			item[--index] = '\0';
 			memcpy(&tempRtable->interface, item, 8);
 			index = 0;
-			if ((*rtable) == NULL)
-				(*rtable) = tempRtable;
-			else {
-			}
+			//if ((*rtable) == NULL)
+			//	(*rtable) = tempRtable;
+			//else {
+			//}
 			tempRtable->next = NULL;
 			if(tmpRtable == NULL)
 				tmpRtable = tempRtable;
