@@ -256,7 +256,7 @@ int main(int argc, char **argv){
     		//see packets in both directions. Only outgoing can be seen when
     		//using a packet socket with some specific protocol)
    		
-			int n = recvfrom(tempInterface->packet_socket, buf, 1500,0,(struct sockaddr*)&recvaddr, &recvaddrlen);
+			int n = recvfrom(tempInterface->packet_socket, buf, 1500,0,(struct sockaddr*)&recvaddr, 							&recvaddrlen);
  		
 			//ignore outgoing packets (we can't disable some from being sent
     		//by the OS automatically, for example ICMP port unreachable
@@ -278,10 +278,10 @@ int main(int argc, char **argv){
 			tempIcmp = ((struct iicmp*)&buf);
 
 
-			u_int32_t interfaceIP = tempInterface->ip_addrs[0] | (tempInterface->ip_addrs[1] << 8) | (tempInterface->ip_addrs[2] << 16) | (tempInterface->ip_addrs[3] << 24);
+			u_int32_t interfaceIP = tempInterface->ip_addrs[0] | (tempInterface->ip_addrs[1] << 8) | 								(tempInterface->ip_addrs[2] << 16) | (tempInterface->ip_addrs[3] << 24);
 			
 			//limit based on mac address and ip address
-			if((ntohs(recvaddr.sll_protocol) == ETH_P_ARP) && n > -1 && ntohs(tempArp->arp_header.ea_hdr.ar_op) == ARPOP_REQUEST){
+			if((ntohs(recvaddr.sll_protocol) == ETH_P_ARP)){
 				struct aarp *request;
 		
 				request = ((struct aarp*)&buf);
