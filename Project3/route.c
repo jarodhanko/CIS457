@@ -397,7 +397,7 @@ int main(int argc, char **argv){
 
 // START: process ICMP echo request.
 						
-						printf("Searching for interface...");
+						printf("Searching for interface...\n");
 
 						struct interface *tmpInterface;
 						tmpInterface = interfaceList;
@@ -418,7 +418,7 @@ printf("FIX --- ME\n");
 								printf("Found interface: %s", tmpInterface->name);
 
 								// Copy the temp interface name to i_name, exit the loop.
-								memcpy(i_name, &tmpInterface->name, sizeof(tmpInterface->name));
+								memcpy(i_name, tmpInterface->name, sizeof(&tmpInterface->name));
 								break; 
 							}
 
