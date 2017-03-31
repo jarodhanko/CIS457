@@ -418,7 +418,7 @@ printf("FIX --- iip\n");
 							if (i_ip & interfaceIP){
 printf("FIX --- if\n");
 								printf("Found interface: %s", tmpInterface->name);
-
+printf("FIX --- print\n");
 								// Copy the temp interface name to i_name, exit the loop.
 								strcpy(i_name, tmpInterface->name);
 printf("FIX --- copy\n");
