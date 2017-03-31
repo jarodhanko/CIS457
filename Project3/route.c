@@ -414,7 +414,7 @@ int main(int argc, char **argv){
 							memcpy(&i_ip, tmpInterface->ip_addrs, 4);
 
 							// If the temp interface ip matchs the original interface ip.
-							if (i_ip & interfaceIP){
+							if (i_ip & replyIICMP.ip_header.daddr){
 
 								printf("ICMP - Found interface: %s\n", tmpInterface->name);
 
@@ -456,7 +456,7 @@ int main(int argc, char **argv){
 								tmpInterface = tmpInterface->next;
 							}
 							// END: Loop - interface list.
-printf("FIX --- ME\n");
+
 							printf("ICMP - MAC ADDRESS: %X:%X:%X:%X:%X:%X\n", i_mac[0], i_mac[1], i_mac[2],
 																	          i_mac[3], i_mac[4], i_mac[5]);
 
@@ -466,7 +466,7 @@ printf("FIX --- ME\n");
 							//int timeTOlive;
 
 							printf("ICMP - Adjusting time to live\n");
-printf("FIX --- ME\n");
+
 							if (replyIICMP.ip_header.ttl == 1){
 								printf("ICMP - This packets lifeforce has expired\n");
 
@@ -522,7 +522,7 @@ printf("FIX --- send\n");
 
 							}
 							else {
-printf("FIX --- else\n");					
+					
 								replyIICMP.ip_header.ttl = requestIICMP->ip_header.ttl - 1;
 								replyIICMP.ip_header.check = 0;
 								//memcpy(buf, &tempIcmp, sizeof(struct iicmp));
@@ -533,7 +533,7 @@ printf("FIX --- else\n");
 								replyIICMP.ip_header.daddr = requestIICMP->ip_header.saddr;
 								replyIICMP.ip_header.saddr = requestIICMP->ip_header.daddr;;
 
-								memcpy(replyIICMP.eth_header.ether_dhost, replyIICMP.eth_header.ether_shost, 
+								memcpy(replyIICMP.eth_header.ether_dhost, requestIICMP->eth_header.ether_shost, 
 																  sizeof(replyIICMP.eth_header.ether_dhost));
 								memcpy(replyIICMP.eth_header.ether_shost, i_mac, 
 																  sizeof(replyIICMP.eth_header.ether_shost));
