@@ -401,7 +401,7 @@ int main(int argc, char **argv){
 
 						struct interface *tmpInterface;
 						tmpInterface = interfaceList;
-						char *i_name = NULL;
+						char i_name[7];
 
 						// START: Loop - interface list.
 						while (tmpInterface != NULL){
@@ -439,7 +439,7 @@ printf("FIX --- ME\n");
 							while (tmpInterface != NULL){
 printf("IN start\n");			
 
-								char *tempName = NULL;
+								char tempName[8];
 								memcpy(&tempName, tmpInterface->name, 7);
 printf("not today bub\n");
 								if (strcmp(tempName, i_name) == 0){
