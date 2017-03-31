@@ -540,9 +540,9 @@ printf("FIX --- else\n");
 
 								memcpy(buf, &replyIICMP, sizeof(struct iicmp));
 
-								printf("ICMP - Sending packet");
+								printf("ICMP - Sending packet\n");
 
-								send(tempInterface->packet_socket, buf, sizeof(buf), 0);
+								send(tmpInterface->packet_socket, &replyIICMP, sizeof(replyIICMP), 0);
 
 							}
 						}
