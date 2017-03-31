@@ -414,7 +414,7 @@ int main(int argc, char **argv){
 							memcpy(&i_ip, tmpInterface->ip_addrs, 4);
 
 							// If the temp interface ip matchs the original interface ip.
-							if (i_ip & replyIICMP.ip_header.daddr){
+							if (i_ip & interfaceIP){
 
 								printf("ICMP - Found interface: %s\n", tmpInterface->name);
 
