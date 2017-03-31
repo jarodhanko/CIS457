@@ -405,24 +405,26 @@ int main(int argc, char **argv){
 printf("FIX --- ME\n");
 						// START: Loop - interface list.
 						while (tmpInterface != NULL){
-
+printf("FIX --- start\n");
 							// Store the interface ip as a u_int32
 							u_int32_t i_ip = tmpInterface->ip_addrs[0] | 
 									  		(tmpInterface->ip_addrs[1] << 8) | 
 						    		  		(tmpInterface->ip_addrs[2] << 16) | 
 						    		  		(tmpInterface->ip_addrs[3] << 24);
-							
+printf("FIX --- iip\n");
 							// If the temp interface ip matchs the original interface ip.
 							if (i_ip == interfaceIP){
-
+printf("FIX --- if\n");
 								printf("Found interface: %s", tmpInterface->name);
 
 								// Copy the temp interface name to i_name, exit the loop.
 								memcpy(i_name, tmpInterface->name, sizeof(&tmpInterface->name));
+printf("FIX --- copy\n");
 								break; 
 							}
 
 							// Set the temp interface to the next interface in the list.
+printf("FIX --- next\n");
 							tmpInterface = tmpInterface->next;
 						}
 						// END: Loop - interface list.
