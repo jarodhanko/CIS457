@@ -270,18 +270,487 @@ int main(int argc, char **argv){
 			}
     		//start processing all others
     		printf("Got a %d byte packet\n", n);
-		
+
+			// Store the original interface ip as a u_int32
+			u_int32_t interfaceIP = tempInterface->ip_addrs[0] | (tempInterface->ip_addrs[1] << 8) | 								(tempInterface->ip_addrs[2] << 16) | (tempInterface->ip_addrs[3] << 24);
 			
-   	 		struct aarp *tempArp;
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+// NEW CODE, NOT FINISHED.
+
+
+			// Recieved ARP.
+			if((ntohs(recvaddr.sll_protocol) == ETH_P_ARP)){
+				printf("----- Recieved ARP -----\n");
+
+// START: process ARP request.
+				
+				struct aarp *tempArp;
+				tempArp  = ((struct aarp*)&buf);
+
+				// Arp_header op_code was not arp reply
+				if (tempArp->arp_header.ea_hdr.ar_op != ntohs(ARPOP_REPLY)){
+				
+					// Store arp_header ip as u_int32
+					u_int32_t ipAddr = tempArp->arp_header.arp_tpa[3] << 24 | 
+									   tempArp->arp_header.arp_tpa[2] << 16 | 										   tempArp->arp_header.arp_tpa[1] << 8 | 
+									   tempArp->arp_header.arp_tpa[0];
+
+					// Store interface ip as u_int32
+					u_int32_t i_ip = tempInterface->ip_addrs[0] | 
+									(tempInterface->ip_addrs[1] << 8) | 
+						    		(tempInterface->ip_addrs[2] << 16) | 
+						   			(tempInterface->ip_addrs[3] << 24);
+				 	
+					// Interface ip matches arp_header ip, then we want this arp request.
+					if(i_ip == ipAddr){
+
+						// Change the arp_header op_code to reply.
+						tempArp->arp_header.ea_hdr.ar_op = htons(2);
+
+						// Swap arp_header sender ip to arp_header target ip and vice versa. 
+						u_int32_t tempAddr;
+						memcpy(&tempAddr, tempArp->arp_header.arp_spa, sizeof(tempAddr));
+						memcpy(tempArp->arp_header.arp_spa, tempArp->arp_header.arp_tpa, sizeof(tempAddr));
+						memcpy(tempArp->arp_header.arp_tpa, &tempAddr, sizeof(tempAddr));
+
+						// Set arp_header target mac to arp_header sender mac.
+						memcpy(tempArp->arp_header.arp_tha, tempArp->arp_header.arp_sha, 
+													sizeof(tempArp->arp_header.arp_tha));
+
+						// Set arp_header sender mac to interface mac.
+						memcpy(tempArp->arp_header.arp_sha, tempInterface->mac_addrs, 
+													sizeof(tempArp->arp_header.arp_sha));
+						
+						// Set eth_header destination mac to eth_header sender mac.
+						memcpy(tempArp->eth_header.ether_dhost, tempArp->eth_header.ether_shost, 
+													sizeof(tempArp->eth_header.ether_dhost));
+
+						// Set eth_header sender mac to interface mac.
+						memcpy(tempArp->eth_header.ether_shost, tempInterface->mac_addrs, 
+													sizeof(tempArp->eth_header.ether_shost));
+
+						// Overwrite buf with aarp.
+						memcpy(buf, &tempArp, sizeof(struct aarp));
+
+						// Send the ARP reply.
+						send(tempInterface->packet_socket, &buf, sizeof(buf), 0);
+					}
+
+					// Interface ip doesn't match arp ip, disregard the arp request.
+					else {
+					
+						printf("We dont want this ARP packet sir");
+
+					}
+				}
+
+// END: process ARP requst.
+
+			}
+
+			// Recieved IP.
+			else if ((ntohs(recvaddr.sll_protocol) == ETH_P_IP)){
+				printf("----- Recieved IP -----\n");
+
+				struct iicmp *tempIcmp;
+				tempIcmp = ((struct iicmp*)&buf);
+				
+				// If protocol is recieve ICMP packets for all local sockets.
+				if (tempIcmp->ip_header.protocol == IPPROTO_ICMP) {	
+					
+					// If the icmp_header type is an icmp echo or reply.
+					if (tempIcmp->icmp_header.type == ICMP_ECHO || 
+						tempIcmp->icmp_header.type == ICMP_ECHOREPLY) {
+             			
+						if (tempIcmp->icmp_header.type == ICMP_ECHO)							
+							printf("Received ICMP ECHO\n");
+						else
+							printf("Received ICMP REPLY\n");
+
+// START: process ICMP echo request.
+						
+						printf("Searching for interface...");
+
+						struct interface *tmpInterface;
+						tmpInterface = interfaceList;
+						char *i_name = NULL;
+
+						// START: Loop - interface list.
+						while (tmpInterface != NULL){
+
+							// Store the interface ip as a u_int32
+							u_int32_t i_ip = tmpInterface->ip_addrs[0] | 
+									  		(tmpInterface->ip_addrs[1] << 8) | 
+						    		  		(tmpInterface->ip_addrs[2] << 16) | 
+						    		  		(tmpInterface->ip_addrs[3] << 24);
+							
+							// If the temp interface ip matchs the original interface ip.
+							if (i_ip == interfaceIP){
+
+								printf("Found interface: %s", tmpInterface->name);
+
+								// Copy the temp interface name to i_name, exit the loop.
+								memcpy(i_name, &tmpInterface->name, sizeof(tmpInterface->name));
+								break; 
+							}
+
+							// Set the temp interface to the next interface in the list.
+							tmpInterface = tmpInterface->next;
+						}
+						// END: Loop - interface list.
+						
+						// If there was a match in the loop.
+						if (i_name != NULL) {
+
+							printf("We got mail!!!");
+
+							struct interface *tmpInterface;
+							tmpInterface = interfaceList;
+							u_int8_t i_mac[6];
+						
+							while (tmpInterface != NULL){
+							
+								if (strcmp(tmpInterface->name, i_name)){
+
+									memcpy(i_mac, &tmpInterface->mac_addrs, sizeof(i_mac));
+									break; 
+								}
+								tmpInterface = tmpInterface->next;
+							}
+
+							printf("MAC ADDRESS: %X:%X:%X:%X:%X:%X", i_mac[0], i_mac[1], i_mac[2],
+																	 i_mac[3], i_mac[4], i_mac[5]);
+
+							tempIcmp->icmp_header.type = ICMP_ECHOREPLY;
+
+							tempIcmp->icmp_header.checksum = 0;
+							//int timeTOlive;
+
+							printf("Adjusting time to live");
+
+							if (tempIcmp->ip_header.ttl == 1){
+								printf("This packets lifeforce has expired");
+
+			// START: send ICMP error - ICMP_TIME_EXCEEDED
+								
+								u_int8_t tempAddr[4];
+	
+								memcpy(&tempAddr, tempIcmp->eth_header.ether_shost, sizeof(tempAddr));
+								memcpy(tempIcmp->eth_header.ether_shost, tmpInterface->mac_addrs, 
+																				   sizeof(tempAddr));
+								memcpy(tempIcmp->eth_header.ether_dhost, tempAddr, sizeof(tempAddr));
+
+								tempIcmp->eth_header.ether_type = htons(ETHERTYPE_IP);
+
+								tempIcmp->ip_header.daddr    = tempIcmp->ip_header.saddr;
+								memcpy(&tempIcmp->ip_header.saddr, &tmpInterface->ip_addrs, 
+															 sizeof(tmpInterface->ip_addrs));
+								tempIcmp->ip_header.check    = 0;
+								tempIcmp->ip_header.frag_off = 0; 
+								tempIcmp->ip_header.ihl      = 5;
+								tempIcmp->ip_header.protocol = IPPROTO_ICMP; 
+								tempIcmp->ip_header.tos      = 0;
+								tempIcmp->ip_header.tot_len  = htons(28); 
+								tempIcmp->ip_header.ttl      = 64;
+								tempIcmp->ip_header.version  = 4;
+								
+								tempIcmp->icmp_header.type = ICMP_TIME_EXCEEDED;
+								tempIcmp->icmp_header.checksum = 0;
+								tempIcmp->icmp_header.code = ICMP_HOST_UNREACH;
+
+								memcpy(buf, &tempIcmp, sizeof(struct iicmp));
+								
+								tempIcmp->icmp_header.checksum = ip_checksum(buf, sizeof(buf));
+								
+								memcpy(buf, &tempIcmp, sizeof(struct iicmp));
+
+								send(tmpInterface->packet_socket, buf, sizeof(buf), 0);
+
+			// END: send ICMP error - ICMP_TIME_EXCEEDED
+
+							}
+							else {
+					
+								tempIcmp->ip_header.ttl = tempIcmp->ip_header.ttl - 1;
+								tempIcmp->ip_header.check = 0;
+								memcpy(buf, &tempIcmp, sizeof(struct iicmp));
+								tempIcmp->ip_header.check = ip_checksum(buf, sizeof(buf));
+								tempIcmp->icmp_header.checksum = ip_checksum(buf, sizeof(buf));
+								
+								u_int32_t tempAddr;
+								tempAddr = tempIcmp->ip_header.daddr;
+								tempIcmp->ip_header.daddr = tempIcmp->ip_header.saddr;
+								tempIcmp->ip_header.saddr = tempAddr;
+
+								memcpy(tempIcmp->eth_header.ether_dhost, tempIcmp->eth_header.ether_shost, 
+																  sizeof(tempIcmp->eth_header.ether_dhost));
+								memcpy(tempIcmp->eth_header.ether_shost, i_mac, 
+																  sizeof(tempIcmp->eth_header.ether_shost));
+
+								memcpy(buf, &tempIcmp, sizeof(struct iicmp));
+
+								send(tmpInterface->packet_socket, buf, sizeof(buf), 0);
+
+							}
+						}
+						else {
+
+							printf("Whose packet is this???");
+
+							int foundMatch = 0;
+							u_int32_t ip_addr;
+
+							struct interface *tmpInterface;
+							tmpInterface = interfaceList;
+							while (tmpInterface != NULL){
+
+								struct routing_table *tmpTable;
+								tmpTable = rtable;
+								while (tmpTable != NULL){
+
+									if (tmpTable->network << (32 - tmpTable->prefix) == 
+													tempIcmp->ip_header.daddr << (32 - tmpTable->prefix)){
+
+										
+										foundMatch = 1;
+										ip_addr = tmpTable->hop;
+										break;
+									}
+								}
+								if (foundMatch){
+
+									break;
+								}
+								ip_addr = 0;
+							}
+							
+							
+							if (tmpInterface != NULL){
+
+			// START: send ARP request.
+
+								if (ip_addr == 0){
+								
+									ip_addr = tempIcmp->ip_header.daddr;
+								}
+								
+								// Send ARP request.
+
+								struct aarp *tempARP;
+								tempARP = NULL;
+
+								char broadcast255[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+								char broadcast0[6]   = {0,0,0,0,0,0};
+
+								memcpy(tempARP->eth_header.ether_dhost, &broadcast255,
+															sizeof(tempIcmp->eth_header.ether_dhost));
+
+								memcpy(tempARP->arp_header.arp_tha, &broadcast0,
+															sizeof(tempIcmp->eth_header.ether_dhost));
+
+								memcpy(tempARP->arp_header.arp_sha, tmpInterface->mac_addrs, 6);
+								
+								tempARP->arp_header.arp_tpa[3] = (uint8_t) (ip_addr >> 24);
+								tempARP->arp_header.arp_tpa[2] = (uint8_t) (ip_addr >> 16);
+								tempARP->arp_header.arp_tpa[1] = (uint8_t) (ip_addr >> 8);
+								tempARP->arp_header.arp_tpa[0] = (uint8_t) (ip_addr);
+								
+								u_int32_t i_ip = tmpInterface->ip_addrs[0] | 
+									  		    (tmpInterface->ip_addrs[1] << 8) | 
+						    		  		    (tmpInterface->ip_addrs[2] << 16) | 
+						    		  		    (tmpInterface->ip_addrs[3] << 24);
+
+								tempARP->arp_header.arp_spa[3] = (uint8_t) (i_ip >> 24);
+								tempARP->arp_header.arp_spa[2] = (uint8_t) (i_ip >> 16);
+								tempARP->arp_header.arp_spa[1] = (uint8_t) (i_ip >> 8);
+								tempARP->arp_header.arp_spa[0] = (uint8_t) (i_ip);
+
+								tempARP->arp_header.ea_hdr.ar_hln = 6;
+								tempARP->arp_header.ea_hdr.ar_hrd = htons(ARPHRD_ETHER);
+								tempARP->arp_header.ea_hdr.ar_pln = 4;
+								tempARP->arp_header.ea_hdr.ar_pro = htons(ETH_P_IP);
+								tempARP->arp_header.ea_hdr.ar_op  = htons(ARPOP_REQUEST);
+					
+								char tempBuf[1500];
+								memcpy(tempBuf, tempARP, sizeof(tempBuf));
+
+								send(tmpInterface->packet_socket, tempBuf, sizeof(struct aarp), 0);
+									
+								
+								struct sockaddr_ll tmpRecv;
+
+  								struct timeval tv;
+  								tv.tv_sec = 0;
+  								tv.tv_usec = 1000 * 20;
+  								if (setsockopt(tmpInterface->packet_socket, SOL_SOCKET, SO_RCVTIMEO,&tv,
+																					sizeof(tv)) < 0) {
+    								perror("Error");
+								}
+
+								socklen_t tmpRecvlen = sizeof(struct sockaddr_ll);
+  								int n = recvfrom(tmpInterface->packet_socket, tempBuf, 1500, 0, 
+																(struct sockaddr*)&tmpRecv, &tmpRecvlen);
+  					
+								u_int8_t *mac_addr;								
+			
+  								if (n < 1){
+    								mac_addr = NULL;
+								}
+								else {
+
+									tv.tv_sec = 0;
+								    tv.tv_usec = 1000;
+									if (setsockopt(tmpInterface->packet_socket, SOL_SOCKET,SO_RCVTIMEO,
+																				&tv,sizeof(tv)) < 0) {
+										perror("Error");
+									}
+
+									struct aarp *new_aarp;
+									memcpy(&new_aarp, tempBuf + sizeof(struct ether_header), 
+																					sizeof(struct aarp));
+									
+									memcpy(&mac_addr, &new_aarp->arp_header.arp_sha, sizeof(mac_addr));
+
+								}
+
+			// END: send ARP request.
+								
+								if (mac_addr == NULL) {
+					
+									printf("No MAC received from ARP request");
+
+			// START: send ICMP error - ICMP_DEST_UNREACH.
+
+									u_int8_t tempAddr[4];
+	
+									memcpy(&tempAddr, tempIcmp->eth_header.ether_shost, sizeof(tempAddr));
+									memcpy(tempIcmp->eth_header.ether_shost, tmpInterface->mac_addrs, 
+																					   sizeof(tempAddr));
+									memcpy(tempIcmp->eth_header.ether_dhost, tempAddr, sizeof(tempAddr));
+
+									tempIcmp->eth_header.ether_type = htons(ETHERTYPE_IP);
+
+									tempIcmp->ip_header.daddr    = tempIcmp->ip_header.saddr;
+									memcpy(&tempIcmp->ip_header.saddr, &tmpInterface->ip_addrs, 
+																 sizeof(tmpInterface->ip_addrs));
+									tempIcmp->ip_header.check    = 0;
+									tempIcmp->ip_header.frag_off = 0; 
+									tempIcmp->ip_header.ihl      = 5;
+									tempIcmp->ip_header.protocol = IPPROTO_ICMP; 
+									tempIcmp->ip_header.tos      = 0;
+									tempIcmp->ip_header.tot_len  = htons(28); 
+									tempIcmp->ip_header.ttl      = 64;
+									tempIcmp->ip_header.version  = 4;
+								
+									tempIcmp->icmp_header.type = ICMP_HOST_UNREACH;
+									tempIcmp->icmp_header.checksum = 0;
+									tempIcmp->icmp_header.code = ICMP_HOST_UNREACH;
+
+									memcpy(buf, &tempIcmp, sizeof(struct iicmp));
+								
+									tempIcmp->icmp_header.checksum = ip_checksum(buf, sizeof(buf));
+								
+									memcpy(buf, &tempIcmp, sizeof(struct iicmp));
+
+									send(tmpInterface->packet_socket, buf, sizeof(buf), 0);
+
+			// END: send ICMP error - ICMP_DEST_UNREACH.
+								}
+								else {
+
+									printf("MAC from ARP request: %02X:%02X:%02X:%02X:%02X:%02X\n", 
+																	mac_addr[0], mac_addr[1], mac_addr[2], 
+																	mac_addr[3], mac_addr[4], mac_addr[5]);
+
+
+									tempIcmp->eth_header.ether_type = htons(ETH_P_IP);
+									memcpy(tempIcmp->eth_header.ether_dhost, &mac_addr, sizeof(mac_addr));
+									memcpy(tempIcmp->eth_header.ether_shost, &tmpInterface->mac_addrs, 
+																sizeof(tempIcmp->eth_header.ether_shost));
+
+									tempIcmp->icmp_header.checksum = 0;
+									memcpy(buf, &tempIcmp, sizeof(struct iicmp));
+									
+									if (tempIcmp->ip_header.ttl == 1){
+
+										// ICMP error - time to live
+
+									}
+									else {
+
+										tempIcmp->ip_header.ttl = tempIcmp->ip_header.ttl - 1;
+										tempIcmp->ip_header.check = 0;
+										memcpy(buf, &tempIcmp, sizeof(struct iicmp));
+										tempIcmp->ip_header.check = ip_checksum(buf, sizeof(buf));
+										tempIcmp->icmp_header.checksum = ip_checksum(buf, sizeof(buf));
+
+										memcpy(buf, &tempIcmp, sizeof(struct iicmp));
+
+										send(tmpInterface->packet_socket, buf, sizeof(buf), 0);
+										
+									}
+								}
+							}
+						}
+
+// END: process ICMP echo request.
+
+            		} 
+					else {
+              			printf("Forwarding Packet\n");
+
+// START: forward packet.
+
+
+
+// END: forward packet.
+					}
+				}
+				else {
+            		printf("Recieved packet (not ARP or ICMP), Forwarding\n");
+
+// START: forward packet.
+            		
+
+
+// END: forward packet.
+
+				}
+			}
+			else {
+				printf("Dropping this packet because why not?\n");
+			}
+		}
+	}
+	return 0;
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+
+
+
+/*
+
+
+
+
+
+struct aarp *tempArp;
 			tempArp  = ((struct aarp*)&buf);
 			struct iicmp *tempIcmp;
 			tempIcmp = ((struct iicmp*)&buf);
 
 
-			u_int32_t interfaceIP = tempInterface->ip_addrs[0] | (tempInterface->ip_addrs[1] << 8) | 								(tempInterface->ip_addrs[2] << 16) | (tempInterface->ip_addrs[3] << 24);
-			
-			//limit based on mac address and ip address
-			if((ntohs(recvaddr.sll_protocol) == ETH_P_ARP)){
+
+
 				struct aarp *request;
 		
 				request = ((struct aarp*)&buf);
@@ -313,7 +782,7 @@ int main(int argc, char **argv){
 				send(tempInterface->packet_socket, &reply, sizeof(reply), 0);
 				printf("Sent ARP reply \n");
 
-			}else if((ntohs(recvaddr.sll_protocol) == ETH_P_IP) && n > -1 && tempIcmp->icmp_header.type == ICMP_ECHO && tempIcmp->ip_header.daddr == interfaceIP){
+			}else if((ntohs(recvaddr.sll_protocol) == ETH_P_IP) && n > -1 && tempIcmp->icmp_header.type == 										ICMP_ECHO && tempIcmp->ip_header.daddr == interfaceIP){
 				
 		
 				char buf2[1500];
@@ -357,7 +826,8 @@ int main(int argc, char **argv){
 				memcpy(result + sizeof(reply), data, datalength);
 		
 				send(tempInterface->packet_socket, &result, sizeof(result), 0);
-			}else if ((ntohs(recvaddr.sll_protocol) == ETH_P_IP) && n > -1 && ntohs(tempIcmp->eth_header.ether_type) == ETHERTYPE_IP){
+			}else if ((ntohs(recvaddr.sll_protocol) == ETH_P_IP) && n > -1 && 
+						ntohs(tempIcmp->eth_header.ether_type) == ETHERTYPE_IP){
 				struct iip *iip;
 				iip = ((struct iip*)&buf);
 				
@@ -475,7 +945,7 @@ int main(int argc, char **argv){
 
 
 
-
+**/
 
 /****************************************************************************************
 * LOAD ROUTING TABLE  ---- FIX ME ---- 
