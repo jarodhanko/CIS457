@@ -439,7 +439,7 @@ printf("FIX --- ME\n");
 							while (tmpInterface != NULL){
 printf("IN start\n");			
 
-								char *tempName;
+								char *tempName = NULL;
 								memcpy(&tempName, tmpInterface->name, 7);
 printf("not today bub");
 								if (strcmp(tempName, i_name) == 0){
