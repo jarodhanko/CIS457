@@ -438,7 +438,10 @@ printf("FIX --- ME\n");
 printf("FIX --- ME\n");						
 							while (tmpInterface != NULL){
 printf("IN start\n");			
-								if (i_name != NULL && strcmp(tmpInterface->name, i_name) == 0){
+
+								char *tempName;
+								memcpy(&tempName, tmpInterface->name, 7);
+								if (strcmp(tempName, i_name) == 0){
 printf("IN HERE\n");
 									memcpy(&i_mac, tmpInterface->mac_addrs, 6);
 									break; 
