@@ -542,7 +542,7 @@ printf("FIX --- else\n");
 
 								printf("ICMP - Sending packet");
 
-								send(tmpInterface->packet_socket, buf, sizeof(buf), 0);
+								send(tempInterface->packet_socket, buf, sizeof(buf), 0);
 
 							}
 						}
