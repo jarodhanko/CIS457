@@ -465,10 +465,10 @@ printf("FIX --- ME\n");
 							replyIICMP.icmp_header.checksum = 0;
 							//int timeTOlive;
 
-							printf("Adjusting time to live");
+							printf("Adjusting time to live\n");
 printf("FIX --- ME\n");
 							if (replyIICMP.ip_header.ttl == 1){
-								printf("This packets lifeforce has expired");
+								printf("This packets lifeforce has expired\n");
 
 			// START: send ICMP error - ICMP_TIME_EXCEEDED
 printf("FIX --- ME\n");								
@@ -522,7 +522,7 @@ printf("FIX --- send\n");
 
 							}
 							else {
-					
+printf("FIX --- else\n");					
 								tempIcmp->ip_header.ttl = tempIcmp->ip_header.ttl - 1;
 								tempIcmp->ip_header.check = 0;
 								memcpy(buf, &tempIcmp, sizeof(struct iicmp));
