@@ -357,19 +357,21 @@ int main(int argc, char **argv){
 
 				struct iicmp *tempIcmp;
 				tempIcmp = ((struct iicmp*)&buf);
+
+printf("FIX --- ME");
 				
 				// If protocol is recieve ICMP packets for all local sockets.
 				if (tempIcmp->ip_header.protocol == IPPROTO_ICMP) {	
-					
+printf("FIX --- ME");					
 					// If the icmp_header type is an icmp echo or reply.
 					if (tempIcmp->icmp_header.type == ICMP_ECHO || 
 						tempIcmp->icmp_header.type == ICMP_ECHOREPLY) {
-             			
+ printf("FIX --- ME");            			
 						if (tempIcmp->icmp_header.type == ICMP_ECHO)							
 							printf("Received ICMP ECHO\n");
 						else
 							printf("Received ICMP REPLY\n");
-
+printf("FIX --- ME");
 // START: process ICMP echo request.
 						
 						printf("Searching for interface...");
