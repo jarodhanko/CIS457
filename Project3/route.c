@@ -413,7 +413,7 @@ printf("FIX --- start\n");
 						    		  		(tmpInterface->ip_addrs[3] << 24);
 printf("FIX --- iip\n");
 							// If the temp interface ip matchs the original interface ip.
-							if (i_ip == interfaceIP){
+							if (i_ip & interfaceIP){
 printf("FIX --- if\n");
 								printf("Found interface: %s", tmpInterface->name);
 
