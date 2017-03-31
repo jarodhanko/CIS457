@@ -326,7 +326,7 @@ int main(int argc, char **argv){
 
 						// Swap arp_header sender ip to arp_header target ip and vice versa. 
 						memcpy(replyARP.arp_header.arp_spa, requestARP->arp_header.arp_tpa, 4);
-						memcpy(replyARP.arp_header.arp_tpa, requestARP->arp_header.arp_tpa, 4);
+						memcpy(replyARP.arp_header.arp_tpa, requestARP->arp_header.arp_spa, 4);
 
 						// Set arp_header target mac to arp_header sender mac.
 						memcpy(replyARP.arp_header.arp_tha, requestARP->arp_header.arp_sha, 6);
