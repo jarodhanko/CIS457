@@ -441,7 +441,7 @@ printf("IN start\n");
 
 								char *tempName = NULL;
 								memcpy(&tempName, tmpInterface->name, 7);
-printf("not today bub");
+printf("not today bub\n");
 								if (strcmp(tempName, i_name) == 0){
 printf("IN HERE\n");
 									memcpy(&i_mac, tmpInterface->mac_addrs, 6);
