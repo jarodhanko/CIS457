@@ -287,18 +287,28 @@ int main(int argc, char **argv){
 
 // START: process ARP request.
 				
-				struct aarp *tempArp;
-				tempArp  = ((struct aarp*)&buf);
+
+				// The original arp packet sent to us.
+				struct aarp *requestARP;
+				requestARP = ((struct aarp*)&buf);
+
+
+				// The arp packet we will send.
+				struct aarp replyARP = *requestARP;
+
+
+				//struct aarp *tempArp;
+				//tempArp  = ((struct aarp*)&buf);
 
 				// Arp_header op_code was not arp reply
-				if (tempArp->arp_header.ea_hdr.ar_op != ntohs(ARPOP_REPLY)){
+				if (requestARP->arp_header.ea_hdr.ar_op != ntohs(ARPOP_REPLY)){
 
 					printf("ARP - op = 'REQUEST'\n");
 				
 					// Store arp_header ip as u_int32
-					u_int32_t ipAddr = tempArp->arp_header.arp_tpa[3] << 24 | 
-									   tempArp->arp_header.arp_tpa[2] << 16 | 										   tempArp->arp_header.arp_tpa[1] << 8 | 
-									   tempArp->arp_header.arp_tpa[0];
+					u_int32_t ipAddr = requestARP->arp_header.arp_tpa[3] << 24 | 
+									   requestARP->arp_header.arp_tpa[2] << 16 | 										   requestARP->arp_header.arp_tpa[1] << 8 | 
+									   requestARP->arp_header.arp_tpa[0];
 
 					// Store interface ip as u_int32
 					u_int32_t i_ip = tempInterface->ip_addrs[0] | 
@@ -312,38 +322,28 @@ int main(int argc, char **argv){
 						printf("ARP - found interface\n");
 
 						// Change the arp_header op_code to reply.
-						tempArp->arp_header.ea_hdr.ar_op = htons(ARPOP_REPLY);
+						replyARP.arp_header.ea_hdr.ar_op = htons(ARPOP_REPLY);
 
 						// Swap arp_header sender ip to arp_header target ip and vice versa. 
-						u_int32_t tempAddr;
-						memcpy(&tempAddr, tempArp->arp_header.arp_spa, sizeof(tempAddr));
-						memcpy(tempArp->arp_header.arp_spa, tempArp->arp_header.arp_tpa, sizeof(tempAddr));
-						memcpy(tempArp->arp_header.arp_tpa, &tempAddr, sizeof(tempAddr));
+						memcpy(replyARP.arp_header.arp_spa, requestARP->arp_header.arp_tpa, 4);
+						memcpy(replyARP.arp_header.arp_tpa, requestARP->arp_header.arp_tpa, 4);
 
 						// Set arp_header target mac to arp_header sender mac.
-						memcpy(tempArp->arp_header.arp_tha, tempArp->arp_header.arp_sha, 
-													sizeof(tempArp->arp_header.arp_tha));
+						memcpy(replyARP.arp_header.arp_tha, requestARP->arp_header.arp_sha, 6);
 
 						// Set arp_header sender mac to interface mac.
-						memcpy(tempArp->arp_header.arp_sha, tempInterface->mac_addrs, 
-													sizeof(tempArp->arp_header.arp_sha));
+						memcpy(replyARP.arp_header.arp_sha, tempInterface->mac_addrs, 6);
 						
 						// Set eth_header destination mac to eth_header sender mac.
-						memcpy(tempArp->eth_header.ether_dhost, tempArp->eth_header.ether_shost, 
-													sizeof(tempArp->eth_header.ether_dhost));
+						memcpy(replyARP.eth_header.ether_dhost, requestARP->eth_header.ether_shost, 6);
 
 						// Set eth_header sender mac to interface mac.
-						memcpy(tempArp->eth_header.ether_shost, tempInterface->mac_addrs, 
-													sizeof(tempArp->eth_header.ether_shost));
-
-						// Overwrite buf with aarp.
-						memcpy(buf, tempArp, sizeof(struct aarp));
-
+						memcpy(replyARP.eth_header.ether_shost, tempInterface->mac_addrs, 6);
 
 						printf("ARP - sending reply\n");
 
 						// Send the ARP reply.
-						send(tempInterface->packet_socket, tempArp, sizeof(struct aarp), 0);
+						send(tempInterface->packet_socket, &replyARP, sizeof(struct aarp), 0);
 					}
 
 					// Interface ip doesn't match arp ip, disregard the arp request.
