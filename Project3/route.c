@@ -399,8 +399,11 @@ int main(int argc, char **argv){
 						
 						printf("Searching for interface...\n");
 
+						// Create a temp interface pointer for looping.
 						struct interface *tmpInterface;
 						tmpInterface = interfaceList;
+
+						// Temp char array to hold current interface name.
 						char i_name[7];
 
 						// START: Loop - interface list.
@@ -422,8 +425,8 @@ int main(int argc, char **argv){
 							}
 
 							// Set the temp interface to the next interface in the list.
-
 							tmpInterface = tmpInterface->next;
+
 						}
 						// END: Loop - interface list.
 					
@@ -431,28 +434,31 @@ int main(int argc, char **argv){
 						if (i_name != NULL) {
 
 							printf("We got mail!!!\n");
-printf("FIX --- ME\n");
+
+							// Create a temp interface pointer for looping.
 							struct interface *tmpInterface;
 							tmpInterface = interfaceList;
 							u_int8_t i_mac[6];
-printf("FIX --- ME\n");						
+					
+							// START: Loop - interface list
 							while (tmpInterface != NULL){
-printf("IN start\n");			
-
+			
+								// Temp char array to hold current interface name.
 								char tempName[8];
 								memcpy(&tempName, tmpInterface->name, 7);
-printf("not today bub\n");
+
 								if (strcmp(tempName, i_name) == 0){
-printf("IN HERE\n");
+
 									memcpy(&i_mac, tmpInterface->mac_addrs, 6);
 									break; 
 								}
-printf("IN next\n");
+
 								tmpInterface = tmpInterface->next;
 							}
+							// END: Loop - interface list.
 printf("FIX --- ME\n");
-							printf("MAC ADDRESS: %X:%X:%X:%X:%X:%X", i_mac[0], i_mac[1], i_mac[2],
-																	 i_mac[3], i_mac[4], i_mac[5]);
+							printf("MAC ADDRESS: %X:%X:%X:%X:%X:%X\n", i_mac[0], i_mac[1], i_mac[2],
+																	   i_mac[3], i_mac[4], i_mac[5]);
 
 							replyIICMP.icmp_header.type = ICMP_ECHOREPLY;
 
@@ -461,43 +467,56 @@ printf("FIX --- ME\n");
 
 							printf("Adjusting time to live");
 printf("FIX --- ME\n");
-							if (tempIcmp->ip_header.ttl == 1){
+							if (replyIICMP.ip_header.ttl == 1){
 								printf("This packets lifeforce has expired");
 
 			// START: send ICMP error - ICMP_TIME_EXCEEDED
 printf("FIX --- ME\n");								
-								u_int8_t tempAddr[4];
 	
-								memcpy(&tempAddr, tempIcmp->eth_header.ether_shost, sizeof(tempAddr));
-								memcpy(tempIcmp->eth_header.ether_shost, tmpInterface->mac_addrs, 
-																				   sizeof(tempAddr));
-								memcpy(tempIcmp->eth_header.ether_dhost, tempAddr, sizeof(tempAddr));
+								memcpy(replyIICMP.eth_header.ether_shost, tmpInterface->mac_addrs, 6);
+								memcpy(replyIICMP.eth_header.ether_dhost, requestIICMP->eth_header.ether_shost, 6);
 
-								tempIcmp->eth_header.ether_type = htons(ETHERTYPE_IP);
+								replyIICMP.eth_header.ether_type = htons(ETHERTYPE_IP);
 
-								tempIcmp->ip_header.daddr    = tempIcmp->ip_header.saddr;
-								memcpy(&tempIcmp->ip_header.saddr, &tmpInterface->ip_addrs, 
-															 sizeof(tmpInterface->ip_addrs));
-								tempIcmp->ip_header.check    = 0;
-								tempIcmp->ip_header.frag_off = 0; 
-								tempIcmp->ip_header.ihl      = 5;
-								tempIcmp->ip_header.protocol = IPPROTO_ICMP; 
-								tempIcmp->ip_header.tos      = 0;
-								tempIcmp->ip_header.tot_len  = htons(28); 
-								tempIcmp->ip_header.ttl      = 64;
-								tempIcmp->ip_header.version  = 4;
+								replyIICMP.ip_header.daddr = requestIICMP->ip_header.saddr;
+								memcpy(&replyIICMP.ip_header.saddr, tmpInterface->ip_addrs, 4);
+								replyIICMP.ip_header.check    = 0;
+								replyIICMP.ip_header.frag_off = 0; 
+								replyIICMP.ip_header.ihl      = 5;
+								replyIICMP.ip_header.protocol = IPPROTO_ICMP; 
+								replyIICMP.ip_header.tos      = 0;
+								replyIICMP.ip_header.tot_len  = htons(28); 
+								replyIICMP.ip_header.ttl      = 64;
+								replyIICMP.ip_header.version  = 4;
+printf("FIX --- ME\n");								
+								replyIICMP.icmp_header.type = ICMP_TIME_EXCEEDED;
+								replyIICMP.icmp_header.checksum = 0;
+								replyIICMP.icmp_header.code = ICMP_HOST_UNREACH;
+
+printf("FIX --- ME\n");
+
+								int datalength = ntohs(requestIICMP->ip_header.tot_len) - 
+											sizeof(requestIICMP->ip_header) - sizeof(requestIICMP->icmp_header);
+printf("FIX --- ME\n");								
+								unsigned char *data = NULL;
+								unsigned char ptr[sizeof(replyIICMP.icmp_header) + datalength];
+								memcpy(ptr, &replyIICMP.icmp_header, sizeof(replyIICMP.icmp_header));
+								memcpy(ptr + sizeof(replyIICMP.icmp_header), data, datalength);
+								replyIICMP.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));		
+printf("FIX --- ME\n");	
+								unsigned char result[sizeof(replyIICMP) + datalength];
+								memcpy(result, &replyIICMP, sizeof(replyIICMP));
+								memcpy(result + sizeof(replyIICMP), data, datalength);
+printf("FIX --- ME\n");		
+								send(tmpInterface->packet_socket, &result, sizeof(result), 0);
+
+printf("FIX --- send\n");
+
+								//tempIcmp->icmp_header.checksum = ip_checksum(buf, sizeof(buf));
 								
-								tempIcmp->icmp_header.type = ICMP_TIME_EXCEEDED;
-								tempIcmp->icmp_header.checksum = 0;
-								tempIcmp->icmp_header.code = ICMP_HOST_UNREACH;
+								//memcpy(buf, &tempIcmp, sizeof(struct iicmp));
 
-								memcpy(buf, &tempIcmp, sizeof(struct iicmp));
-								
-								tempIcmp->icmp_header.checksum = ip_checksum(buf, sizeof(buf));
-								
-								memcpy(buf, &tempIcmp, sizeof(struct iicmp));
-
-								send(tmpInterface->packet_socket, buf, sizeof(buf), 0);
+								//send(tmpInterface->packet_socket, buf, sizeof(buf), 0);
 
 			// END: send ICMP error - ICMP_TIME_EXCEEDED
 
@@ -823,7 +842,7 @@ struct aarp *tempArp;
 				request2 = *((struct iicmp*)&buf2);
 				int datalength = ntohs(request2.ip_header.tot_len) - sizeof(request2.ip_header) - 
 																	 sizeof(request2.icmp_header);
-
+//fdbg
 				if(datalength > 0){
 					data = malloc(datalength);
 					memcpy(data, buf2 + sizeof(request2), datalength);
@@ -838,7 +857,7 @@ struct aarp *tempArp;
 				// Copy info to reply.
 				memcpy(&reply, &request2, sizeof(request2));
 				memcpy(&reply.eth_header.ether_shost, tempInterface->mac_addrs, ETH_ALEN);
-				memcpy(&reply.eth_header.ether_dhost, request2.eth_header.ether_shost, ETH_ALEN);
+//dsd				memcpy(&reply.eth_header.ether_dhost, request2.eth_header.ether_shost, ETH_ALEN);
 				memcpy(&reply.ip_header.daddr, tmp3, 4);
 				memcpy(&reply.ip_header.saddr, tmp4, 4);
 				reply.icmp_header.type = ICMP_ECHOREPLY;
