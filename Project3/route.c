@@ -407,10 +407,12 @@ printf("FIX --- ME\n");
 						while (tmpInterface != NULL){
 printf("FIX --- start\n");
 							// Store the interface ip as a u_int32
-							u_int32_t i_ip = tmpInterface->ip_addrs[0] | 
-									  		(tmpInterface->ip_addrs[1] << 8) | 
-						    		  		(tmpInterface->ip_addrs[2] << 16) | 
-						    		  		(tmpInterface->ip_addrs[3] << 24);
+							u_int32_t i_ip;
+							memcpy(&i_ip, tmpInterface->ip_addrs, 4);
+							//u_int32_t i_ip = tmpInterface->ip_addrs[0] | 
+							//		  		(tmpInterface->ip_addrs[1] << 8) | 
+						    //		  		(tmpInterface->ip_addrs[2] << 16) | 
+						    //		  		(tmpInterface->ip_addrs[3] << 24);
 printf("FIX --- iip\n");
 							// If the temp interface ip matchs the original interface ip.
 							if (i_ip & interfaceIP){
