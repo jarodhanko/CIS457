@@ -377,7 +377,8 @@ int main(int argc, char **argv){
 				struct iicmp replyIICMP = *requestIICMP;
 
 
-				//struct iicmp *tempIcmp;
+				struct iicmp *tempIcmp;
+				tempIcmp = NULL;
 				//tempIcmp = ((struct iicmp*)&buf);
 
 printf("FIX --- ME\n");
@@ -448,9 +449,9 @@ printf("FIX --- ME\n");
 							printf("MAC ADDRESS: %X:%X:%X:%X:%X:%X", i_mac[0], i_mac[1], i_mac[2],
 																	 i_mac[3], i_mac[4], i_mac[5]);
 
-							tempIcmp->icmp_header.type = ICMP_ECHOREPLY;
+							replyIICMP.icmp_header.type = ICMP_ECHOREPLY;
 
-							tempIcmp->icmp_header.checksum = 0;
+							replyIICMP.icmp_header.checksum = 0;
 							//int timeTOlive;
 
 							printf("Adjusting time to live");
