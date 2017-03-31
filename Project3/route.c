@@ -417,10 +417,10 @@ printf("FIX --- iip\n");
 							// If the temp interface ip matchs the original interface ip.
 							if (i_ip & interfaceIP){
 printf("FIX --- if\n");
-								printf("Found interface: %s", tmpInterface->name);
+								printf("Found interface: %s\n", tmpInterface->name);
 printf("FIX --- print\n");
 								// Copy the temp interface name to i_name, exit the loop.
-								strcpy(i_name, tmpInterface->name);
+								memcpy(i_name, tmpInterface->name, 7);
 printf("FIX --- copy\n");
 								break; 
 							}
