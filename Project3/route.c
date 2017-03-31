@@ -391,13 +391,13 @@ int main(int argc, char **argv){
 						requestIICMP->icmp_header.type == ICMP_ECHOREPLY) {
              			
 						if (requestIICMP->icmp_header.type == ICMP_ECHO)							
-							printf("Received ICMP ECHO\n");
+							printf("ICMP - Received ICMP ECHO\n");
 						else
-							printf("Received ICMP REPLY\n");
+							printf("ICMP - Received ICMP REPLY\n");
 
 // START: process ICMP echo request.
 						
-						printf("Searching for interface...\n");
+						printf("ICMP - Scanning interfaces...\n");
 
 						// Create a temp interface pointer for looping.
 						struct interface *tmpInterface;
@@ -416,7 +416,7 @@ int main(int argc, char **argv){
 							// If the temp interface ip matchs the original interface ip.
 							if (i_ip & interfaceIP){
 
-								printf("Found interface: %s\n", tmpInterface->name);
+								printf("ICMP - Found interface: %s\n", tmpInterface->name);
 
 								// Copy the temp interface name to i_name, exit the loop.
 								memcpy(&i_name, tmpInterface->name, 7);
@@ -433,7 +433,7 @@ int main(int argc, char **argv){
 						// If there was a match in the loop.
 						if (i_name != NULL) {
 
-							printf("We got mail!!!\n");
+							printf("ICMP - We got mail!!!\n");
 
 							// Create a temp interface pointer for looping.
 							struct interface *tmpInterface;
@@ -457,18 +457,18 @@ int main(int argc, char **argv){
 							}
 							// END: Loop - interface list.
 printf("FIX --- ME\n");
-							printf("MAC ADDRESS: %X:%X:%X:%X:%X:%X\n", i_mac[0], i_mac[1], i_mac[2],
-																	   i_mac[3], i_mac[4], i_mac[5]);
+							printf("ICMP - MAC ADDRESS: %X:%X:%X:%X:%X:%X\n", i_mac[0], i_mac[1], i_mac[2],
+																	          i_mac[3], i_mac[4], i_mac[5]);
 
 							replyIICMP.icmp_header.type = ICMP_ECHOREPLY;
 
 							replyIICMP.icmp_header.checksum = 0;
 							//int timeTOlive;
 
-							printf("Adjusting time to live\n");
+							printf("ICMP - Adjusting time to live\n");
 printf("FIX --- ME\n");
 							if (replyIICMP.ip_header.ttl == 1){
-								printf("This packets lifeforce has expired\n");
+								printf("ICMP - This packets lifeforce has expired\n");
 
 			// START: send ICMP error - ICMP_TIME_EXCEEDED
 printf("FIX --- ME\n");								
@@ -523,23 +523,24 @@ printf("FIX --- send\n");
 							}
 							else {
 printf("FIX --- else\n");					
-								tempIcmp->ip_header.ttl = tempIcmp->ip_header.ttl - 1;
-								tempIcmp->ip_header.check = 0;
-								memcpy(buf, &tempIcmp, sizeof(struct iicmp));
-								tempIcmp->ip_header.check = ip_checksum(buf, sizeof(buf));
-								tempIcmp->icmp_header.checksum = ip_checksum(buf, sizeof(buf));
+								replyIICMP.ip_header.ttl = requestIICMP->ip_header.ttl - 1;
+								replyIICMP.ip_header.check = 0;
+								//memcpy(buf, &tempIcmp, sizeof(struct iicmp));
+								replyIICMP.ip_header.check = ip_checksum(buf, sizeof(buf));
+								replyIICMP.icmp_header.checksum = ip_checksum(buf, sizeof(buf));
 								
-								u_int32_t tempAddr;
-								tempAddr = tempIcmp->ip_header.daddr;
-								tempIcmp->ip_header.daddr = tempIcmp->ip_header.saddr;
-								tempIcmp->ip_header.saddr = tempAddr;
+	
+								replyIICMP.ip_header.daddr = requestIICMP->ip_header.saddr;
+								replyIICMP.ip_header.saddr = requestIICMP->ip_header.daddr;;
 
-								memcpy(tempIcmp->eth_header.ether_dhost, tempIcmp->eth_header.ether_shost, 
-																  sizeof(tempIcmp->eth_header.ether_dhost));
-								memcpy(tempIcmp->eth_header.ether_shost, i_mac, 
-																  sizeof(tempIcmp->eth_header.ether_shost));
+								memcpy(replyIICMP.eth_header.ether_dhost, replyIICMP.eth_header.ether_shost, 
+																  sizeof(replyIICMP.eth_header.ether_dhost));
+								memcpy(replyIICMP.eth_header.ether_shost, i_mac, 
+																  sizeof(replyIICMP.eth_header.ether_shost));
 
-								memcpy(buf, &tempIcmp, sizeof(struct iicmp));
+								memcpy(buf, &replyIICMP, sizeof(struct iicmp));
+
+								printf("ICMP - Sending packet");
 
 								send(tmpInterface->packet_socket, buf, sizeof(buf), 0);
 
