@@ -337,7 +337,7 @@ int main(int argc, char **argv){
 													sizeof(tempArp->eth_header.ether_shost));
 
 						// Overwrite buf with aarp.
-						memcpy(buf, &tempArp, sizeof(struct aarp));
+						memcpy(buf, tempArp, sizeof(struct aarp));
 
 
 						printf("ARP - sending reply\n");
