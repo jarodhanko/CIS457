@@ -309,10 +309,10 @@ int main(int argc, char **argv){
 					// Interface ip matches arp_header ip, then we want this arp request.
 					if(i_ip == ipAddr){
 
-						printf("ARP - found interface");
+						printf("ARP - found interface\n");
 
 						// Change the arp_header op_code to reply.
-						tempArp->arp_header.ea_hdr.ar_op = htons(2);
+						tempArp->arp_header.ea_hdr.ar_op = htons(ARPOP_REPLY);
 
 						// Swap arp_header sender ip to arp_header target ip and vice versa. 
 						u_int32_t tempAddr;
@@ -340,7 +340,7 @@ int main(int argc, char **argv){
 						memcpy(buf, &tempArp, sizeof(struct aarp));
 
 
-						printf("ARP - sending reply");
+						printf("ARP - sending reply\n");
 
 						// Send the ARP reply.
 						send(tempInterface->packet_socket, &buf, sizeof(buf), 0);
@@ -349,7 +349,7 @@ int main(int argc, char **argv){
 					// Interface ip doesn't match arp ip, disregard the arp request.
 					else {
 					
-						printf("We dont want this ARP packet sir");
+						printf("We dont want this ARP packet sir\n");
 
 					}
 				}
