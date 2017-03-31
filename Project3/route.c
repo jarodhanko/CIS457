@@ -381,20 +381,20 @@ int main(int argc, char **argv){
 				tempIcmp = NULL;
 				//tempIcmp = ((struct iicmp*)&buf);
 
-printf("FIX --- ME\n");
+
 				
 				// If protocol is recieve ICMP packets for all local sockets.
 				if (requestIICMP->ip_header.protocol == IPPROTO_ICMP) {	
-printf("FIX --- ME\n");					
+				
 					// If the icmp_header type is an icmp echo or reply.
 					if (requestIICMP->icmp_header.type == ICMP_ECHO || 
 						requestIICMP->icmp_header.type == ICMP_ECHOREPLY) {
- printf("FIX --- ME\n");            			
+             			
 						if (requestIICMP->icmp_header.type == ICMP_ECHO)							
 							printf("Received ICMP ECHO\n");
 						else
 							printf("Received ICMP REPLY\n");
-printf("FIX --- ME\n");
+
 // START: process ICMP echo request.
 						
 						printf("Searching for interface...");
@@ -402,7 +402,7 @@ printf("FIX --- ME\n");
 						struct interface *tmpInterface;
 						tmpInterface = interfaceList;
 						char *i_name = NULL;
-
+printf("FIX --- ME\n");
 						// START: Loop - interface list.
 						while (tmpInterface != NULL){
 
@@ -426,16 +426,16 @@ printf("FIX --- ME\n");
 							tmpInterface = tmpInterface->next;
 						}
 						// END: Loop - interface list.
-						
+printf("FIX --- ME\n");						
 						// If there was a match in the loop.
 						if (i_name != NULL) {
 
 							printf("We got mail!!!");
-
+printf("FIX --- ME\n");
 							struct interface *tmpInterface;
 							tmpInterface = interfaceList;
 							u_int8_t i_mac[6];
-						
+printf("FIX --- ME\n");						
 							while (tmpInterface != NULL){
 							
 								if (strcmp(tmpInterface->name, i_name)){
@@ -445,7 +445,7 @@ printf("FIX --- ME\n");
 								}
 								tmpInterface = tmpInterface->next;
 							}
-
+printf("FIX --- ME\n");
 							printf("MAC ADDRESS: %X:%X:%X:%X:%X:%X", i_mac[0], i_mac[1], i_mac[2],
 																	 i_mac[3], i_mac[4], i_mac[5]);
 
@@ -455,12 +455,12 @@ printf("FIX --- ME\n");
 							//int timeTOlive;
 
 							printf("Adjusting time to live");
-
+printf("FIX --- ME\n");
 							if (tempIcmp->ip_header.ttl == 1){
 								printf("This packets lifeforce has expired");
 
 			// START: send ICMP error - ICMP_TIME_EXCEEDED
-								
+printf("FIX --- ME\n");								
 								u_int8_t tempAddr[4];
 	
 								memcpy(&tempAddr, tempIcmp->eth_header.ether_shost, sizeof(tempAddr));
