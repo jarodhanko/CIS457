@@ -269,7 +269,7 @@ int main(int argc, char **argv){
 				continue;
 			}
     		//start processing all others
-    		printf("Got a %d byte packet\n", n);
+    		printf("***** Got a %d byte packet *****\n", n);
 
 			// Store the original interface ip as a u_int32
 			u_int32_t interfaceIP = tempInterface->ip_addrs[0] | (tempInterface->ip_addrs[1] << 8) | 								(tempInterface->ip_addrs[2] << 16) | (tempInterface->ip_addrs[3] << 24);
@@ -367,19 +367,29 @@ int main(int argc, char **argv){
 			else if ((ntohs(recvaddr.sll_protocol) == ETH_P_IP)){
 				printf("----- Recieved IP -----\n");
 
-				struct iicmp *tempIcmp;
-				tempIcmp = ((struct iicmp*)&buf);
+
+				// The original packet sent to us.
+				struct iicmp *requestIICMP;
+				requestIICMP = ((struct iicmp*)&buf);
+
+
+				// The packet we will send.
+				struct iicmp replyIICMP = *requestIICMP;
+
+
+				//struct iicmp *tempIcmp;
+				//tempIcmp = ((struct iicmp*)&buf);
 
 printf("FIX --- ME\n");
 				
 				// If protocol is recieve ICMP packets for all local sockets.
-				if (tempIcmp->ip_header.protocol == IPPROTO_ICMP) {	
+				if (requestIICMP->ip_header.protocol == IPPROTO_ICMP) {	
 printf("FIX --- ME\n");					
 					// If the icmp_header type is an icmp echo or reply.
-					if (tempIcmp->icmp_header.type == ICMP_ECHO || 
-						tempIcmp->icmp_header.type == ICMP_ECHOREPLY) {
+					if (requestIICMP->icmp_header.type == ICMP_ECHO || 
+						requestIICMP->icmp_header.type == ICMP_ECHOREPLY) {
  printf("FIX --- ME\n");            			
-						if (tempIcmp->icmp_header.type == ICMP_ECHO)							
+						if (requestIICMP->icmp_header.type == ICMP_ECHO)							
 							printf("Received ICMP ECHO\n");
 						else
 							printf("Received ICMP REPLY\n");
