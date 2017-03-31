@@ -292,6 +292,8 @@ int main(int argc, char **argv){
 
 				// Arp_header op_code was not arp reply
 				if (tempArp->arp_header.ea_hdr.ar_op != ntohs(ARPOP_REPLY)){
+
+					printf("ARP - op = 'REQUEST'\n");
 				
 					// Store arp_header ip as u_int32
 					u_int32_t ipAddr = tempArp->arp_header.arp_tpa[3] << 24 | 
@@ -306,6 +308,8 @@ int main(int argc, char **argv){
 				 	
 					// Interface ip matches arp_header ip, then we want this arp request.
 					if(i_ip == ipAddr){
+
+						printf("ARP - found interface");
 
 						// Change the arp_header op_code to reply.
 						tempArp->arp_header.ea_hdr.ar_op = htons(2);
@@ -335,6 +339,9 @@ int main(int argc, char **argv){
 						// Overwrite buf with aarp.
 						memcpy(buf, &tempArp, sizeof(struct aarp));
 
+
+						printf("ARP - sending reply");
+
 						// Send the ARP reply.
 						send(tempInterface->packet_socket, &buf, sizeof(buf), 0);
 					}
@@ -345,6 +352,11 @@ int main(int argc, char **argv){
 						printf("We dont want this ARP packet sir");
 
 					}
+				}
+				else {
+				
+					printf("ARP - op = 'OTHER'\n");	
+
 				}
 
 // END: process ARP requst.
@@ -358,20 +370,20 @@ int main(int argc, char **argv){
 				struct iicmp *tempIcmp;
 				tempIcmp = ((struct iicmp*)&buf);
 
-printf("FIX --- ME");
+printf("FIX --- ME\n");
 				
 				// If protocol is recieve ICMP packets for all local sockets.
 				if (tempIcmp->ip_header.protocol == IPPROTO_ICMP) {	
-printf("FIX --- ME");					
+printf("FIX --- ME\n");					
 					// If the icmp_header type is an icmp echo or reply.
 					if (tempIcmp->icmp_header.type == ICMP_ECHO || 
 						tempIcmp->icmp_header.type == ICMP_ECHOREPLY) {
- printf("FIX --- ME");            			
+ printf("FIX --- ME\n");            			
 						if (tempIcmp->icmp_header.type == ICMP_ECHO)							
 							printf("Received ICMP ECHO\n");
 						else
 							printf("Received ICMP REPLY\n");
-printf("FIX --- ME");
+printf("FIX --- ME\n");
 // START: process ICMP echo request.
 						
 						printf("Searching for interface...");
