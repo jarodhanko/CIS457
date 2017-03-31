@@ -343,7 +343,7 @@ int main(int argc, char **argv){
 						printf("ARP - sending reply\n");
 
 						// Send the ARP reply.
-						send(tempInterface->packet_socket, &buf, sizeof(buf), 0);
+						send(tempInterface->packet_socket, tempArp, sizeof(struct aarp), 0);
 					}
 
 					// Interface ip doesn't match arp ip, disregard the arp request.
