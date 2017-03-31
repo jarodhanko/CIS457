@@ -438,8 +438,8 @@ printf("FIX --- ME\n");
 printf("FIX --- ME\n");						
 							while (tmpInterface != NULL){
 							
-								if (strcmp(tmpInterface->name, i_name)){
-
+								if (strcmp(tmpInterface->name, i_name) == 0){
+printf("IN HERE\n");
 									memcpy(&i_mac, tmpInterface->mac_addrs, 6);
 									break; 
 								}
