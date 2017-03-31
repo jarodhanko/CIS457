@@ -402,39 +402,35 @@ int main(int argc, char **argv){
 						struct interface *tmpInterface;
 						tmpInterface = interfaceList;
 						char *i_name = NULL;
-printf("FIX --- ME\n");
+
 						// START: Loop - interface list.
 						while (tmpInterface != NULL){
-printf("FIX --- start\n");
+
 							// Store the interface ip as a u_int32
 							u_int32_t i_ip;
 							memcpy(&i_ip, tmpInterface->ip_addrs, 4);
-							//u_int32_t i_ip = tmpInterface->ip_addrs[0] | 
-							//		  		(tmpInterface->ip_addrs[1] << 8) | 
-						    //		  		(tmpInterface->ip_addrs[2] << 16) | 
-						    //		  		(tmpInterface->ip_addrs[3] << 24);
-printf("FIX --- iip\n");
+
 							// If the temp interface ip matchs the original interface ip.
 							if (i_ip & interfaceIP){
-printf("FIX --- if\n");
+
 								printf("Found interface: %s\n", tmpInterface->name);
-printf("FIX --- print\n");
+
 								// Copy the temp interface name to i_name, exit the loop.
 								memcpy(&i_name, tmpInterface->name, 7);
-printf("FIX --- copy\n");
+
 								break; 
 							}
 
 							// Set the temp interface to the next interface in the list.
-printf("FIX --- next\n");
+
 							tmpInterface = tmpInterface->next;
 						}
 						// END: Loop - interface list.
-printf("FIX --- ME\n");						
+					
 						// If there was a match in the loop.
 						if (i_name != NULL) {
 
-							printf("We got mail!!!");
+							printf("We got mail!!!\n");
 printf("FIX --- ME\n");
 							struct interface *tmpInterface;
 							tmpInterface = interfaceList;
@@ -444,7 +440,7 @@ printf("FIX --- ME\n");
 							
 								if (strcmp(tmpInterface->name, i_name)){
 
-									memcpy(i_mac, &tmpInterface->mac_addrs, sizeof(i_mac));
+									memcpy(&i_mac, tmpInterface->mac_addrs, 6);
 									break; 
 								}
 								tmpInterface = tmpInterface->next;
