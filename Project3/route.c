@@ -420,7 +420,7 @@ printf("FIX --- if\n");
 								printf("Found interface: %s", tmpInterface->name);
 
 								// Copy the temp interface name to i_name, exit the loop.
-								memcpy(i_name, tmpInterface->name, sizeof(&tmpInterface->name));
+								strcpy(i_name, tmpInterface->name);
 printf("FIX --- copy\n");
 								break; 
 							}
