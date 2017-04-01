@@ -842,7 +842,7 @@ printf("FIX ----- ME");
 										char *data = malloc(sizeof(reply_IICMP));
 										memcpy(data, &reply_IICMP, sizeof(reply_IICMP));
 
-										reply_IICMP.icmp_header.checksum = calculateIcmpChecksum(data, sizeof(reply_IICMP));
+										reply_IICMP.icmp_header.checksum = htons(calculateIcmpChecksum(data, sizeof(reply_IICMP)));
 
 					
 
