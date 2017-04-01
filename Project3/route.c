@@ -798,20 +798,38 @@ printf("FIX ----- ME");
 
 		
 // FIX ME: NEED CHECKSUM CALCS!!!	
-										unsigned char *data;
-										int datalength = ntohs(request_IICMP->ip_header.tot_len) - 
+										//unsigned char *data;
+										//int datalength = ntohs(request_IICMP->ip_header.tot_len) - 
+										//							 sizeof(request_IICMP->ip_header) - 
+										//							 sizeof(request_IICMP->icmp_header);
+
+										//if(datalength > 0){
+										//	data = malloc(datalength);
+										//	memcpy(data, buf + sizeof(request_IICMP), datalength);
+										//}
+
+										//unsigned char ptr[sizeof(reply_IICMP.icmp_header) + datalength];
+										//memcpy(ptr, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
+										//memcpy(ptr + sizeof(reply_IICMP.icmp_header), data, datalength);
+										reply_IICMP.ip_header.check = ip_checksum(&reply_IICMP, sizeof(reply_IICMP));
+
+
+
+
+										unsigned char *data2;
+										int datalength2 = ntohs(request_IICMP->ip_header.tot_len) - 
 																	 sizeof(request_IICMP->ip_header) - 
 																	 sizeof(request_IICMP->icmp_header);
 
-										if(datalength > 0){
-											data = malloc(datalength);
-											memcpy(data, buf + sizeof(request_IICMP), datalength);
+										if(datalength2 > 0){
+											data2 = malloc(datalength2);
+											memcpy(data2, buf + sizeof(request_IICMP), datalength2);
 										}
 
-										unsigned char ptr[sizeof(reply_IICMP.icmp_header) + datalength];
-										memcpy(ptr, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
-										memcpy(ptr + sizeof(reply_IICMP.icmp_header), data, datalength);
-										reply_IICMP.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
+										unsigned char ptr2[sizeof(reply_IICMP.icmp_header) + datalength2];
+										memcpy(ptr2, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
+										memcpy(ptr2 + sizeof(reply_IICMP.icmp_header), data2, datalength2);
+										reply_IICMP.icmp_header.checksum = ip_checksum(&ptr2, sizeof(ptr2));
 
 
 										//reply_IICMP->ip_header.check = ip_checksum(buf, sizeof(buf));
