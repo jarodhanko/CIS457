@@ -1002,7 +1002,7 @@ printf("FIX ----- ME");
 
 
 
-
+// There is code above that we can use for this.
 
 
 
@@ -1047,7 +1047,7 @@ printf("FIX ----- ME");
 
 
 
-// END: forward packet.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// END: forward packet.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 					}
 				}
 				else {
@@ -1055,7 +1055,7 @@ printf("FIX ----- ME");
 
 // START: forward packet.
             		
-
+// There is code above that can be reused for this.
 
 // END: forward packet.
 
