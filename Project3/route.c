@@ -443,7 +443,7 @@ printf("out...\n");
 			// END: find interface given ip address
 					
 						// If there was a match in the loop.
-						if (name1P_INT != NULL) {
+						//if (name1P_INT != NULL) {
 
 							printf("ICMP - We got mail!!!\n");
 
