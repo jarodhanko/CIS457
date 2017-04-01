@@ -799,65 +799,55 @@ printf("FIX ----- ME");
 
 									}
 									else {
+// ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+
+				
+
+
+// OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+
+
+
 
 										reply_IICMP.ip_header.ttl = request_IICMP->ip_header.ttl - 1;
 										reply_IICMP.ip_header.check = 0;
 
 		
 // FIX ME: NEED CHECKSUM CALCS!!!	
-										//unsigned char *data;
-										//int datalength = ntohs(request_IICMP->ip_header.tot_len) - 
-										//							 sizeof(request_IICMP->ip_header) - 
-										//							 sizeof(request_IICMP->icmp_header);
-
-										//if(datalength > 0){
-										//	data = malloc(datalength);
-										//	memcpy(data, buf + sizeof(request_IICMP), datalength);
-										//}
-
-										//unsigned char ptr[sizeof(reply_IICMP.icmp_header) + datalength];
-										//memcpy(ptr, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
-										//memcpy(ptr + sizeof(reply_IICMP.icmp_header), data, datalength);
-										//reply_IICMP.ip_header.check = ip_checksum(&reply_IICMP, sizeof(reply_IICMP));
-
-
-
-
-										unsigned char *data2;
-										int datalength2 = ntohs(request_IICMP->ip_header.tot_len) - 
+										unsigned char *data;
+										int datalength = ntohs(request_IICMP->ip_header.tot_len) - 
 																	 sizeof(request_IICMP->ip_header) - 
 																	 sizeof(request_IICMP->icmp_header);
 
-										if(datalength2 > 0){
-											data2 = malloc(datalength2);
-											memcpy(data2, buf + sizeof(request_IICMP), datalength2);
+										if(datalength > 0){
+											data = malloc(datalength);
+											memcpy(data, buf + sizeof(struct iicmp), datalength);
 										}
 
-										unsigned char ptr2[sizeof(reply_IICMP.icmp_header) + datalength2];
+							
+
+
+										unsigned char ptr2[sizeof(reply_IICMP.icmp_header) + datalength];
 										memcpy(ptr2, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
-										memcpy(ptr2 + sizeof(reply_IICMP.icmp_header), data2, datalength2);
+										memcpy(ptr2 + sizeof(reply_IICMP.icmp_header), data, datalength);
 
-		
-										//struct iicmp *helpME = malloc(sizeof(struct iicmp));
-										//*helpME = reply_IICMP;										
-
-										//reply_IICMP.icmp_header.checksum = ip_checksum(&ptr2, sizeof(ptr2));
+										reply_IICMP.icmp_header.checksum = ip_checksum(&ptr2, sizeof(ptr2));
 
 
 										//reply_IICMP->ip_header.check = ip_checksum(buf, sizeof(buf));
-										char *data = malloc(sizeof(reply_IICMP));
-										memcpy(data, &reply_IICMP, sizeof(reply_IICMP));
+										
 									
-										unsigned char result[sizeof(reply_IICMP) + datalength2];
+										unsigned char result[sizeof(reply_IICMP) + datalength];
 					
 
-										reply_IICMP.icmp_header.checksum = htons(calculateIcmpChecksum(data, sizeof(reply_IICMP)));
+										//reply_IICMP.icmp_header.checksum = htons(calculateIcmpChecksum(data, sizeof(reply_IICMP)));
 										
 										memcpy(result, &reply_IICMP, sizeof(reply_IICMP));
-										memcpy(result + sizeof(reply_IICMP), data2, datalength2);
+										memcpy(result + sizeof(reply_IICMP), data, datalength);
 
 										send(prize_Interface->packet_socket, &result, sizeof(result), 0);
-										
+// ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ	
 									}
 								}
 							}
