@@ -693,7 +693,7 @@ printf("FIX ----- ME");
 
 								send(prize_Interface->packet_socket, temp_ARP, sizeof(struct aarp), 0);
 									
-printf("1\n");								
+								
 								struct sockaddr_ll temp_Recv;
 
   								struct timeval tv2;
@@ -704,7 +704,7 @@ printf("1\n");
 																					sizeof(tv2)) < 0) {
     								perror("Error");
 								}
-printf("2\n");
+
 								socklen_t temp_Recvlen = sizeof(struct sockaddr_ll);
 								char temp_Buf[1500];
 
@@ -716,7 +716,7 @@ printf("2\n");
     								mac_HOST = NULL;
 								}
 								else {
-printf("3\n");
+
 									tv2.tv_sec = 0;
 								    tv2.tv_usec = 1000;
 
@@ -733,7 +733,7 @@ printf("3\n");
 									memcpy(mac_HOST, new_aarp.arp_header.arp_sha, 6);
 
 								}
-printf("4\n");
+
 			// END: send ARP request.
 
 								
@@ -743,7 +743,7 @@ printf("4\n");
 									printf("Sending ICMP error\n");
 
 			// START: send ICMP error - ICMP_DEST_UNREACH.
-printf("5\n");
+
 									memcpy(reply_IICMP.eth_header.ether_shost, prime_Interface->mac_addrs, 6);
 									memcpy(reply_IICMP.eth_header.ether_dhost, request_IICMP->eth_header.ether_shost, 6);
 
@@ -764,7 +764,7 @@ printf("5\n");
 									reply_IICMP.icmp_header.checksum = 0;
 									reply_IICMP.icmp_header.code = ICMP_HOST_UNREACH;
 
-printf("1\n");
+
 // FIX ME: CALC CHECKSOME AND SEND.
 
 
@@ -797,13 +797,13 @@ printf("1\n");
 										reply_IICMP.ip_header.check = 0;
 
 		
-// FIX ME: NEED CHECKSUM CALCS, THEN SEND!!!	
+// FIX ME: NEED CHECKSUM CALCS!!!	
 										//reply_IICMP->ip_header.check = ip_checksum(buf, sizeof(buf));
 										//reply_IICMP->icmp_header.checksum = ip_checksum(buf, sizeof(buf));
 
 					
 
-										//send(prize_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
+										send(prize_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
 										
 									}
 								}
