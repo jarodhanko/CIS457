@@ -606,6 +606,8 @@ printf("FIX ----- ME");
 										foundMatch = 1;
 										ip_HOP = tmp_TBL->hop;
 										prize_Interface = tmp_INT;
+										printf("Found interface: %s", prize_Interface->name);
+										printf("Next hop: %" PRIu32 "\n", ip_HOP);
 										break;
 									}
 
