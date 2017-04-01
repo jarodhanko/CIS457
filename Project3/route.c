@@ -652,6 +652,8 @@ printf("FIX ----- ME");
 								req_ARP = ((struct aarp*)&buf);
 								struct aarp temp_ARP = *req_ARP;
 
+								temp_ARP.eth_header.ether_type = htons(ETHERTYPE_ARP);
+
 
 								char broadcast_255[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 								char broadcast_0[6]   = {0,0,0,0,0,0};
@@ -743,7 +745,7 @@ printf("FIX ----- ME");
 									memcpy(reply_IICMP.eth_header.ether_shost, prime_Interface->mac_addrs, 6);
 									memcpy(reply_IICMP.eth_header.ether_dhost, request_IICMP->eth_header.ether_shost, 6);
 
-									reply_IICMP.eth_header.ether_type = htons(ETHERTYPE_ARP);
+									reply_IICMP.eth_header.ether_type = htons(ETHERTYPE_IP);
 
 									reply_IICMP.ip_header.daddr = request_IICMP->ip_header.saddr;
 									memcpy(&reply_IICMP.ip_header.saddr, prime_Interface->ip_addrs, 4);
