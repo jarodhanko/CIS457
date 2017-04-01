@@ -68,6 +68,7 @@ void load_table(char *filename);
 void print_ETHERTYPE_ARP(struct aarp *request);
 void print_ETHERTYPE_IP(struct iicmp reply);
 void clearArray(char *array);
+int calculateIcmpChecksum(char *buf, int length);
 
 
 
@@ -838,8 +839,10 @@ printf("FIX ----- ME");
 
 
 										//reply_IICMP->ip_header.check = ip_checksum(buf, sizeof(buf));
+										char *data = malloc(sizeof(reply_IICMP));
+										memcpy(data, &reply_IICMP, sizeof(reply_IICMP));
 
-										reply_IICMP.icmp_header.checksum = ip_checksum(&reply_IICMP, sizeof(reply_IICMP));
+										reply_IICMP.icmp_header.checksum = calculateIcmpChecksum(data, sizeof(reply_IICMP));
 
 					
 
@@ -1474,4 +1477,26 @@ void print_ETHERTYPE_IP(struct iicmp reply){
 	printf("ICMP TYPE: %02X \n", reply.icmp_header.type);
 	printf("ICMP CODE: %02X \n", reply.icmp_header.code);
 	printf("ICMP CHECKSUM: %02X \n\n", ntohs(reply.icmp_header.checksum));
+
+
 }
+
+int calculateIcmpChecksum(char *buf, int length){
+
+  int lengthToIcmp = sizeof(struct ether_header)+sizeof(struct iphdr);
+  int icmpDataLength = length - (sizeof(struct ether_header)+sizeof(struct iphdr)+sizeof(struct icmphdr)+8);
+  int icmpLength = (sizeof(struct icmphdr) + 8 + icmpDataLength);
+
+  struct icmphdr icmpHeader;
+  memcpy(&icmpHeader,&buf+lengthToIcmp,sizeof(struct icmphdr));
+
+  unsigned int checksum = 0;
+  int i;
+  for(i = 0; i < icmpLength; i+=2) {
+    checksum += (uint32_t) ((uint8_t) buf[lengthToIcmp+i] << 8 | (uint8_t) buf[lengthToIcmp+i+1]);
+  }
+  checksum = (checksum >> 16) + (checksum & 0xffff);
+  return (uint16_t) ~checksum;
+}
+
+
