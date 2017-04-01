@@ -422,7 +422,7 @@ printf("2...\n");
 							memcpy(&ip_TEMP_IICMP, &request_IICMP->ip_header.daddr, 4);
 printf("3...\n");
 							
-							if (ip_INT == ip_TEMP_IICMP){
+							if (((u_int32_t)ip_INT) == ((u_int32_t)ip_TEMP_IICMP)){
 printf("in...\n");
 								printf("ICMP - Found interface: %s\n", tmp1_INT->name);
 
