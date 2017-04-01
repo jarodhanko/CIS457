@@ -784,7 +784,7 @@ printf("FIX ----- ME");
 									memcpy(reply_IICMP.eth_header.ether_dhost, mac_HOST, 6);
 									memcpy(reply_IICMP.eth_header.ether_shost, prize_Interface->mac_addrs, 6);
 
-									reply_IICMP.icmp_header.checksum = reply_IICMP.icmp_header.checksum + 5;
+									//reply_IICMP.icmp_header.checksum = 0;
 									
 									if (request_IICMP->ip_header.ttl == 1){
 
