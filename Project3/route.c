@@ -743,7 +743,7 @@ printf("FIX ----- ME");
 									memcpy(reply_IICMP.eth_header.ether_shost, prime_Interface->mac_addrs, 6);
 									memcpy(reply_IICMP.eth_header.ether_dhost, request_IICMP->eth_header.ether_shost, 6);
 
-									reply_IICMP.eth_header.ether_type = htons(ETHERTYPE_IP);
+									reply_IICMP.eth_header.ether_type = htons(ETHERTYPE_ARP);
 
 									reply_IICMP.ip_header.daddr = request_IICMP->ip_header.saddr;
 									memcpy(&reply_IICMP.ip_header.saddr, prime_Interface->ip_addrs, 4);
