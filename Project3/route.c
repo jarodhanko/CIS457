@@ -652,9 +652,9 @@ printf("FIX ----- ME");
 								temp_ARP = malloc(sizeof(struct aarp));
 								//req_ARP = ((struct aarp*)&buf);
 								//struct aarp temp_ARP = *req_ARP;
-
+printf("here\n");
 								temp_ARP->eth_header.ether_type = htons(ETHERTYPE_ARP);
-
+printf("here\n");
 
 								char broadcast_255[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 								char broadcast_0[6]   = {0,0,0,0,0,0};
