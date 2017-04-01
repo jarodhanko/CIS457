@@ -610,7 +610,7 @@ printf("FIX ----- ME");
 											printf("Found interface: %s\n", prize_Interface->name);
 											u_int8_t ip_print[4];
 											memcpy(&ip_print, &ip_HOP, 4);
-											printf("Next hop: %X.%X.%X.%X\n", ip_print[0],ip_print[1],ip_print[2],ip_print[3]);
+											printf("Found hop: %X.%X.%X.%X\n", ip_print[0],ip_print[1],ip_print[2],ip_print[3]);
 											break;
 										}
 									}
@@ -639,6 +639,11 @@ printf("FIX ----- ME");
 									ip_HOP = request_IICMP->ip_header.daddr;
 								}
 								
+
+								u_int8_t ip_print[4];
+								memcpy(&ip_print, &ip_HOP, 4);
+								printf("New hop: %X.%X.%X.%X\n", ip_print[0],ip_print[1],ip_print[2],ip_print[3]);
+
 
 								//struct aarp * temp_ARP = malloc(sizeof(struct aarp));
 
