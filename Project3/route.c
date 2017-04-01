@@ -271,6 +271,9 @@ int main(int argc, char **argv){
     		//start processing all others
     		printf("***** Got a %d byte packet *****\n", n);
 
+			printf("Interface Was: %s\n", tempInterface->name);
+	
+
 			// Store the original interface ip as a u_int32
 			u_int32_t interfaceIP = tempInterface->ip_addrs[0] | (tempInterface->ip_addrs[1] << 8) | 								(tempInterface->ip_addrs[2] << 16) | (tempInterface->ip_addrs[3] << 24);
 			
@@ -530,8 +533,8 @@ printf("FIX --- send\n");
 								replyIICMP.ip_header.ttl = requestIICMP->ip_header.ttl - 1;
 								replyIICMP.ip_header.check = 0;
 								//memcpy(buf, &tempIcmp, sizeof(struct iicmp));
-								replyIICMP.ip_header.check = ip_checksum(buf, sizeof(buf));
-								replyIICMP.icmp_header.checksum = ip_checksum(buf, sizeof(buf));
+								replyIICMP.ip_header.check = ip_checksum(&replyIICMP, sizeof(replyIICMP));
+								//replyIICMP.icmp_header.checksum = ip_checksum(buf, sizeof(buf));
 								
 	
 								replyIICMP.ip_header.daddr = requestIICMP->ip_header.saddr;
