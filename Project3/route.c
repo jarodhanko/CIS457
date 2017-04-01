@@ -589,18 +589,18 @@ printf("FIX ----- ME");
 
 							struct interface * tmp_INT;
 							tmp_INT = interfaceList;
-
+printf("1...\n");
 							while (tmp_INT != NULL){
 
 								struct routing_table * tmp_TBL;
 								tmp_TBL = rtable;
 
 								while (tmp_TBL != NULL){
-
+printf("2...\n");
 									if (tmp_TBL->network << (32 - tmp_TBL->prefix) == 
 													request_IICMP->ip_header.daddr << (32 - tmp_TBL->prefix)){
 
-										
+printf("3...\n");										
 										foundMatch = 1;
 										ip_HOP = tmp_TBL->hop;
 										prize_Interface = tmp_INT;
