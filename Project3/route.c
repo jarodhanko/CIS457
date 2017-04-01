@@ -424,8 +424,8 @@ int main(int argc, char **argv){
 								printf("ICMP - Found interface: %s\n", tmp1_INT->name);
 
 								// Copy the temp interface name to i_name, exit the loop.
-								memcpy(&name1A_INT, tmp1_INT->name, 7);
-								memcpy(name1P_INT, name1A_INT, 7);
+								memcpy(&name1A_INT, &tmp1_INT->name, 7);
+								memcpy(&name1P_INT, &name1A_INT, 7);
 								printf("FIX ----- ME\n");
 								break; 
 							}
