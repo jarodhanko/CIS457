@@ -648,49 +648,50 @@ printf("FIX ----- ME");
 								//struct aarp * temp_ARP = malloc(sizeof(struct aarp));
 
 
-								struct aarp *req_ARP;
-								req_ARP = ((struct aarp*)&buf);
-								struct aarp temp_ARP = *req_ARP;
+								struct aarp *temp_ARP;
+								temp_ARP = malloc(sizeof(struct aarp));
+								//req_ARP = ((struct aarp*)&buf);
+								//struct aarp temp_ARP = *req_ARP;
 
-								temp_ARP.eth_header.ether_type = htons(ETHERTYPE_ARP);
+								temp_ARP->eth_header.ether_type = htons(ETHERTYPE_ARP);
 
 
 								char broadcast_255[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 								char broadcast_0[6]   = {0,0,0,0,0,0};
 
-								memcpy(&temp_ARP.eth_header.ether_dhost, broadcast_255, 6);
+								memcpy(&temp_ARP->eth_header.ether_dhost, broadcast_255, 6);
 
-								memcpy(&temp_ARP.eth_header.ether_shost, prize_Interface->mac_addrs, 6);
+								memcpy(&temp_ARP->eth_header.ether_shost, prize_Interface->mac_addrs, 6);
 
-								memcpy(temp_ARP.arp_header.arp_tha, &broadcast_0, 6);
-								memcpy(temp_ARP.arp_header.arp_sha, prize_Interface->mac_addrs, 6);
+								memcpy(temp_ARP->arp_header.arp_tha, &broadcast_0, 6);
+								memcpy(temp_ARP->arp_header.arp_sha, prize_Interface->mac_addrs, 6);
 								
-								temp_ARP.arp_header.arp_tpa[3] = (uint8_t) (ip_HOP >> 24);
-								temp_ARP.arp_header.arp_tpa[2] = (uint8_t) (ip_HOP >> 16);
-								temp_ARP.arp_header.arp_tpa[1] = (uint8_t) (ip_HOP >> 8);
-								temp_ARP.arp_header.arp_tpa[0] = (uint8_t) (ip_HOP);
+								temp_ARP->arp_header.arp_tpa[3] = (uint8_t) (ip_HOP >> 24);
+								temp_ARP->arp_header.arp_tpa[2] = (uint8_t) (ip_HOP >> 16);
+								temp_ARP->arp_header.arp_tpa[1] = (uint8_t) (ip_HOP >> 8);
+								temp_ARP->arp_header.arp_tpa[0] = (uint8_t) (ip_HOP);
 
 								u_int32_t temp_ip_INT = prize_Interface->ip_addrs[0] | 
 									  		    	   (prize_Interface->ip_addrs[1] << 8) | 
 						    		  		           (prize_Interface->ip_addrs[2] << 16) | 
 												       (prize_Interface->ip_addrs[3] << 24);
 
-								temp_ARP.arp_header.arp_spa[3] = (uint8_t) (temp_ip_INT >> 24);
-								temp_ARP.arp_header.arp_spa[2] = (uint8_t) (temp_ip_INT >> 16);
-								temp_ARP.arp_header.arp_spa[1] = (uint8_t) (temp_ip_INT >> 8);
-								temp_ARP.arp_header.arp_spa[0] = (uint8_t) (temp_ip_INT);
+								temp_ARP->arp_header.arp_spa[3] = (uint8_t) (temp_ip_INT >> 24);
+								temp_ARP->arp_header.arp_spa[2] = (uint8_t) (temp_ip_INT >> 16);
+								temp_ARP->arp_header.arp_spa[1] = (uint8_t) (temp_ip_INT >> 8);
+								temp_ARP->arp_header.arp_spa[0] = (uint8_t) (temp_ip_INT);
 
-								temp_ARP.arp_header.ea_hdr.ar_hln = 6;
-								temp_ARP.arp_header.ea_hdr.ar_hrd = htons(ARPHRD_ETHER);
-								temp_ARP.arp_header.ea_hdr.ar_pln = 4;
-								temp_ARP.arp_header.ea_hdr.ar_pro = htons(ETH_P_IP);
-								temp_ARP.arp_header.ea_hdr.ar_op  = htons(ARPOP_REQUEST);
+								temp_ARP->arp_header.ea_hdr.ar_hln = 6;
+								temp_ARP->arp_header.ea_hdr.ar_hrd = htons(ARPHRD_ETHER);
+								temp_ARP->arp_header.ea_hdr.ar_pln = 4;
+								temp_ARP->arp_header.ea_hdr.ar_pro = htons(ETH_P_IP);
+								temp_ARP->arp_header.ea_hdr.ar_op  = htons(ARPOP_REQUEST);
 
 								
 								printf("Sending ARP request\n");
 					
 
-								send(prize_Interface->packet_socket, &temp_ARP, sizeof(temp_ARP), 0);
+								send(prize_Interface->packet_socket, temp_ARP, sizeof(struct aarp), 0);
 									
 								
 								struct sockaddr_ll temp_Recv;
