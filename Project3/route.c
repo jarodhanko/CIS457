@@ -397,6 +397,9 @@ int main(int argc, char **argv){
 
 // START: process ICMP echo request.
 						
+
+			// START: find interface given ip address.
+
 						printf("ICMP - Scanning interfaces...\n");
 
 						// Create a temp interface pointer for looping.
@@ -404,7 +407,7 @@ int main(int argc, char **argv){
 						tmpInterface = interfaceList;
 
 						// Temp char array to hold current interface name.
-						char i_name[7];
+						char * i_name = NULL;
 
 						// START: Loop - interface list.
 						while (tmpInterface != NULL){
@@ -414,7 +417,7 @@ int main(int argc, char **argv){
 							memcpy(&i_ip, tmpInterface->ip_addrs, 4);
 
 							// If the temp interface ip matchs the original interface ip.
-							if (i_ip & interfaceIP){
+							if (i_ip & requestIICMP->ip_header.daddr){
 
 								printf("ICMP - Found interface: %s\n", tmpInterface->name);
 
@@ -429,6 +432,7 @@ int main(int argc, char **argv){
 
 						}
 						// END: Loop - interface list.
+			// END: find interface given ip address
 					
 						// If there was a match in the loop.
 						if (i_name != NULL) {
@@ -752,11 +756,164 @@ printf("FIX --- send\n");
 					else {
               			printf("Forwarding Packet\n");
 
-// START: forward packet.
+// START: forward packet. ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+			// START: find interface with the correct ip.
+
+						char *i_name;
+						i_name = NULL;
+
+						struct interface * iface1;
+
+						for(iface1 = interfaceList; iface1 != NULL; iface1 = iface1->next) {
+
+							u_int32_t temp_ip;
+							memcpy(&temp_ip, iface1->ip_addrs, 4);
+							if(temp_ip == requestIICMP->ip_header.daddr){
+
+								printf("interface name: %s\n", iface1->name);
+								memcpy(i_name, iface1->name, 7);
+							  	break;
+							}
+						}
+
+			// END: find interface with the correct ip.
+
+
+						if(i_name != NULL) {
+
+						 	printf("This is for us!\n");
+
+							u_int8_t tmp_MAC[6];
+
+		
+			// START: find mac with interface.
+
+							struct interface * iface2;
+							for(iface2 = interfaceList; iface2 != NULL; iface2 = iface2->next) {
+
+								if(strcmp(iface2->name, i_name)){
+
+								  	memcpy(tmp_MAC, iface2->mac_addrs, 6);
+								  	break;
+								}
+							}
+
+			// END: find mac with interface.
+							
+
+ 							memcpy(replyIICMP.eth_header.ether_dhost, requestIICMP->eth_header.ether_shost, 6);
+							memcpy(replyIICMP.eth_header.ether_shost, tmp_MAC, 6);
+							
+							send(tempInterface->packet_socket, &replyIICMP, sizeof(struct iicmp), 0);
+
+  
+						}
+
+						else {
+						  	//ICMP echo is not for us, figure out the correct interfaces to send to
+						  	printf("This isn't for us\n");
+						  	//Check that address in on our routing table
+
+
+						  	
+
+
+			// START: find interface from ip address.
+
+							struct interface * forwardInterface = NULL;
+							u_int32_t forward_ip = 0;
+
+							int breakLoop = 0;
+							
+							struct interface * iface2;
+
+						  	for(iface2 = interfaceList; iface2 != NULL; iface2 = iface2->next) {
+
+								struct routing_table * temptable;
+
+								for(temptable = rtable; temptable!=NULL; temptable = temptable->next) {
+
+							  		if (temptable->network << (32 - temptable->prefix) == requestIICMP->ip_header.daddr << (32 - temptable->prefix)) {
+									
+										forwardInterface = iface2;
+										forward_ip = temptable->network;
+										breakLoop = 1;
+										break;
+							  		}
+								}
+								if (breakLoop){
+									break;
+								}
+						  	}
+
+			// END: find interface from ip address
 
 
 
-// END: forward packet.
+						  	if(forwardInterface != NULL){
+
+								u_int8_t * forward_mac = NULL;
+								
+
+								if(forward_ip == 0) {
+								  	
+									forward_ip = requestIICMP->ip_header.daddr;
+								
+								}
+
+							
+// START: send arp request.
+
+
+
+
+
+
+
+// END: send arp request.
+							
+
+
+								if(forward_mac == NULL){
+
+								  	//send ICMP error
+								  	printf("ARP returned no MAC\n");
+
+
+								}
+								else
+								{
+								  	printf("ARP returned MAC:\n");
+								  	printf("%02x:%02x:%02x:%02x:%02x:%02x\n",
+									forward_mac[0],forward_mac[1],
+									forward_mac[2],forward_mac[3],
+									forward_mac[4],forward_mac[5]);
+
+								  	
+									memcpy(replyIICMP.eth_header.ether_dhost, forward_mac, 6);
+									memcpy(replyIICMP.eth_header.ether_shost, forwardInterface->mac_addrs, 6);
+
+									replyIICMP.eth_header.ether_type = htons(ETH_P_IP);
+
+								  	send(forwardInterface->packet_socket, &replyIICMP, sizeof(replyIICMP), 0);
+								}
+
+						  	}
+						  	else{
+
+								printf("Address not found in table, sending error\n");
+						  	}
+						}
+					
+
+
+
+
+
+
+// END: forward packet.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 					}
 				}
 				else {
