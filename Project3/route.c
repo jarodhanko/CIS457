@@ -725,11 +725,11 @@ printf("3\n");
 										perror("Error");
 									}
 
-									struct aarp *new_aarp;
+									struct aarp new_aarp;
 
 									memcpy(&new_aarp, temp_Buf, sizeof(struct aarp));
 									
-									memcpy(&mac_HOST, new_aarp->arp_header.arp_sha, 6);
+									memcpy(&mac_HOST, new_aarp.arp_header.arp_sha, 6);
 
 								}
 printf("4\n");
