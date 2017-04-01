@@ -585,7 +585,7 @@ printf("FIX ----- ME");
 
 			// START: find interface from ip
 
-							printf("searching page table...");
+							printf("searching page table...\n");
 							
 							int foundMatch = 0;
 
@@ -669,7 +669,7 @@ printf("FIX ----- ME");
 								temp_ARP->arp_header.ea_hdr.ar_op  = htons(ARPOP_REQUEST);
 
 								
-								printf("Sending ARP request");
+								printf("Sending ARP request\n");
 					
 
 								send(prize_Interface->packet_socket, &temp_ARP, sizeof(temp_ARP), 0);
@@ -691,7 +691,7 @@ printf("FIX ----- ME");
 
   								int n2 = recvfrom(prize_Interface->packet_socket, temp_Buf, 1500, 0, 
 																(struct sockaddr*)&temp_Recv, &temp_Recvlen);
-printf("1...\n"); 												
+ 												
 			
   								if (n2 < 1){
     								mac_HOST = NULL;
@@ -719,8 +719,8 @@ printf("1...\n");
 								
 								if (mac_HOST == NULL) {
 					
-									printf("No MAC received from ARP request");
-									printf("Sending ICMP error");
+									printf("No MAC received from ARP request\n");
+									printf("Sending ICMP error\n");
 
 			// START: send ICMP error - ICMP_DEST_UNREACH.
 
@@ -791,7 +791,7 @@ printf("1...\n");
 							// No address was found in table, send an error.
 							else {
 
-								printf("Not my neighbor, sending ICMP error");
+								printf("Not my neighbor, sending ICMP error\n");
 
 			// START: send ICMP error - ICMP_DEST_UNREACH.
 
