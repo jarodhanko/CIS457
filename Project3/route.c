@@ -413,32 +413,32 @@ int main(int argc, char **argv){
 
 						// START: Loop - interface list.
 						while (tmp1_INT != NULL){
-printf("1...\n");
+
 							// Store the interface ip as a u_int32
 							//u_int32_t ip_INT;
 							//memcpy(&ip_INT, tmp1_INT->ip_addrs, 4);
-printf("2...\n");
+
 							//u_int32_t ip_TEMP_IICMP ;
 							//memcpy(&ip_TEMP_IICMP, &request_IICMP->ip_header.daddr, 4);
-printf("3...\n");
+
 							
 							if (*(tmp1_INT->ip_addrs) == request_IICMP->ip_header.daddr){
-printf("in...\n");
+
 								printf("ICMP - Found interface: %s\n", tmp1_INT->name);
 
 								// Copy the temp interface name to i_name, exit the loop.
 								memcpy(&name1A_INT, &tmp1_INT->name, 7);
-printf("copy1...\n");
+
 								memcpy(&name1P_INT, &name1A_INT, 7);
-printf("copy2...\n");
+
 								break; 
 							}
-printf("4...\n");
+
 							// Set the temp interface to the next interface in the list.
 							tmp1_INT = tmp1_INT->next;
-printf("5...\n");
+
 						}
-printf("out...\n");
+
 						// END: Loop - interface list.
 			// END: find interface given ip address
 					
@@ -584,23 +584,25 @@ printf("FIX ----- ME");
 							u_int32_t ip_HOP = 0;
 
 			// START: find interface from ip
+
+							printf("searching page table...");
 							
 							int foundMatch = 0;
 
 							struct interface * tmp_INT;
 							tmp_INT = interfaceList;
-printf("1...\n");
+
 							while (tmp_INT != NULL){
 
 								struct routing_table * tmp_TBL;
 								tmp_TBL = rtable;
 
 								while (tmp_TBL != NULL){
-printf("2...\n");
+
 									if (tmp_TBL->network << (32 - tmp_TBL->prefix) == 
 													request_IICMP->ip_header.daddr << (32 - tmp_TBL->prefix)){
 
-printf("3...\n");										
+										
 										foundMatch = 1;
 										ip_HOP = tmp_TBL->hop;
 										prize_Interface = tmp_INT;
@@ -619,7 +621,7 @@ printf("3...\n");
 
 			// END: find interface from ip.
 							
-printf("11111...\n");							
+							
 							if (prize_Interface != NULL){
 
 								u_int8_t * mac_HOST;
@@ -637,24 +639,24 @@ printf("11111...\n");
 
 								char broadcast_255[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 								char broadcast_0[6]   = {0,0,0,0,0,0};
-printf("1...\n");
+
 								memcpy(&temp_ARP->eth_header.ether_dhost, broadcast_255, 6);
-printf("1.5...\n");
+
 								memcpy(&temp_ARP->eth_header.ether_shost, prize_Interface->mac_addrs, 6);
-printf("2...\n");
+
 								memcpy(temp_ARP->arp_header.arp_tha, &broadcast_0, 6);
 								memcpy(temp_ARP->arp_header.arp_sha, prize_Interface->mac_addrs, 6);
-printf("3...\n");								
+								
 								temp_ARP->arp_header.arp_tpa[3] = (uint8_t) (ip_HOP >> 24);
 								temp_ARP->arp_header.arp_tpa[2] = (uint8_t) (ip_HOP >> 16);
 								temp_ARP->arp_header.arp_tpa[1] = (uint8_t) (ip_HOP >> 8);
 								temp_ARP->arp_header.arp_tpa[0] = (uint8_t) (ip_HOP);
 
-printf("4...\n");								u_int32_t temp_ip_INT = prize_Interface->ip_addrs[0] | 
+								u_int32_t temp_ip_INT = prize_Interface->ip_addrs[0] | 
 									  		    	   (prize_Interface->ip_addrs[1] << 8) | 
 						    		  		           (prize_Interface->ip_addrs[2] << 16) | 
 												       (prize_Interface->ip_addrs[3] << 24);
-printf("5...\n");
+
 								temp_ARP->arp_header.arp_spa[3] = (uint8_t) (temp_ip_INT >> 24);
 								temp_ARP->arp_header.arp_spa[2] = (uint8_t) (temp_ip_INT >> 16);
 								temp_ARP->arp_header.arp_spa[1] = (uint8_t) (temp_ip_INT >> 8);
@@ -665,8 +667,11 @@ printf("5...\n");
 								temp_ARP->arp_header.ea_hdr.ar_pln = 4;
 								temp_ARP->arp_header.ea_hdr.ar_pro = htons(ETH_P_IP);
 								temp_ARP->arp_header.ea_hdr.ar_op  = htons(ARPOP_REQUEST);
+
+								
+								printf("Sending ARP request");
 					
-printf("6...\n");
+
 								send(prize_Interface->packet_socket, &temp_ARP, sizeof(temp_ARP), 0);
 									
 								
@@ -715,6 +720,7 @@ printf("1...\n");
 								if (mac_HOST == NULL) {
 					
 									printf("No MAC received from ARP request");
+									printf("Sending ICMP error");
 
 			// START: send ICMP error - ICMP_DEST_UNREACH.
 
@@ -784,6 +790,8 @@ printf("1...\n");
 							}
 							// No address was found in table, send an error.
 							else {
+
+								printf("Not my neighbor, sending ICMP error");
 
 			// START: send ICMP error - ICMP_DEST_UNREACH.
 
