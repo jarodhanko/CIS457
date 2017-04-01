@@ -438,6 +438,7 @@ printf("copy2...\n");
 							tmp1_INT = tmp1_INT->next;
 
 						}
+printf("out...\n");
 						// END: Loop - interface list.
 			// END: find interface given ip address
 					
