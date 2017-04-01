@@ -415,11 +415,11 @@ int main(int argc, char **argv){
 						while (tmp1_INT != NULL){
 printf("1...\n");
 							// Store the interface ip as a u_int32
-							u_int32_t ip_INT;
-							memcpy(&ip_INT, tmp1_INT->ip_addrs, 4);
+							//u_int32_t ip_INT;
+							//memcpy(&ip_INT, tmp1_INT->ip_addrs, 4);
 printf("2...\n");
-							u_int32_t ip_TEMP_IICMP ;
-							memcpy(&ip_TEMP_IICMP, &request_IICMP->ip_header.daddr, 4);
+							//u_int32_t ip_TEMP_IICMP ;
+							//memcpy(&ip_TEMP_IICMP, &request_IICMP->ip_header.daddr, 4);
 printf("3...\n");
 							
 							if (*(tmp1_INT->ip_addrs) == request_IICMP->ip_header.daddr){
@@ -433,17 +433,17 @@ printf("copy1...\n");
 printf("copy2...\n");
 								break; 
 							}
-
+printf("4...\n");
 							// Set the temp interface to the next interface in the list.
 							tmp1_INT = tmp1_INT->next;
-
+printf("5...\n");
 						}
 printf("out...\n");
 						// END: Loop - interface list.
 			// END: find interface given ip address
 					
 						// If there was a match in the loop.
-						//if (name1P_INT != NULL) {
+						if (name1P_INT != NULL) {
 
 							printf("ICMP - We got mail!!!\n");
 
