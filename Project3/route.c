@@ -768,7 +768,7 @@ printf("FIX ----- ME");
 // FIX ME: CALC CHECKSOME AND SEND.
 
 
-									//send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
+									send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
 
 			// END: send ICMP error - ICMP_DEST_UNREACH.
 								}
@@ -798,12 +798,25 @@ printf("FIX ----- ME");
 
 		
 // FIX ME: NEED CHECKSUM CALCS!!!	
+										unsigned char *data;
+										int datalength = ntohs(request_IICMP->ip_header.tot_len) - 
+																	 sizeof(request_IICMP->ip_header) - 
+																	 sizeof(request_IICMP->icmp_header);
+
+										if(datalength > 0){
+											data = malloc(datalength);
+											memcpy(data, buf + sizeof(request_IICMP), datalength);
+										}
+
+										unsigned char ptr[sizeof(reply_IICMP.icmp_header) + datalength];
+										memcpy(ptr, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
+										memcpy(ptr + sizeof(reply_IICMP.icmp_header), data, datalength);
+										reply_IICMP.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
+
+
 										//reply_IICMP->ip_header.check = ip_checksum(buf, sizeof(buf));
 
-										char chSUM[1500];
-										memcpy(&chSUM, &reply_IICMP, sizeof(reply_IICMP));
-
-										reply_IICMP.icmp_header.checksum = ip_checksum(chSUM, sizeof(chSUM));
+										//reply_IICMP.icmp_header.checksum = ip_checksum(chSUM, sizeof(chSUM));
 
 					
 
