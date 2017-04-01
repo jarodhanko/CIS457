@@ -416,13 +416,16 @@ int main(int argc, char **argv){
 						while (tmp1_INT != NULL){
 
 							// Store the interface ip as a u_int32
-							//u_int32_t ip_INT;
-							//memcpy(&ip_INT, tmp1_INT->ip_addrs, 4);
+							u_int32_t ip_INT;
+							ip_INT = tmp1_INT->ip_addrs[0] | 
+							 	   (tmp1_INT->ip_addrs[1] << 8) | 								
+								   (tmp1_INT->ip_addrs[2] << 16) | 
+								   (tmp1_INT->ip_addrs[3] << 24);
 
 							//u_int32_t ip_TEMP_IICMP ;
 							//memcpy(&ip_TEMP_IICMP, &request_IICMP->ip_header.daddr, 4);
 
-							printf("WHHHHY INT: %X \n", *(tmp1_INT->ip_addrs));
+							printf("WHHHHY INT: %X \n", ip_INT);
 							printf("WHHHHY REQ: %X \n", request_IICMP->ip_header.daddr);
 
 							
