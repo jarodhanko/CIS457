@@ -601,16 +601,18 @@ printf("FIX ----- ME");
 
 									if (tmp_TBL->network << (32 - tmp_TBL->prefix) == 
 													request_IICMP->ip_header.daddr << (32 - tmp_TBL->prefix)){
-
 										
-										foundMatch = 1;
-										ip_HOP = tmp_TBL->hop;
-										prize_Interface = tmp_INT;
-										printf("Found interface: %s\n", prize_Interface->name);
-										u_int8_t ip_print[4];
-										memcpy(&ip_print, &ip_HOP, 4);
-										printf("Next hop: %X.%X.%X.%X\n", ip_print[0],ip_print[1],ip_print[2],ip_print[3]);
-										break;
+										if (strcmp(tmp_TBL->interface, tmp_INT->name) == 0){
+										
+											foundMatch = 1;
+											ip_HOP = tmp_TBL->hop;
+											prize_Interface = tmp_INT;
+											printf("Found interface: %s\n", prize_Interface->name);
+											u_int8_t ip_print[4];
+											memcpy(&ip_print, &ip_HOP, 4);
+											printf("Next hop: %X.%X.%X.%X\n", ip_print[0],ip_print[1],ip_print[2],ip_print[3]);
+											break;
+										}
 									}
 
 									tmp_TBL = tmp_TBL->next;									
