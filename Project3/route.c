@@ -413,22 +413,24 @@ int main(int argc, char **argv){
 
 						// START: Loop - interface list.
 						while (tmp1_INT != NULL){
-
+printf("1...\n");
 							// Store the interface ip as a u_int32
 							u_int32_t ip_INT;
 							memcpy(&ip_INT, tmp1_INT->ip_addrs, 4);
-
+printf("2...\n");
 							u_int32_t ip_TEMP_IICMP;
 							memcpy(&ip_TEMP_IICMP, &request_IICMP->ip_header.daddr, 4);
-
+printf("3...\n");
 							
 							if (ip_INT == ip_TEMP_IICMP){
-
+printf("in...\n");
 								printf("ICMP - Found interface: %s\n", tmp1_INT->name);
 
 								// Copy the temp interface name to i_name, exit the loop.
 								memcpy(&name1A_INT, &tmp1_INT->name, 7);
+printf("copy1...\n");
 								memcpy(&name1P_INT, &name1A_INT, 7);
+printf("copy2...\n");
 								break; 
 							}
 
