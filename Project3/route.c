@@ -407,7 +407,7 @@ int main(int argc, char **argv){
 						tmpInterface = interfaceList;
 
 						// Temp char array to hold current interface name.
-						char * i_name = NULL;
+						char  i_name[7];
 
 						// START: Loop - interface list.
 						while (tmpInterface != NULL){
