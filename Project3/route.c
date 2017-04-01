@@ -607,7 +607,9 @@ printf("FIX ----- ME");
 										ip_HOP = tmp_TBL->hop;
 										prize_Interface = tmp_INT;
 										printf("Found interface: %s", prize_Interface->name);
-										printf("Next hop: %" PRIu32 "\n", ip_HOP);
+										u_int8_t ip_print[4];
+										memcpy(&ip_print, &ip_HOP, 4);
+										printf("Next hop: %X.%X.%X.%X", ip_print[0],ip_print[1],ip_print[2],ip_print[3]);
 										break;
 									}
 
