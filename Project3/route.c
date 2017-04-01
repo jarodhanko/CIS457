@@ -422,6 +422,9 @@ int main(int argc, char **argv){
 							//u_int32_t ip_TEMP_IICMP ;
 							//memcpy(&ip_TEMP_IICMP, &request_IICMP->ip_header.daddr, 4);
 
+							printf("WHHHHY INT: %X \n", *(tmp1_INT->ip_addrs));
+							printf("WHHHHY REQ: %X \n", request_IICMP->ip_header.daddr);
+
 							
 							if (*(tmp1_INT->ip_addrs) == request_IICMP->ip_header.daddr){
 
