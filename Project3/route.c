@@ -418,8 +418,11 @@ int main(int argc, char **argv){
 							u_int32_t ip_INT;
 							memcpy(&ip_INT, tmp1_INT->ip_addrs, 4);
 
-							// If the temp interface ip matchs the original interface ip.
-							if (ip_INT & request_IICMP->ip_header.daddr){
+							u_int32_t ip_TEMP_IICMP;
+							memcpy(&ip_TEMP_IICMP, &request_IICMP->ip_header.daddr, 4);
+
+							
+							if (ip_INT == ip_TEMP_IICMP){
 
 								printf("ICMP - Found interface: %s\n", tmp1_INT->name);
 
