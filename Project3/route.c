@@ -793,7 +793,7 @@ printf("FIX ----- ME");
 									}
 									else {
 
-										reply_IICMP.ip_header.ttl = request_IICMP->ip_header.ttl - 1;
+										//reply_IICMP.ip_header.ttl = request_IICMP->ip_header.ttl - 1;
 										reply_IICMP.ip_header.check = 0;
 
 		
