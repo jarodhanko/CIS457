@@ -799,7 +799,11 @@ printf("FIX ----- ME");
 		
 // FIX ME: NEED CHECKSUM CALCS!!!	
 										//reply_IICMP->ip_header.check = ip_checksum(buf, sizeof(buf));
-										reply_IICMP.icmp_header.checksum = ip_checksum(&reply_IICMP, sizeof(reply_IICMP));
+
+										char chSUM[1500];
+										memcpy(&chSUM, &reply_IICMP, sizeof(reply_IICMP));
+
+										reply_IICMP.icmp_header.checksum = ip_checksum(chSUM, sizeof(chSUM));
 
 					
 
