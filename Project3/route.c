@@ -415,16 +415,14 @@ int main(int argc, char **argv){
 						while (tmp1_INT != NULL){
 printf("1...\n");
 							// Store the interface ip as a u_int32
-							u_int32_t * ip_INT = NULL;
-							//ip_INT = tmp1_INT->ip_addrs;
-							memcpy(ip_INT, tmp1_INT->ip_addrs, 4);
+							u_int32_t ip_INT;
+							memcpy(&ip_INT, tmp1_INT->ip_addrs, 4);
 printf("2...\n");
-							u_int32_t * ip_TEMP_IICMP = NULL;
-							*ip_TEMP_IICMP = request_IICMP->ip_header.daddr;
-							//memcpy(&ip_TEMP_IICMP, &request_IICMP->ip_header.daddr, 4);
+							u_int32_t ip_TEMP_IICMP ;
+							memcpy(&ip_TEMP_IICMP, &request_IICMP->ip_header.daddr, 4);
 printf("3...\n");
 							
-							if ((memcmp(ip_INT, ip_TEMP_IICMP, 4)) == 0){
+							if (ip_INT == request_IICMP->ip_header.daddr){
 printf("in...\n");
 								printf("ICMP - Found interface: %s\n", tmp1_INT->name);
 
