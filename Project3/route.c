@@ -606,10 +606,10 @@ printf("FIX ----- ME");
 										foundMatch = 1;
 										ip_HOP = tmp_TBL->hop;
 										prize_Interface = tmp_INT;
-										printf("Found interface: %s", prize_Interface->name);
+										printf("Found interface: %s\n", prize_Interface->name);
 										u_int8_t ip_print[4];
 										memcpy(&ip_print, &ip_HOP, 4);
-										printf("Next hop: %X.%X.%X.%X", ip_print[0],ip_print[1],ip_print[2],ip_print[3]);
+										printf("Next hop: %X.%X.%X.%X\n", ip_print[0],ip_print[1],ip_print[2],ip_print[3]);
 										break;
 									}
 
@@ -632,7 +632,7 @@ printf("FIX ----- ME");
 
 			// START: send ARP request.
 
-								if (ip_HOP == 0){
+								if (ip_HOP == 0 || ip_HOP == -1){
 								
 									ip_HOP = request_IICMP->ip_header.daddr;
 								}
