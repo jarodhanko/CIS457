@@ -416,7 +416,7 @@ int main(int argc, char **argv){
 printf("1...\n");
 							// Store the interface ip as a u_int32
 							u_int32_t ip_INT;
-							memcpy(&ip_INT, tmp1_INT->ip_addrs, 4);
+							memcpy(&ip_INT, &tmp1_INT->ip_addrs, 4);
 printf("2...\n");
 							u_int32_t ip_TEMP_IICMP ;
 							memcpy(&ip_TEMP_IICMP, &request_IICMP->ip_header.daddr, 4);
