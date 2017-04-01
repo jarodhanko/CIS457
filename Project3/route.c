@@ -554,76 +554,39 @@ printf("FIX ----- ME");
 								reply_IICMP.ip_header.ttl = request_IICMP->ip_header.ttl - 1;
 								reply_IICMP.ip_header.check = 0;
 
-
-
-
-// FIX ME: NEED TO CALC CHECKSUM FOR IP HEADER AND FOR ICMP HEADER
-					
-								//replyIICMP.ip_header.check = ip_checksum(&replyIICMP, sizeof(replyIICMP));
-							
-								//reply_IICMP.icmp_header.checksum = 0;
-
-	
-
-
 								reply_IICMP.ip_header.daddr = request_IICMP->ip_header.saddr;
 								reply_IICMP.ip_header.saddr = request_IICMP->ip_header.daddr;
 
 								memcpy(reply_IICMP.eth_header.ether_dhost, request_IICMP->eth_header.ether_shost, 6);
 								memcpy(reply_IICMP.eth_header.ether_shost, mac_INT, 6);
 
-
-
-
-
-		
-
-
-										unsigned char *data;
-										int datalength = ntohs(request_IICMP->ip_header.tot_len) - 
+								unsigned char *data;
+								int datalength = ntohs(request_IICMP->ip_header.tot_len) - 
 																	 sizeof(request_IICMP->ip_header) - 
 																	 sizeof(request_IICMP->icmp_header);
 
-										if(datalength > 0){
-											data = malloc(datalength);
-											memcpy(data, buf + sizeof(struct iicmp), datalength);
-										}
+								if(datalength > 0){
+									data = malloc(datalength);
+									memcpy(data, buf + sizeof(struct iicmp), datalength);
+								}
 
-							
+				
+								unsigned char ptr2[sizeof(reply_IICMP.icmp_header) + datalength];
+								memcpy(ptr2, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
+								memcpy(ptr2 + sizeof(reply_IICMP.icmp_header), data, datalength);
 
-
-										unsigned char ptr2[sizeof(reply_IICMP.icmp_header) + datalength];
-										memcpy(ptr2, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
-										memcpy(ptr2 + sizeof(reply_IICMP.icmp_header), data, datalength);
-
-										reply_IICMP.icmp_header.checksum = ip_checksum(&ptr2, sizeof(ptr2));
-
-
-										//reply_IICMP->ip_header.check = ip_checksum(buf, sizeof(buf));
-										
-									
-										unsigned char result[sizeof(reply_IICMP) + datalength];
+								reply_IICMP.icmp_header.checksum = ip_checksum(&ptr2, sizeof(ptr2));
+			
+								unsigned char result[sizeof(reply_IICMP) + datalength];
 					
-
-										//reply_IICMP.icmp_header.checksum = htons(calculateIcmpChecksum(data, sizeof(reply_IICMP)));
-										
-										memcpy(result, &reply_IICMP, sizeof(reply_IICMP));
-										memcpy(result + sizeof(reply_IICMP), data, datalength);
-
-										send(prime_Interface->packet_socket, &result, sizeof(result), 0);
-
-
-
-
-
-
+								memcpy(result, &reply_IICMP, sizeof(reply_IICMP));
+								memcpy(result + sizeof(reply_IICMP), data, datalength);
 
 
 								printf("ICMP - Sending packet\n");
-
 								printf("Sending on interface: %s\n", prime_Interface->name);
 
-								//send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
+								send(prime_Interface->packet_socket, &result, sizeof(result), 0);
 
 							}
 						}
@@ -841,26 +804,17 @@ printf("FIX ----- ME");
 									
 									if (request_IICMP->ip_header.ttl == 1){
 
+										printf("The packet died");
 										// ICMP error - packet died in our arms.
 
 									}
 									else {
-// ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-
-				
-
-
-// OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-
-
 
 
 										reply_IICMP.ip_header.ttl = request_IICMP->ip_header.ttl - 1;
 										reply_IICMP.ip_header.check = 0;
 
-		
-// FIX ME: NEED CHECKSUM CALCS!!!	
+			
 										unsigned char *data;
 										int datalength = ntohs(request_IICMP->ip_header.tot_len) - 
 																	 sizeof(request_IICMP->ip_header) - 
@@ -871,29 +825,21 @@ printf("FIX ----- ME");
 											memcpy(data, buf + sizeof(struct iicmp), datalength);
 										}
 
-							
-
-
 										unsigned char ptr2[sizeof(reply_IICMP.icmp_header) + datalength];
 										memcpy(ptr2, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
 										memcpy(ptr2 + sizeof(reply_IICMP.icmp_header), data, datalength);
 
 										reply_IICMP.icmp_header.checksum = ip_checksum(&ptr2, sizeof(ptr2));
-
-
-										//reply_IICMP->ip_header.check = ip_checksum(buf, sizeof(buf));
-										
 									
 										unsigned char result[sizeof(reply_IICMP) + datalength];
-					
-
-										//reply_IICMP.icmp_header.checksum = htons(calculateIcmpChecksum(data, sizeof(reply_IICMP)));
 										
 										memcpy(result, &reply_IICMP, sizeof(reply_IICMP));
 										memcpy(result + sizeof(reply_IICMP), data, datalength);
 
+										printf("Sending ICMP reply");
+
 										send(prize_Interface->packet_socket, &result, sizeof(result), 0);
-// ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ	
+	
 									}
 								}
 							}
