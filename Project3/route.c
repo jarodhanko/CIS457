@@ -429,7 +429,7 @@ int main(int argc, char **argv){
 							printf("WHHHHY REQ: %X \n", request_IICMP->ip_header.daddr);
 
 							
-							if (*(tmp1_INT->ip_addrs) == request_IICMP->ip_header.daddr){
+							if (ip_INT == request_IICMP->ip_header.daddr){
 
 								printf("ICMP - Found interface: %s\n", tmp1_INT->name);
 
