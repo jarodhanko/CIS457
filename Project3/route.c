@@ -549,6 +549,8 @@ printf("FIX --- send\n");
 
 								printf("ICMP - Sending packet\n");
 
+								printf("Sending on interface: %s\n", tempInterface->name);
+
 								send(tempInterface->packet_socket, &replyIICMP, sizeof(replyIICMP), 0);
 
 							}
