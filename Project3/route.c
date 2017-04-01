@@ -804,7 +804,7 @@ printf("FIX ----- ME");
 									
 									if (request_IICMP->ip_header.ttl == 1){
 
-										printf("The packet died");
+										printf("The packet died\n");
 										// ICMP error - packet died in our arms.
 
 									}
@@ -836,7 +836,7 @@ printf("FIX ----- ME");
 										memcpy(result, &reply_IICMP, sizeof(reply_IICMP));
 										memcpy(result + sizeof(reply_IICMP), data, datalength);
 
-										printf("Sending ICMP reply");
+										printf("Sending ICMP reply\n");
 
 										send(prize_Interface->packet_socket, &result, sizeof(result), 0);
 	
