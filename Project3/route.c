@@ -729,6 +729,7 @@ printf("3\n");
 
 									memcpy(&new_aarp, temp_Buf, sizeof(struct aarp));
 									
+									mac_HOST = malloc(sizeof(u_int8_t)*6);
 									memcpy(mac_HOST, new_aarp.arp_header.arp_sha, 6);
 
 								}
