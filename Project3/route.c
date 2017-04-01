@@ -619,7 +619,7 @@ printf("3...\n");
 
 			// END: find interface from ip.
 							
-							
+printf("11111...\n");							
 							if (prize_Interface != NULL){
 
 								u_int8_t * mac_HOST;
@@ -638,23 +638,23 @@ printf("3...\n");
 
 								char broadcast_255[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 								char broadcast_0[6]   = {0,0,0,0,0,0};
-
+printf("1...\n");
 								memcpy(temp_ARP->eth_header.ether_dhost, &broadcast_255, 6);
 								memcpy(temp_ARP->eth_header.ether_shost, prize_Interface->mac_addrs, 6);
-
+printf("2...\n");
 								memcpy(temp_ARP->arp_header.arp_tha, &broadcast_0, 6);
 								memcpy(temp_ARP->arp_header.arp_sha, prize_Interface->mac_addrs, 6);
-								
+printf("3...\n");								
 								temp_ARP->arp_header.arp_tpa[3] = (uint8_t) (ip_HOP >> 24);
 								temp_ARP->arp_header.arp_tpa[2] = (uint8_t) (ip_HOP >> 16);
 								temp_ARP->arp_header.arp_tpa[1] = (uint8_t) (ip_HOP >> 8);
 								temp_ARP->arp_header.arp_tpa[0] = (uint8_t) (ip_HOP);
 
-								u_int32_t temp_ip_INT = prize_Interface->ip_addrs[0] | 
+printf("4...\n");								u_int32_t temp_ip_INT = prize_Interface->ip_addrs[0] | 
 									  		    	   (prize_Interface->ip_addrs[1] << 8) | 
 						    		  		           (prize_Interface->ip_addrs[2] << 16) | 
 												       (prize_Interface->ip_addrs[3] << 24);
-
+printf("5...\n");
 								temp_ARP->arp_header.arp_spa[3] = (uint8_t) (temp_ip_INT >> 24);
 								temp_ARP->arp_header.arp_spa[2] = (uint8_t) (temp_ip_INT >> 16);
 								temp_ARP->arp_header.arp_spa[1] = (uint8_t) (temp_ip_INT >> 8);
@@ -666,7 +666,7 @@ printf("3...\n");
 								temp_ARP->arp_header.ea_hdr.ar_pro = htons(ETH_P_IP);
 								temp_ARP->arp_header.ea_hdr.ar_op  = htons(ARPOP_REQUEST);
 					
-
+printf("6...\n");
 								send(prize_Interface->packet_socket, &temp_ARP, sizeof(temp_ARP), 0);
 									
 								
@@ -686,7 +686,7 @@ printf("3...\n");
 
   								int n2 = recvfrom(prize_Interface->packet_socket, temp_Buf, 1500, 0, 
 																(struct sockaddr*)&temp_Recv, &temp_Recvlen);
-  												
+printf("1...\n"); 												
 			
   								if (n2 < 1){
     								mac_HOST = NULL;
