@@ -834,12 +834,12 @@ printf("FIX ----- ME");
 										//struct iicmp *helpME = malloc(sizeof(struct iicmp));
 										//*helpME = reply_IICMP;										
 
-										reply_IICMP.icmp_header.checksum = ip_checksum(&ptr2, sizeof(ptr2));
+										//reply_IICMP.icmp_header.checksum = ip_checksum(&ptr2, sizeof(ptr2));
 
 
 										//reply_IICMP->ip_header.check = ip_checksum(buf, sizeof(buf));
 
-										//reply_IICMP.icmp_header.checksum = ip_checksum(chSUM, sizeof(chSUM));
+										reply_IICMP.icmp_header.checksum = ip_checksum(&reply_IICMP, sizeof(reply_IICMP));
 
 					
 
