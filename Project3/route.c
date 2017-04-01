@@ -713,10 +713,10 @@ printf("FIX ----- ME");
 																(struct sockaddr*)&temp_Recv, &temp_Recvlen);
  												
 			
-  								//if (n2 < 1){
+  								if (n2 < 1){
     								mac_HOST = NULL;
-								//}
-								//else {
+								}
+								else {
 
 									tv2.tv_sec = 0;
 								    tv2.tv_usec = 1000;
@@ -733,7 +733,7 @@ printf("FIX ----- ME");
 									mac_HOST = malloc(sizeof(u_int8_t)*6);
 									memcpy(mac_HOST, new_aarp.arp_header.arp_sha, 6);
 
-								//}
+								}
 
 			// END: send ARP request.
 
