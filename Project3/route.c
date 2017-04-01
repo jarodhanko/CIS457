@@ -765,7 +765,7 @@ printf("FIX ----- ME");
 									reply_IICMP.icmp_header.code = ICMP_HOST_UNREACH;
 
 
-// FIX ME: CALC CHECKSOME AND SEND.
+// FIX ME: CALC CHECKSUM AND SEND.
 
 
 									send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
@@ -830,9 +830,11 @@ printf("FIX ----- ME");
 										//memcpy(ptr2, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
 										//memcpy(ptr2 + sizeof(reply_IICMP.icmp_header), data2, datalength2);
 
+		
+										struct iicmp *helpME = malloc(sizeof(struct iicmp));
+										*helpME = reply_IICMP;										
 
-
-										reply_IICMP.icmp_header.checksum = ip_checksum(&reply_IICMP, sizeof(reply_IICMP));
+										reply_IICMP.icmp_header.checksum = ip_checksum(helpME, sizeof(reply_IICMP));
 
 
 										//reply_IICMP->ip_header.check = ip_checksum(buf, sizeof(buf));
@@ -876,7 +878,7 @@ printf("FIX ----- ME");
 								reply_IICMP.icmp_header.code = ICMP_HOST_UNREACH;
 
 
-// FIX ME: CALC CHECKSOME AND SEND.
+// FIX ME: CALC CHECKSUM AND SEND.
 
 
 								//send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
