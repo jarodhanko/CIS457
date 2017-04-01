@@ -847,12 +847,16 @@ printf("FIX ----- ME");
 										//reply_IICMP->ip_header.check = ip_checksum(buf, sizeof(buf));
 										char *data = malloc(sizeof(reply_IICMP));
 										memcpy(data, &reply_IICMP, sizeof(reply_IICMP));
-
-										reply_IICMP.icmp_header.checksum = htons(calculateIcmpChecksum(data, sizeof(reply_IICMP)));
-
+									
+										unsigned char result[sizeof(reply_IICMP) + datalength2];
 					
 
-										send(prize_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
+										reply_IICMP.icmp_header.checksum = htons(calculateIcmpChecksum(data, sizeof(reply_IICMP)));
+										
+										memcpy(result, &reply_IICMP, sizeof(reply_IICMP));
+										memcpy(result + sizeof(reply_IICMP), data2, datalength2);
+
+										send(prize_Interface->packet_socket, &result, sizeof(result), 0);
 										
 									}
 								}
