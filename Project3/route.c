@@ -573,11 +573,57 @@ printf("FIX ----- ME");
 								memcpy(reply_IICMP.eth_header.ether_shost, mac_INT, 6);
 
 
+
+
+
+		
+
+
+										unsigned char *data;
+										int datalength = ntohs(request_IICMP->ip_header.tot_len) - 
+																	 sizeof(request_IICMP->ip_header) - 
+																	 sizeof(request_IICMP->icmp_header);
+
+										if(datalength > 0){
+											data = malloc(datalength);
+											memcpy(data, buf + sizeof(struct iicmp), datalength);
+										}
+
+							
+
+
+										unsigned char ptr2[sizeof(reply_IICMP.icmp_header) + datalength];
+										memcpy(ptr2, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
+										memcpy(ptr2 + sizeof(reply_IICMP.icmp_header), data, datalength);
+
+										reply_IICMP.icmp_header.checksum = ip_checksum(&ptr2, sizeof(ptr2));
+
+
+										//reply_IICMP->ip_header.check = ip_checksum(buf, sizeof(buf));
+										
+									
+										unsigned char result[sizeof(reply_IICMP) + datalength];
+					
+
+										//reply_IICMP.icmp_header.checksum = htons(calculateIcmpChecksum(data, sizeof(reply_IICMP)));
+										
+										memcpy(result, &reply_IICMP, sizeof(reply_IICMP));
+										memcpy(result + sizeof(reply_IICMP), data, datalength);
+
+										send(prime_Interface->packet_socket, &result, sizeof(result), 0);
+
+
+
+
+
+
+
+
 								printf("ICMP - Sending packet\n");
 
 								printf("Sending on interface: %s\n", prime_Interface->name);
 
-								send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
+								//send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
 
 							}
 						}
