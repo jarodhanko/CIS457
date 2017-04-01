@@ -784,7 +784,7 @@ printf("FIX ----- ME");
 									memcpy(reply_IICMP.eth_header.ether_dhost, mac_HOST, 6);
 									memcpy(reply_IICMP.eth_header.ether_shost, prize_Interface->mac_addrs, 6);
 
-									reply_IICMP.icmp_header.checksum = 0;
+									//reply_IICMP.icmp_header.checksum = 0;
 									
 									if (request_IICMP->ip_header.ttl == 1){
 
@@ -811,7 +811,7 @@ printf("FIX ----- ME");
 										//unsigned char ptr[sizeof(reply_IICMP.icmp_header) + datalength];
 										//memcpy(ptr, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
 										//memcpy(ptr + sizeof(reply_IICMP.icmp_header), data, datalength);
-										reply_IICMP.ip_header.check = ip_checksum(&reply_IICMP, sizeof(reply_IICMP));
+										//reply_IICMP.ip_header.check = ip_checksum(&reply_IICMP, sizeof(reply_IICMP));
 
 
 
@@ -831,10 +831,10 @@ printf("FIX ----- ME");
 										//memcpy(ptr2 + sizeof(reply_IICMP.icmp_header), data2, datalength2);
 
 		
-										struct iicmp *helpME = malloc(sizeof(struct iicmp));
-										*helpME = reply_IICMP;										
+										//struct iicmp *helpME = malloc(sizeof(struct iicmp));
+										//*helpME = reply_IICMP;										
 
-										reply_IICMP.icmp_header.checksum = ip_checksum(helpME, sizeof(reply_IICMP));
+										//reply_IICMP.icmp_header.checksum = ip_checksum(helpME, sizeof(reply_IICMP));
 
 
 										//reply_IICMP->ip_header.check = ip_checksum(buf, sizeof(buf));
