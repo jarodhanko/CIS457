@@ -641,7 +641,7 @@ printf("11111...\n");
 printf("1...\n");
 								//memcpy(&temp_ARP->eth_header.ether_dhost, broadcast_255, 6);
 printf("1.5...\n");
-								memcpy(temp_ARP->eth_header.ether_shost, prize_Interface->mac_addrs, 6);
+								memcpy(&temp_ARP->eth_header.ether_shost, prize_Interface->mac_addrs, 6);
 printf("2...\n");
 								memcpy(temp_ARP->arp_header.arp_tha, &broadcast_0, 6);
 								memcpy(temp_ARP->arp_header.arp_sha, prize_Interface->mac_addrs, 6);
