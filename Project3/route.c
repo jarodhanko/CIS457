@@ -781,7 +781,7 @@ printf("FIX ----- ME");
 									reply_IICMP.icmp_header.code = ICMP_HOST_UNREACH;
 
 
-// FIX ME: CALC CHECKSUM AND SEND.
+// FIX ME: CALC CHECKSUM AND SEND. 
 
 
 									send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
