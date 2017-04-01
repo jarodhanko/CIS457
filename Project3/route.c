@@ -578,7 +578,7 @@ printf("FIX ----- ME");
 						// Did not find an interface name.
 						else {
 
-							printf("Whose packet is this???");
+							printf("Whose packet is this???\n");
 
 							struct interface * prize_Interface = NULL;
 							u_int32_t ip_HOP = 0;
