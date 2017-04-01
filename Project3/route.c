@@ -816,20 +816,23 @@ printf("FIX ----- ME");
 
 
 
-										unsigned char *data2;
-										int datalength2 = ntohs(request_IICMP->ip_header.tot_len) - 
-																	 sizeof(request_IICMP->ip_header) - 
-																	 sizeof(request_IICMP->icmp_header);
+										//unsigned char *data2;
+										//int datalength2 = ntohs(request_IICMP->ip_header.tot_len) - 
+										//							 sizeof(request_IICMP->ip_header) - 
+										//							 sizeof(request_IICMP->icmp_header);
 
-										if(datalength2 > 0){
-											data2 = malloc(datalength2);
-											memcpy(data2, buf + sizeof(request_IICMP), datalength2);
-										}
+										//if(datalength2 > 0){
+										//	data2 = malloc(datalength2);
+										//	memcpy(data2, buf + sizeof(request_IICMP), datalength2);
+										//}
 
-										unsigned char ptr2[sizeof(reply_IICMP.icmp_header) + datalength2];
-										memcpy(ptr2, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
-										memcpy(ptr2 + sizeof(reply_IICMP.icmp_header), data2, datalength2);
-										reply_IICMP.icmp_header.checksum = ip_checksum(&ptr2, sizeof(ptr2));
+										//unsigned char ptr2[sizeof(reply_IICMP.icmp_header) + datalength2];
+										//memcpy(ptr2, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
+										//memcpy(ptr2 + sizeof(reply_IICMP.icmp_header), data2, datalength2);
+
+
+
+										reply_IICMP.icmp_header.checksum = ip_checksum(&reply_IICMP, sizeof(reply_IICMP));
 
 
 										//reply_IICMP->ip_header.check = ip_checksum(buf, sizeof(buf));
