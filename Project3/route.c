@@ -1144,10 +1144,12 @@ printf("FIX ----- ME");
 
 							  		if (temptable->network << (32 - temptable->prefix) == request_IICMP->ip_header.daddr << (32 - temptable->prefix)) {
 									
-										forwardInterface = iface2;
-										forward_ip = temptable->hop;
-										breakLoop = 1;
-										break;
+										if (strcmp(temptable->interface, iface2->name) == 0){
+											forwardInterface = iface2;
+											forward_ip = temptable->hop;
+											breakLoop = 1;
+											break;
+										}
 							  		}
 								}
 								if (breakLoop){
