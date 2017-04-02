@@ -1063,6 +1063,14 @@ printf("FIX ----- ME");
 				else {
             		printf("Recieved packet (not ARP or ICMP), Forwarding\n");
 
+
+					struct iip *request_IIP;
+					request_IIP = ((struct iip*)&buf);
+
+
+					// The packet we will send.
+					struct iip reply_IIP = *request_IIP;
+
 // START: forward packet.
             		
 
@@ -1077,7 +1085,7 @@ printf("FIX ----- ME");
 
 							u_int32_t temp_ip;
 							memcpy(&temp_ip, iface1->ip_addrs, 4);
-							if(temp_ip == request_IICMP->ip_header.daddr){
+							if(temp_ip == request_IIP->ip_header.daddr){
 
 								printf("interface name: %s\n", iface1->name);
 								memcpy(i_name, iface1->name, 7);
@@ -1110,8 +1118,8 @@ printf("FIX ----- ME");
 			// END: find mac with interface.
 							
 
- 							memcpy(reply_IICMP.eth_header.ether_dhost, request_IICMP->eth_header.ether_shost, 6);
-							memcpy(reply_IICMP.eth_header.ether_shost, tmp_MAC, 6);
+ 							memcpy(reply_IIP.eth_header.ether_dhost, request_IIP->eth_header.ether_shost, 6);
+							memcpy(reply_IIP.eth_header.ether_shost, tmp_MAC, 6);
 							
 							send(prime_Interface->packet_socket, &reply_IICMP, sizeof(struct iicmp), 0);
 
@@ -1142,7 +1150,7 @@ printf("FIX ----- ME");
 
 								for(temptable = rtable; temptable!=NULL; temptable = temptable->next) {
 
-							  		if (temptable->network << (32 - temptable->prefix) == request_IICMP->ip_header.daddr << (32 - temptable->prefix)) {
+							  		if (temptable->network << (32 - temptable->prefix) == request_IIP->ip_header.daddr << (32 - temptable->prefix)) {
 									
 										if (strcmp(temptable->interface, iface2->name) == 0){
 											forwardInterface = iface2;
@@ -1168,7 +1176,7 @@ printf("FIX ----- ME");
 
 								if(forward_ip == 0 || forward_ip == -1) {
 								  	
-									forward_ip = request_IICMP->ip_header.daddr;
+									forward_ip = request_IIP->ip_header.daddr;
 								
 								}
 				
@@ -1295,12 +1303,12 @@ printf("FIX ----- ME");
 									forward_mac[4],forward_mac[5]);
 
 								  	
-									memcpy(reply_IICMP.eth_header.ether_dhost, forward_mac, 6);
-									memcpy(reply_IICMP.eth_header.ether_shost, forwardInterface->mac_addrs, 6);
+									memcpy(reply_IIP.eth_header.ether_dhost, forward_mac, 6);
+									memcpy(reply_IIP.eth_header.ether_shost, forwardInterface->mac_addrs, 6);
 
-									reply_IICMP.eth_header.ether_type = htons(ETH_P_IP);
+									reply_IIP.eth_header.ether_type = htons(ETH_P_IP);
 
-								  	send(forwardInterface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
+								  	send(forwardInterface->packet_socket, &reply_IIP, sizeof(reply_IIP), 0);
 								}
 
 						  	}
