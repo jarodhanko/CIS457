@@ -41,6 +41,7 @@ struct iicmp{
 struct iip{
 	struct ether_header eth_header;
 	struct iphdr ip_header;
+	char data[];
 } __attribute__ ((__packed__));
 
 struct routing_table {
