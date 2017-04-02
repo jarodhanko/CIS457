@@ -1164,7 +1164,7 @@ printf("FIX ----- ME");
 								u_int8_t * forward_mac;
 								
 
-								if(forward_ip == 0) {
+								if(forward_ip == 0 || forward_ip == -1) {
 								  	
 									forward_ip = request_IICMP->ip_header.daddr;
 								
