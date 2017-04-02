@@ -1169,13 +1169,107 @@ printf("FIX ----- ME");
 									forward_ip = request_IICMP->ip_header.daddr;
 								
 								}
+				
 
-							
-// START: send arp request.
+// START: send ARP request.
+
+								
+
+								u_int8_t ip_print[4];
+								memcpy(&ip_print, &forward_ip, 4);
+								printf("New hop: %X.%X.%X.%X\n", ip_print[0],ip_print[1],ip_print[2],ip_print[3]);
 
 
+								//struct aarp * temp_ARP = malloc(sizeof(struct aarp));
 
-// There is code above that we can use for this.
+
+								struct aarp *temp_ARP;
+								temp_ARP = malloc(sizeof(struct aarp));
+								//req_ARP = ((struct aarp*)&buf);
+								//struct aarp temp_ARP = *req_ARP;
+
+								temp_ARP->eth_header.ether_type = htons(ETHERTYPE_ARP);
+
+
+								char broadcast_255[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+								char broadcast_0[6]   = {0,0,0,0,0,0};
+
+								memcpy(&temp_ARP->eth_header.ether_dhost, broadcast_255, 6);
+
+								memcpy(&temp_ARP->eth_header.ether_shost, forwardInterface->mac_addrs, 6);
+
+								memcpy(temp_ARP->arp_header.arp_tha, &broadcast_0, 6);
+								memcpy(temp_ARP->arp_header.arp_sha, forwardInterface->mac_addrs, 6);
+								
+								temp_ARP->arp_header.arp_tpa[3] = (uint8_t) (forward_ip >> 24);
+								temp_ARP->arp_header.arp_tpa[2] = (uint8_t) (forward_ip >> 16);
+								temp_ARP->arp_header.arp_tpa[1] = (uint8_t) (forward_ip >> 8);
+								temp_ARP->arp_header.arp_tpa[0] = (uint8_t) (forward_ip);
+
+								u_int32_t temp_ip_INT = forwardInterface->ip_addrs[0] | 
+									  		    	   (forwardInterface->ip_addrs[1] << 8) | 
+						    		  		           (forwardInterface->ip_addrs[2] << 16) | 
+												       (forwardInterface->ip_addrs[3] << 24);
+
+								temp_ARP->arp_header.arp_spa[3] = (uint8_t) (temp_ip_INT >> 24);
+								temp_ARP->arp_header.arp_spa[2] = (uint8_t) (temp_ip_INT >> 16);
+								temp_ARP->arp_header.arp_spa[1] = (uint8_t) (temp_ip_INT >> 8);
+								temp_ARP->arp_header.arp_spa[0] = (uint8_t) (temp_ip_INT);
+
+								temp_ARP->arp_header.ea_hdr.ar_hln = 6;
+								temp_ARP->arp_header.ea_hdr.ar_hrd = htons(ARPHRD_ETHER);
+								temp_ARP->arp_header.ea_hdr.ar_pln = 4;
+								temp_ARP->arp_header.ea_hdr.ar_pro = htons(ETH_P_IP);
+								temp_ARP->arp_header.ea_hdr.ar_op  = htons(ARPOP_REQUEST);
+
+								
+								printf("Sending ARP request\n");
+					
+
+								send(forwardInterface->packet_socket, temp_ARP, sizeof(struct aarp), 0);
+									
+								
+								struct sockaddr_ll temp_Recv;
+
+  								struct timeval tv2;
+  								tv2.tv_sec = 0;
+  								tv2.tv_usec = 1000 * 20;
+
+  								if (setsockopt(forwardInterface->packet_socket, SOL_SOCKET, SO_RCVTIMEO,&tv2,
+																					sizeof(tv2)) < 0) {
+    								perror("Error");
+								}
+
+								socklen_t temp_Recvlen = sizeof(struct sockaddr_ll);
+								char temp_Buf[1500];
+
+  								int n2 = recvfrom(forwardInterface->packet_socket, temp_Buf, 1500, 0, 
+																(struct sockaddr*)&temp_Recv, &temp_Recvlen);
+ 												
+			
+  								if (n2 < 1){
+    								forward_mac = NULL;
+								}
+								else {
+
+									tv2.tv_sec = 0;
+								    tv2.tv_usec = 1000;
+
+									if (setsockopt(forwardInterface->packet_socket, SOL_SOCKET,SO_RCVTIMEO,
+																				&tv2,sizeof(tv2)) < 0) {
+										perror("Error");
+									}
+
+									struct aarp new_aarp;
+
+									memcpy(&new_aarp, temp_Buf, sizeof(struct aarp));
+									
+									forward_mac = malloc(sizeof(u_int8_t)*6);
+									memcpy(forward_mac, new_aarp.arp_header.arp_sha, 6);
+
+								}
+
+			// END: send ARP request.
 
 
 
