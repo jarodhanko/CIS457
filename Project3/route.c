@@ -812,7 +812,7 @@ printf("FIX ----- ME");
 
 
 										reply_IICMP.ip_header.ttl = request_IICMP->ip_header.ttl - 1;
-										reply_IICMP.ip_header.check = 0;
+										//reply_IICMP.ip_header.check = 0;
 
 // FIX ME: calc ip header check
 // ...
