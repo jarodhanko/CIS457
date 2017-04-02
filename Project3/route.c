@@ -814,7 +814,17 @@ printf("FIX ----- ME");
 										reply_IICMP.ip_header.ttl = request_IICMP->ip_header.ttl - 1;
 										reply_IICMP.ip_header.check = 0;
 
-			
+// FIX ME: calc ip header check
+// ...
+// ...
+// ...
+										char data3[1500];
+										memcpy(data3, buf, 1500);
+										memcpy(data3 + sizeof(struct ether_header), &reply_IICMP.ip_header, sizeof(struct iphdr));
+
+										reply_IICMP.ip_header.check = ip_checksum(data3, n);
+
+
 										unsigned char *data;
 										int datalength = ntohs(request_IICMP->ip_header.tot_len) - 
 																	 sizeof(request_IICMP->ip_header) - 
