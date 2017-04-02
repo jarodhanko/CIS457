@@ -1145,7 +1145,7 @@ printf("FIX ----- ME");
 							  		if (temptable->network << (32 - temptable->prefix) == request_IICMP->ip_header.daddr << (32 - temptable->prefix)) {
 									
 										forwardInterface = iface2;
-										forward_ip = temptable->network;
+										forward_ip = temptable->hop;
 										breakLoop = 1;
 										break;
 							  		}
@@ -1161,7 +1161,7 @@ printf("FIX ----- ME");
 
 						  	if(forwardInterface != NULL){
 
-								u_int8_t * forward_mac = NULL;
+								u_int8_t * forward_mac;
 								
 
 								if(forward_ip == 0) {
