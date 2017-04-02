@@ -41,7 +41,6 @@ struct iicmp{
 struct iip{
 	struct ether_header eth_header;
 	struct iphdr ip_header;
-	char data[];
 } __attribute__ ((__packed__));
 
 struct routing_table {
@@ -1309,7 +1308,24 @@ printf("FIX ----- ME");
 
 									reply_IIP.eth_header.ether_type = htons(ETH_P_IP);
 
-								  	send(forwardInterface->packet_socket, &reply_IIP, sizeof(reply_IIP), 0);
+
+									unsigned char *data4;
+									int datalength4 = ntohs(request_IICMP->ip_header.tot_len) - 
+																	 sizeof(request_IICMP->ip_header) - 
+																	 sizeof(request_IICMP->icmp_header);
+
+									if(datalength4 > 0){
+										data4 = malloc(datalength4);
+										memcpy(data4, buf + sizeof(struct iip), datalength4);
+									}
+
+									unsigned char result[sizeof(reply_IIP) + datalength4];
+										
+									memcpy(result, &reply_IIP, sizeof(reply_IIP));
+									memcpy(result + sizeof(reply_IIP), data4, datalength4);
+
+
+								  	send(forwardInterface->packet_socket, &result, sizeof(result), 0);
 								}
 
 						  	}
