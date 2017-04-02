@@ -68,7 +68,7 @@ void load_table(char *filename);
 void print_ETHERTYPE_ARP(struct aarp *request);
 void print_ETHERTYPE_IP(struct iicmp reply);
 void clearArray(char *array);
-int calculateIcmpChecksum(char *buf, int length);
+int calculateIPChecksum(char *buf, int length);
 
 
 
@@ -822,7 +822,7 @@ printf("FIX ----- ME");
 										memcpy(data3, buf, 1500);
 										memcpy(data3 + sizeof(struct ether_header), &reply_IICMP.ip_header, sizeof(struct iphdr));
 
-										reply_IICMP.ip_header.check = ntohs(ip_checksum(data3, n));
+										reply_IICMP.ip_header.check = ntohs(calculateIPChecksum(data3, n));
 
 
 										unsigned char *data;
@@ -1483,20 +1483,22 @@ void print_ETHERTYPE_IP(struct iicmp reply){
 
 }
 
-int calculateIcmpChecksum(char *buf, int length){
+int calculateIPChecksum(char* buf, int length)
+{
+  int lengthToIP = sizeof(struct ether_header);
+  int ipLength = sizeof(struct iphdr);
 
-  int lengthToIcmp = sizeof(struct ether_header)+sizeof(struct iphdr);
-  int icmpDataLength = length - (sizeof(struct ether_header)+sizeof(struct iphdr)+sizeof(struct icmphdr)+8);
-  int icmpLength = (sizeof(struct icmphdr) + 8 + icmpDataLength);
-
-  struct icmphdr icmpHeader;
-  memcpy(&icmpHeader,&buf+lengthToIcmp,sizeof(struct icmphdr));
+  struct iphdr ipHeader;
+  memcpy(&ipHeader, &buf + lengthToIP, sizeof(struct iphdr));
 
   unsigned int checksum = 0;
+
   int i;
-  for(i = 0; i < icmpLength; i+=2) {
-    checksum += (uint32_t) ((uint8_t) buf[lengthToIcmp+i] << 8 | (uint8_t) buf[lengthToIcmp+i+1]);
+  for(i = 0; i < ipLength; i+=2)
+  {
+    checksum += (uint32_t) ((uint8_t) buf[lengthToIP+i] << 8 | (uint8_t) buf[lengthToIP + i + 1]);
   }
+
   checksum = (checksum >> 16) + (checksum & 0xffff);
   return (uint16_t) ~checksum;
 }
