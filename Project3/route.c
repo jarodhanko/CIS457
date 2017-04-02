@@ -1319,7 +1319,7 @@ printf("FIX ----- ME");
 										memcpy(data4, buf + sizeof(struct iip), datalength4);
 									}
 
-									unsigned char result[sizeof(reply_IIP) + datalength4];
+									char result[sizeof(reply_IIP) + datalength4];
 										
 									memcpy(result, &reply_IIP, sizeof(reply_IIP));
 									memcpy(result + sizeof(reply_IIP), data4, datalength4);
