@@ -1254,8 +1254,18 @@ says it does not contain a full tcp header???
 									reply_IICMP.eth_header.ether_type = htons(ETH_P_IP);
 
 
+									char result[sizeof(buf)];
+									memcpy(result, &buf, sizeof(buf));
+									memcpy(result, &reply_IICMP, sizeof(reply_IICMP));
+
+
+									printf("FRWD - Sending packet.");
+
+									// Send packet on the correct interface.
+							  		send(forwardInterface->packet_socket, &result, sizeof(result), 0);
+
 									// Send on correct interface.
-								  	send(forwardInterface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
+								  	//send(forwardInterface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
 								}
 
 						  	}
