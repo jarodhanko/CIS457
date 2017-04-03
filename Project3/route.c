@@ -967,6 +967,15 @@ says it does not contain a full tcp header???
 									reply_IICMP.icmp_header.code = ICMP_HOST_UNREACH;
 
 
+
+									// Calc the ip checksum.
+									reply_IICMP.ip_header.check = 0;
+									char data5[1500];
+									memcpy(data5, buf, 1500);
+									memcpy(data5 + sizeof(struct ether_header), &reply_IICMP.ip_header, sizeof(struct iphdr));
+									reply_IICMP.ip_header.check = ntohs(calculateIPChecksum(data5, n));
+
+
 									// Calculate icmp header checksum.
 									unsigned char *data;
 									int datalength = ntohs(request_IICMP->ip_header.tot_len) - 
@@ -980,14 +989,6 @@ says it does not contain a full tcp header???
 									memcpy(ptr2, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
 									memcpy(ptr2 + sizeof(reply_IICMP.icmp_header), data, datalength);
 									reply_IICMP.icmp_header.checksum = icmp_checksum(&ptr2, sizeof(ptr2));
-
-
-									// Calc the ip checksum.
-									reply_IICMP.ip_header.check = 0;
-									char data5[1500];
-									memcpy(data5, buf, 1500);
-									memcpy(data5 + sizeof(struct ether_header), &reply_IICMP.ip_header, sizeof(struct iphdr));
-									reply_IICMP.ip_header.check = ntohs(calculateIPChecksum(data5, n));
 
 
 									// Send the ICMP error on original interface.
@@ -1121,6 +1122,12 @@ says it does not contain a full tcp header???
 								reply_IICMP.icmp_header.checksum = 0;
 								reply_IICMP.icmp_header.code = ICMP_HOST_UNREACH;
 
+								// Calc the ip checksum.
+								reply_IICMP.ip_header.check = 0;
+								char data5[1500];
+								memcpy(data5, buf, 1500);
+								memcpy(data5 + sizeof(struct ether_header), &reply_IICMP.ip_header, sizeof(struct iphdr));
+								reply_IICMP.ip_header.check = ntohs(calculateIPChecksum(data5, n));
 
 								// Calculate icmp header checksum.
 								unsigned char *data;
@@ -1136,13 +1143,6 @@ says it does not contain a full tcp header???
 								memcpy(ptr2 + sizeof(reply_IICMP.icmp_header), data, datalength);
 								reply_IICMP.icmp_header.checksum = icmp_checksum(&ptr2, sizeof(ptr2));
 
-
-								// Calc the ip checksum.
-								reply_IICMP.ip_header.check = 0;
-								char data5[1500];
-								memcpy(data5, buf, 1500);
-								memcpy(data5 + sizeof(struct ether_header), &reply_IICMP.ip_header, sizeof(struct iphdr));
-								reply_IICMP.ip_header.check = ntohs(calculateIPChecksum(data5, n));
 
 
 								// Send on original interface.
