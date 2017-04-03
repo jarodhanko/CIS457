@@ -285,6 +285,29 @@ int main(int argc, char **argv){
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+/*
+
+Any ping works fine. The problem is when doing tcp/udp packets. I dont know if if actually even setting it
+up correctly but it forwards both tcp and udp packts to the destination, heres the catch though, when you
+look at the packet it is forwarding in wireshark it says "malformed packet." The ethernet and ip headers are
+correct but the data must be wrong. Theres a very noticable comment line when the forwarding code is about
+half way down or so. There are a few comments hugging the left side asking about checksums because i wasnt
+sure. Also we still need to calculate the checksum for all incoming packets still but thats easy. The 
+malformed packet problem has me stumped. Like i said the only thing it can be is how we send the data tagged
+on with the headers?? 
+
+At this point i feel we have basically met all of the requirements, but we just need to finish a few things 
+and see why these packets are being flaged malformed, so we might make be able to finish on time.
+
+Looking at wireshark for the tcp packets.
+-- Ethernet header is good.
+-- IP header is good.
+-- TCP header not good.
+
+says it does not contain a full tcp header???
+
+
+*/
 
 			//-----------------------------------------------------------------------------------------
 			// Recieved ARP.
@@ -934,7 +957,7 @@ int main(int argc, char **argv){
 									reply_IICMP.icmp_header.checksum = 0;
 									
 
-									printf("ICMP - Adjusting the time to live");
+									printf("ICMP - Adjusting the time to live\n");
 
 
 									//---------------------------------------------------------------------------------
@@ -1048,6 +1071,11 @@ int main(int argc, char **argv){
 
             		} 
 
+//#############################################################################################################
+//------------------------------------------------------------------------------------------------------------
+//#############################################################################################################
+//-------------------------------------------------------------------------------------------------------------
+//#############################################################################################################
 
 
 //#######			//-----------------------------------------------------------------------------------
