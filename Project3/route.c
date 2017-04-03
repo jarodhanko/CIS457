@@ -1,3 +1,17 @@
+/************************************************
+
+Jarod Hanko and Norman Cunningham
+
+CIS 457 - Project 3
+
+
+References -
+
+http://stackoverflow.com/questions/4181784/how-to-set-socket-timeout-in-c-when-making-multiple-connections
+
+*************************************************/
+
+
 #include <arpa/inet.h>
 #include <errno.h>
 
@@ -1176,7 +1190,7 @@ says it does not contain a full tcp header???
 							// The packet ip matches the interface ip.
 							if(temp_ip == request_IICMP->ip_header.daddr){
 
-								printf("FRWD - Found interface: %s\n", iface1->name);
+								printf("FRWD - Found interface1: %s\n", iface1->name);
 								memcpy(i_name, iface1->name, 7);
 							  	break;
 							}
@@ -1262,7 +1276,7 @@ says it does not contain a full tcp header???
 										forwardInterface = iface2;
 										forward_ip = temptable->network;
 
-										printf("FRWD - Found interface: %s\n", forwardInterface->name);
+										printf("FRWD - Found interface2: %s\n", forwardInterface->name);
 										printf("FRWD - Next hop: %X\n", forward_ip);
 
 										breakLoop = 1;
@@ -1640,7 +1654,7 @@ says it does not contain a full tcp header???
 							// If interface ip matches the ip of the packet.
 							if(temp_ip == request_IIP->ip_header.daddr){
 
-								printf("FRWD - Found interface: %s\n", iface1->name);
+								printf("FRWD - Found interface3: %s\n", iface1->name);
 								memcpy(i_name, iface1->name, 7);
 							  	break;
 							}
@@ -1724,7 +1738,7 @@ says it does not contain a full tcp header???
 											forwardInterface = iface2;
 											forward_ip = temptable->hop;
 
-											printf("FRWD - Found interface: %s\n", forwardInterface->name);
+											printf("FRWD - Found interface4: %s\n", forwardInterface->name);
 											printf("FRWD - Next hop: %X\n", forward_ip);
 
 											breakLoop = 1;
