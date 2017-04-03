@@ -1191,6 +1191,7 @@ says it does not contain a full tcp header???
 							if(temp_ip == request_IICMP->ip_header.daddr){
 
 								printf("FRWD - Found interface1: %s\n", iface1->name);
+								i_name = malloc(sizeof(7));
 								memcpy(i_name, iface1->name, 7);
 								printf("copy\n");
 							  	break;
