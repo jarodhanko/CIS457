@@ -1614,9 +1614,9 @@ says it does not contain a full tcp header???
 								//memcpy(result, &reply_IIP, sizeof(reply_IIP));
 								//memcpy(result + sizeof(reply_IIP), data4, datalength4);
 
-								char result[sizeof(buf) - 4];
-								memcpy(result, &buf, sizeof(buf) - 4);
-								memcpy(result, &reply_IIP, sizeof(reply_IIP));
+								char result[sizeof(buf)];
+								memcpy(result, &buf, sizeof(buf));
+								memcpy(&result, &reply_IIP, sizeof(reply_IIP));
 
 
 								printf("FRWD - Sending packet");
