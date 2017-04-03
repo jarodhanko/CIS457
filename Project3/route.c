@@ -482,6 +482,7 @@ int main(int argc, char **argv){
 								char name2_INT[7];
 								memcpy(&name2_INT, tmp2_INT->name, 7);
 
+		
 								if (strcmp(name2_INT, name1P_INT) == 0){
 
 									memcpy(&mac_INT, tmp2_INT->mac_addrs, 6);
@@ -498,10 +499,14 @@ int main(int argc, char **argv){
 							printf("ICMP - MAC ADDRESS: %X:%X:%X:%X:%X:%X\n", mac_INT[0], mac_INT[1], mac_INT[2],
 																	          mac_INT[3], mac_INT[4], mac_INT[5]);
 
+
+							// Set the ether header type.
 							reply_IICMP.icmp_header.type = ICMP_ECHOREPLY;
 
+
+							// Clear the icmp header checksum.
 							reply_IICMP.icmp_header.checksum = 0;
-							//int timeTOlive;
+							
 
 							printf("ICMP - Adjusting time to live\n");
 
@@ -510,6 +515,8 @@ int main(int argc, char **argv){
 							// The time to live would be zero
 							//---------------------------------------------------------------------------------
 							if (reply_IICMP.ip_header.ttl == 1){
+
+
 								printf("ICMP - This packets lifeforce has expired\n");
 
 
@@ -518,13 +525,21 @@ int main(int argc, char **argv){
 								//#############################################################################
 							
 	
+								// Set ether header mac address.
 								memcpy(reply_IICMP.eth_header.ether_shost, prime_Interface->mac_addrs, 6);
 								memcpy(reply_IICMP.eth_header.ether_dhost, request_IICMP->eth_header.ether_shost, 6);
 
+		
+								// Set ether header type.
 								reply_IICMP.eth_header.ether_type = htons(ETHERTYPE_IP);
 
+
+								// Set ip header destination and source ip address.
 								reply_IICMP.ip_header.daddr = request_IICMP->ip_header.saddr;
 								memcpy(&reply_IICMP.ip_header.saddr, prime_Interface->ip_addrs, 4);
+
+
+								// Set other ip header fields.
 								reply_IICMP.ip_header.check    = 0;
 								reply_IICMP.ip_header.frag_off = 0; 
 								reply_IICMP.ip_header.ihl      = 5;
@@ -534,9 +549,14 @@ int main(int argc, char **argv){
 								reply_IICMP.ip_header.ttl      = 64;
 								reply_IICMP.ip_header.version  = 4;
 							
+
+								// Set icmp header type and code.
 								reply_IICMP.icmp_header.type = ICMP_TIME_EXCEEDED;
-								reply_IICMP.icmp_header.checksum = 0;
 								reply_IICMP.icmp_header.code = ICMP_HOST_UNREACH;
+
+
+								// Calc the icmp checksum.
+								reply_IICMP.icmp_header.checksum = 0;
 
 
 								printf("FIX ----- ME");
@@ -544,8 +564,11 @@ int main(int argc, char **argv){
 
 // DO we need to calc the checksum  though???
 
+
 								printf("ICMP - Sending ICMP error - ICMP_TIME_EXCEEDED");
-					
+
+
+								// Send on correct interface.
 								send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
 
 								//#############################################################################			
@@ -560,34 +583,38 @@ int main(int argc, char **argv){
 							else {
 					
 
+								// Update time to live.
 								reply_IICMP.ip_header.ttl = request_IICMP->ip_header.ttl - 1;
 								reply_IICMP.ip_header.check = 0;
 
+
+								// Set ip header destination and source address.
 								reply_IICMP.ip_header.daddr = request_IICMP->ip_header.saddr;
 								reply_IICMP.ip_header.saddr = request_IICMP->ip_header.daddr;
 
+
+								// Set the ether header destination and source mac address.
 								memcpy(reply_IICMP.eth_header.ether_dhost, request_IICMP->eth_header.ether_shost, 6);
 								memcpy(reply_IICMP.eth_header.ether_shost, mac_INT, 6);
 
+
+								// Calc icmp header checksum.
 								unsigned char *data;
 								int datalength = ntohs(request_IICMP->ip_header.tot_len) - 
 																	 sizeof(request_IICMP->ip_header) - 
 																	 sizeof(request_IICMP->icmp_header);
-
 								if(datalength > 0){
 									data = malloc(datalength);
 									memcpy(data, buf + sizeof(struct iicmp), datalength);
 								}
-
-				
 								unsigned char ptr2[sizeof(reply_IICMP.icmp_header) + datalength];
 								memcpy(ptr2, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
 								memcpy(ptr2 + sizeof(reply_IICMP.icmp_header), data, datalength);
-
 								reply_IICMP.icmp_header.checksum = ip_checksum(&ptr2, sizeof(ptr2));
 			
+
+								// Combine headers with data.
 								unsigned char result[sizeof(reply_IICMP) + datalength];
-					
 								memcpy(result, &reply_IICMP, sizeof(reply_IICMP));
 								memcpy(result + sizeof(reply_IICMP), data, datalength);
 
@@ -595,6 +622,8 @@ int main(int argc, char **argv){
 								printf("ICMP - Sending packet\n");
 								printf("ICMP - Sending on interface: %s\n", prime_Interface->name);
 
+
+								// Send on correct interface.
 								send(prime_Interface->packet_socket, &result, sizeof(result), 0);
 
 							}
@@ -605,17 +634,26 @@ int main(int argc, char **argv){
 						//-----------------------------------------------------------------------------------
 						else {
 
+
 							printf("ICMP - Could not find an interface\n");
 
+
+							// Interface to send on.
 							struct interface * prize_Interface = NULL;
+
+
+							// ip of the next hop.
 							u_int32_t ip_HOP = 0;
 
-			// START: find interface from ip
 
 							printf("ICMP - Searching page table...\n");
 							
+
+							// Boolean to break outer loop.
 							int foundMatch = 0;
 
+
+							// Temp interface.
 							struct interface * tmp_INT;
 							tmp_INT = interfaceList;
 
@@ -625,10 +663,14 @@ int main(int argc, char **argv){
 							//-----------------------------------------------------------------------------
 							while (tmp_INT != NULL){
 
+
+								// Temp table entry.
 								struct routing_table * tmp_TBL;
 								tmp_TBL = rtable;
 
+
 								while (tmp_TBL != NULL){
+
 
 									//---------------------------------------------------------------------
 									// Found an ip in table that matched requested ip.
@@ -636,11 +678,13 @@ int main(int argc, char **argv){
 									if (tmp_TBL->network << (32 - tmp_TBL->prefix) == 
 													request_IICMP->ip_header.daddr << (32 - tmp_TBL->prefix)){
 										
+
 										//-------------------------------------------------------------------
 										// Found interface that matched table interface.
 										//--------------------------------------------------------------------
 										if (strcmp(tmp_TBL->interface, tmp_INT->name) == 0){
 										
+
 											foundMatch = 1;
 											ip_HOP = tmp_TBL->hop;
 											prize_Interface = tmp_INT;
@@ -1001,15 +1045,14 @@ int main(int argc, char **argv){
 							}
 						}
 
-// END: process ICMP echo request.
 
             		} 
 
 
 
-					//-----------------------------------------------------------------------------------
-					// The icmp_header type was not an icmp echo or reply. Forward the packet.
-					//-----------------------------------------------------------------------------------
+//#######			//-----------------------------------------------------------------------------------
+//FORWARD			// The icmp_header type was not an icmp echo or reply. Forward the packet.
+//#######			//-----------------------------------------------------------------------------------
 					else {
               			printf("FRWD - Packet must be forwarded\n");
 						printf("FRWD - Scanning interfaces...\n");
@@ -1194,16 +1237,12 @@ int main(int argc, char **argv){
 						  	}
 						}
 					
-
-
-
-// END: forward packet.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 					}
 				}
 
-				//-------------------------------------------------------------------------------------
-				// Protocol is not, recieve ICMP packets for all local sockets. Forward the packet.
-				//-------------------------------------------------------------------------------------
+//#######		//-------------------------------------------------------------------------------------
+//FORWARD		// Protocol is not, recieve ICMP packets for all local sockets. Forward the packet.
+//#######		//-------------------------------------------------------------------------------------
 				else {
 
             		printf("FRWD - Recieved packet (not ARP or ICMP), Forwarding\n");
@@ -1501,8 +1540,9 @@ int main(int argc, char **argv){
 
 
 							}
-							else
-							{
+							else{
+
+								// Print mac address from arp reply.
 							  	printf("FRWD - ARP returned MAC:\n");
 							  	printf("%02x:%02x:%02x:%02x:%02x:%02x\n",
 								forward_mac[0],forward_mac[1],
