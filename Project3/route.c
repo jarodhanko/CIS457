@@ -936,7 +936,6 @@ int main(int argc, char **argv){
 									reply_IICMP.icmp_header.checksum = icmp_checksum(&ptr2, sizeof(ptr2));
 
 
-									// Send the ICMP error on original interface.
 									send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
 
 									//#############################################################################	
@@ -1037,13 +1036,12 @@ int main(int argc, char **argv){
 										reply_IICMP.icmp_header.checksum = icmp_checksum(&ptr2, sizeof(ptr2));
 
 
-										// Send the ICMP error on original interface.
 										send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
 
 										//#############################################################################	
 										// END: send ICMP error - ICMP_TIME_EXCEEDED
 										//#############################################################################
-// SEND ERROR???
+
 
 									}
 
@@ -1459,9 +1457,6 @@ int main(int argc, char **argv){
 
 
 								  	printf("FRWD - No ARP reply\n");
-// SEND ERROR???
-									
-
 
 								}
 								else{
@@ -1499,7 +1494,7 @@ int main(int argc, char **argv){
 
 						  	}
 						  	else{
-// SEND ERROR???
+
 								printf("FRWD - Address not found in table\n");
 
 
@@ -1804,8 +1799,7 @@ int main(int argc, char **argv){
 
 
 								if(forward_mac == NULL){
-// SEND ERRROR???
-								  	//send ICMP error
+								  	
 								  	printf("FRWD - No ARP reply\n");
 									
 
@@ -1846,7 +1840,7 @@ int main(int argc, char **argv){
 							// No  match in routing table.
 							//-----------------------------------------------------------------------------
 						  	else{
-// SEND ERROR???
+
 
 								printf("FRWD - Could not find an interface\n");
 								
@@ -1858,7 +1852,7 @@ int main(int argc, char **argv){
 				else {
 					printf("--- Bad Checksum ---\n");
 					printf("PCKT - The packet was dropped right into the trash.\n");
-//SEND ERROR??
+
 				}
 			}
 		}
@@ -1949,7 +1943,6 @@ void load_table(char *filename){
 			}
 			else if (caseNum == 2){ // Hop
 
-				printf("NEW HOP\n");
 				item[--index] = '\0';
 				
 				if(item[--index] == '-')
