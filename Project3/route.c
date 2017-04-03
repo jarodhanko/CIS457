@@ -1612,7 +1612,7 @@ says it does not contain a full tcp header???
 								printf("FRWD - Sending packet");
 
 								// Send packet on the correct interface.
-							  	send(forwardInterface->packet_socket, result, sizeof(result), 0);
+							  	send(forwardInterface->packet_socket, &result, sizeof(result), 0);
 							}
 
 					  	}
