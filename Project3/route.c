@@ -1604,8 +1604,8 @@ says it does not contain a full tcp header???
 								//memcpy(result, &reply_IIP, sizeof(reply_IIP));
 								//memcpy(result + sizeof(reply_IIP), data4, datalength4);
 
-								unsigned char *result = malloc(sizeof(buf));
-								memcpy(result, buf, sizeof(buf));
+								char result[sizeof(buf)];
+								memcpy(result, &buf, sizeof(buf));
 								memcpy(result, &reply_IIP, sizeof(reply_IIP));
 
 
