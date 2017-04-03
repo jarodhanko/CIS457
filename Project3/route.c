@@ -82,48 +82,8 @@ void load_table(char *filename);
 void print_ETHERTYPE_ARP(struct aarp *request);
 void print_ETHERTYPE_IP(struct iicmp reply);
 void clearArray(char *array);
+int icmp_checksum(void* vdata,size_t length);
 int calculateIPChecksum(char *buf, int length);
-
-
-
-
-
-/****************************************************************************************
-* Checksum
-****************************************************************************************/
-//icmp checksum calculator from
-//source: http://www.microhowto.info/howto/calculate_an_internet_protocol_checksum_in_c.html
-u_int16_t icmp_checksum(void* vdata,size_t length) {
-    // Cast the data pointer to one that can be indexed.
-    char* data=(char*)vdata;
-
-    // Initialise the accumulator.
-    u_int32_t acc=0xffff;
-
-    // Handle complete 16-bit blocks.
-	size_t i;
-    for (i=0;i+1<length;i+=2) {
-        u_int16_t word;
-        memcpy(&word,data+i,2);
-        acc+=ntohs(word);
-        if (acc>0xffff) {
-            acc-=0xffff;
-        }
-    }
-
-    // Handle any partial block at the end of the data.
-    if (length&1) {
-        u_int16_t word=0;
-        memcpy(&word,data+length-1,1);
-        acc+=ntohs(word);
-        if (acc>0xffff) {
-            acc-=0xffff;
-        }
-    }
-
-    // Return the checksum in network byte order.
-    return htons(~acc);
-}
 
 
 
@@ -1519,7 +1479,7 @@ int main(int argc, char **argv){
 								else{
 
 									// Print the recieved mac address. 
-								  	printf("FRWD - ARP returned MAC:\n");
+								  	printf("FRWD - ARP returned MAC: ");
 								  	printf("%02x:%02x:%02x:%02x:%02x:%02x\n",
 									forward_mac[0],forward_mac[1],
 									forward_mac[2],forward_mac[3],
@@ -1540,7 +1500,7 @@ int main(int argc, char **argv){
 									memcpy(result, &reply_IICMP, sizeof(reply_IICMP));
 
 
-									printf("FRWD - Forwarding packet.");
+									printf("FRWD - Forwarding packet.\n");
 
 									// Send packet on the correct interface.
 							  		send(forwardInterface->packet_socket, &result, sizeof(result), 0);
@@ -1719,7 +1679,7 @@ int main(int argc, char **argv){
 							
 									u_int8_t ip_print[4];
 									memcpy(&ip_print, &forward_ip, 4);
-									printf("New hop: %X.%X.%X.%X\n", ip_print[0],ip_print[1],ip_print[2],ip_print[3]);
+									printf("FRWD - New hop: %X.%X.%X.%X\n", ip_print[0],ip_print[1],ip_print[2],ip_print[3]);
 
 							
 								}
@@ -1866,7 +1826,7 @@ int main(int argc, char **argv){
 								else{
 
 									// Print mac address from arp reply.
-								  	printf("FRWD - ARP returned MAC:\n");
+								  	printf("FRWD - ARP returned MAC: ");
 								  	printf("%02x:%02x:%02x:%02x:%02x:%02x\n",
 									forward_mac[0],forward_mac[1],
 									forward_mac[2],forward_mac[3],
@@ -2110,6 +2070,46 @@ void print_ETHERTYPE_IP(struct iicmp reply){
 
 
 }
+
+
+/****************************************************************************************
+* Checksums
+****************************************************************************************/
+//icmp checksum calculator from
+//source: http://www.microhowto.info/howto/calculate_an_internet_protocol_checksum_in_c.html
+u_int16_t icmp_checksum(void* vdata,size_t length) {
+    // Cast the data pointer to one that can be indexed.
+    char* data=(char*)vdata;
+
+    // Initialise the accumulator.
+    u_int32_t acc=0xffff;
+
+    // Handle complete 16-bit blocks.
+	size_t i;
+    for (i=0;i+1<length;i+=2) {
+        u_int16_t word;
+        memcpy(&word,data+i,2);
+        acc+=ntohs(word);
+        if (acc>0xffff) {
+            acc-=0xffff;
+        }
+    }
+
+    // Handle any partial block at the end of the data.
+    if (length&1) {
+        u_int16_t word=0;
+        memcpy(&word,data+length-1,1);
+        acc+=ntohs(word);
+        if (acc>0xffff) {
+            acc-=0xffff;
+        }
+    }
+
+    // Return the checksum in network byte order.
+    return htons(~acc);
+}
+
+
 
 int calculateIPChecksum(char* buf, int length)
 {
