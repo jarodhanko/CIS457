@@ -412,6 +412,21 @@ says it does not contain a full tcp header???
 				// The packet we will send.
 				struct iicmp reply_IICMP = *request_IICMP;
 
+
+				// Calc the checksum.
+				int temp_checksum = request_IICMP->ip_header.check;
+				reply_IICMP.ip_header.check = 0;
+				char data5[1500];
+				memcpy(data5, buf, 1500);
+				memcpy(data5 + sizeof(struct ether_header), &reply_IICMP.ip_header, sizeof(struct iphdr));
+				reply_IICMP.ip_header.check = ntohs(calculateIPChecksum(data5, n));
+
+
+				if(temp_checksum == request_IICMP->ip_header.check){
+					printf("ITS GOOD IN THE HOOD");
+				}
+
+
 				//---------------------------------------------------------------------------------------
 				// If protocol is recieve ICMP packets for all local sockets.
 				//--------------------------------------------------------------------------------------
@@ -1593,7 +1608,7 @@ says it does not contain a full tcp header???
 								memcpy(reply_IIP.eth_header.ether_shost, forwardInterface->mac_addrs, 6);
 
 								// Set ether header type.
-								//reply_IIP.eth_header.ether_type = htons(ETH_P_IP);
+								reply_IIP.eth_header.ether_type = htons(ETH_P_IP);
 
 
 								// Combine headers and data
