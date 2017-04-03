@@ -1355,7 +1355,7 @@ says it does not contain a full tcp header???
 									// Table entry matched packet destination address.
 							  		if (temptable->network << (32 - temptable->prefix) == request_IICMP->ip_header.daddr << (32 - temptable->prefix)) {
 									
-										if (strcmp(tmp_TBL->interface, tmp_INT->name) == 0){
+										if (strcmp(temptable->interface, iface2->name) == 0){
 										
 
 											forwardInterface = iface2;
