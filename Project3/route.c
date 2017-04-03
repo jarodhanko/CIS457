@@ -1334,6 +1334,7 @@ says it does not contain a full tcp header???
 							// START: find next hop in routing table and correct interface to send on.
 							//-----------------------------------------------------------------------------
 
+							printf("FRWD - Scanning table...\n");
 
 							// Temp interface.
 							struct interface * iface2;
@@ -1526,68 +1527,8 @@ says it does not contain a full tcp header???
 
 
 								  	printf("ICMP - Could not find an interface\n");
-									printf("ICMP - Sending ICMP error - ICMP_HOST_UNREACH\n");
 // SEND ERROR???
-									//#############################################################################	
-									// START: send ICMP error - ICMP_DEST_UNREACH.
-									//#############################################################################
-
-									// Set ether header source and destination mac address.
-									memcpy(reply_IICMP.eth_header.ether_shost, request_IICMP->eth_header.ether_dhost, 6);
-									memcpy(reply_IICMP.eth_header.ether_dhost, request_IICMP->eth_header.ether_shost, 6);
-
-									// Set ether header type.
-									reply_IICMP.eth_header.ether_type = htons(ETHERTYPE_IP);
-
-									// Set ip header desination and source ip address.
-									reply_IICMP.ip_header.daddr = request_IICMP->ip_header.saddr;
-									memcpy(&reply_IICMP.ip_header.saddr, prime_Interface->ip_addrs, 4);
-
-									// Set other ip header fields.
-									reply_IICMP.ip_header.check    = 0;
-									reply_IICMP.ip_header.frag_off = 0; 
-									reply_IICMP.ip_header.ihl      = 5;
-									reply_IICMP.ip_header.protocol = IPPROTO_ICMP; 
-									reply_IICMP.ip_header.tos      = 0;
-									reply_IICMP.ip_header.tot_len  = htons(28); 
-									reply_IICMP.ip_header.ttl      = 64;
-									reply_IICMP.ip_header.version  = 4;
-
-									// Set icmp header fields.						
-									reply_IICMP.icmp_header.type = ICMP_HOST_UNREACH;
-									reply_IICMP.icmp_header.checksum = 0;
-									reply_IICMP.icmp_header.code = ICMP_HOST_UNREACH;
-
-
-									// Calculate icmp header checksum.
-									unsigned char *data;
-									int datalength = ntohs(request_IICMP->ip_header.tot_len) - 
-																 sizeof(request_IICMP->ip_header) - 
-																 sizeof(request_IICMP->icmp_header);
-									if(datalength > 0){
-										data = malloc(datalength);
-										memcpy(data, buf + sizeof(struct iicmp), datalength);
-									}
-									unsigned char ptr2[sizeof(reply_IICMP.icmp_header) + datalength];
-									memcpy(ptr2, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
-									memcpy(ptr2 + sizeof(reply_IICMP.icmp_header), data, datalength);
-									reply_IICMP.icmp_header.checksum = icmp_checksum(&ptr2, sizeof(ptr2));
-
-
-									// Calc the ip checksum.
-									reply_IICMP.ip_header.check = 0;
-									char data5[1500];
-									memcpy(data5, buf, 1500);
-									memcpy(data5 + sizeof(struct ether_header), &reply_IICMP.ip_header, sizeof(struct iphdr));
-									reply_IICMP.ip_header.check = ntohs(calculateIPChecksum(data5, n));
-
-
-									// Send on original interface.
-									//send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
-
-									//#############################################################################	
-									// END: send ICMP error - ICMP_DEST_UNREACH.
-									//#############################################################################
+									
 
 
 								}
@@ -1627,69 +1568,8 @@ says it does not contain a full tcp header???
 						  	}
 						  	else{
 // SEND ERROR???
-								printf("FRWD - Address not found in table, sending error\n");
+								printf("FRWD - Address not found in table\n");
 
-
-								//#############################################################################	
-								// START: send ICMP error - ICMP_DEST_UNREACH.
-								//#############################################################################
-
-								// Set ether header source and destination mac address.
-								memcpy(reply_IICMP.eth_header.ether_shost, request_IICMP->eth_header.ether_dhost, 6);
-								memcpy(reply_IICMP.eth_header.ether_dhost, request_IICMP->eth_header.ether_shost, 6);
-
-								// Set ether header type.
-								reply_IICMP.eth_header.ether_type = htons(ETHERTYPE_IP);
-
-								// Set ip header desination and source ip address.
-								reply_IICMP.ip_header.daddr = request_IICMP->ip_header.saddr;
-								memcpy(&reply_IICMP.ip_header.saddr, prime_Interface->ip_addrs, 4);
-
-								// Set other ip header fields.
-								reply_IICMP.ip_header.check    = 0;
-								reply_IICMP.ip_header.frag_off = 0; 
-								reply_IICMP.ip_header.ihl      = 5;
-								reply_IICMP.ip_header.protocol = IPPROTO_ICMP; 
-								reply_IICMP.ip_header.tos      = 0;
-								reply_IICMP.ip_header.tot_len  = htons(28); 
-								reply_IICMP.ip_header.ttl      = 64;
-								reply_IICMP.ip_header.version  = 4;
-
-								// Set icmp header fields.						
-								reply_IICMP.icmp_header.type = ICMP_HOST_UNREACH;
-								reply_IICMP.icmp_header.checksum = 0;
-								reply_IICMP.icmp_header.code = ICMP_HOST_UNREACH;
-
-
-								// Calculate icmp header checksum.
-								unsigned char *data;
-								int datalength = ntohs(request_IICMP->ip_header.tot_len) - 
-															 sizeof(request_IICMP->ip_header) - 
-															 sizeof(request_IICMP->icmp_header);
-								if(datalength > 0){
-									data = malloc(datalength);
-									memcpy(data, buf + sizeof(struct iicmp), datalength);
-								}
-								unsigned char ptr2[sizeof(reply_IICMP.icmp_header) + datalength];
-								memcpy(ptr2, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
-								memcpy(ptr2 + sizeof(reply_IICMP.icmp_header), data, datalength);
-								reply_IICMP.icmp_header.checksum = icmp_checksum(&ptr2, sizeof(ptr2));
-
-
-								// Calc the ip checksum.
-								reply_IICMP.ip_header.check = 0;
-								char data5[1500];
-								memcpy(data5, buf, 1500);
-								memcpy(data5 + sizeof(struct ether_header), &reply_IICMP.ip_header, sizeof(struct iphdr));
-								reply_IICMP.ip_header.check = ntohs(calculateIPChecksum(data5, n));
-
-
-								// Send on original interface.
-								//send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
-
-								//#############################################################################	
-								// END: send ICMP error - ICMP_DEST_UNREACH.
-								//#############################################################################
 
 						  	}
 						}
@@ -1994,68 +1874,7 @@ says it does not contain a full tcp header???
 // SEND ERRROR???
 								  	//send ICMP error
 								  	printf("ICMP - No ARP reply\n");
-									printf("ICMP - Sending ICMP error - ICMP_HOST_UNREACH\n");
-
-									//#############################################################################	
-									// START: send ICMP error - ICMP_DEST_UNREACH.
-									//#############################################################################
-
-									// Set ether header source and destination mac address.
-									memcpy(reply_IICMP.eth_header.ether_shost, request_IICMP->eth_header.ether_dhost, 6);
-									memcpy(reply_IICMP.eth_header.ether_dhost, request_IICMP->eth_header.ether_shost, 6);
-
-									// Set ether header type.
-									reply_IICMP.eth_header.ether_type = htons(ETHERTYPE_IP);
-
-									// Set ip header desination and source ip address.
-									reply_IICMP.ip_header.daddr = request_IICMP->ip_header.saddr;
-									memcpy(&reply_IICMP.ip_header.saddr, prime_Interface->ip_addrs, 4);
-
-									// Set other ip header fields.
-									reply_IICMP.ip_header.check    = 0;
-									reply_IICMP.ip_header.frag_off = 0; 
-									reply_IICMP.ip_header.ihl      = 5;
-									reply_IICMP.ip_header.protocol = IPPROTO_ICMP; 
-									reply_IICMP.ip_header.tos      = 0;
-									reply_IICMP.ip_header.tot_len  = htons(28); 
-									reply_IICMP.ip_header.ttl      = 64;
-									reply_IICMP.ip_header.version  = 4;
-
-									// Set icmp header fields.						
-									reply_IICMP.icmp_header.type = ICMP_HOST_UNREACH;
-									reply_IICMP.icmp_header.checksum = 0;
-									reply_IICMP.icmp_header.code = ICMP_HOST_UNREACH;
-
-
-									// Calculate icmp header checksum.
-									unsigned char *data;
-									int datalength = ntohs(request_IICMP->ip_header.tot_len) - 
-																 sizeof(request_IICMP->ip_header) - 
-																 sizeof(request_IICMP->icmp_header);
-									if(datalength > 0){
-										data = malloc(datalength);
-										memcpy(data, buf + sizeof(struct iicmp), datalength);
-									}
-									unsigned char ptr2[sizeof(reply_IICMP.icmp_header) + datalength];
-									memcpy(ptr2, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
-									memcpy(ptr2 + sizeof(reply_IICMP.icmp_header), data, datalength);
-									reply_IICMP.icmp_header.checksum = icmp_checksum(&ptr2, sizeof(ptr2));
-
-
-									// Calc the ip checksum.
-									reply_IICMP.ip_header.check = 0;
-									char data5[1500];
-									memcpy(data5, buf, 1500);
-									memcpy(data5 + sizeof(struct ether_header), &reply_IICMP.ip_header, sizeof(struct iphdr));
-									reply_IICMP.ip_header.check = ntohs(calculateIPChecksum(data5, n));
-
-
-									// Send on original interface.
-									//send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
-
-									//#############################################################################	
-									// END: send ICMP error - ICMP_DEST_UNREACH.
-									//#############################################################################
+									
 
 
 								}
@@ -2097,68 +1916,7 @@ says it does not contain a full tcp header???
 // SEND ERROR???
 
 								printf("ICMP - Could not find an interface\n");
-								printf("ICMP - Sending ICMP error - ICMP_HOST_UNREACH\n");
-
-								//#############################################################################	
-								// START: send ICMP error - ICMP_DEST_UNREACH.
-								//#############################################################################
-
-								// Set ether header source and destination mac address.
-								memcpy(reply_IICMP.eth_header.ether_shost, request_IICMP->eth_header.ether_dhost, 6);
-								memcpy(reply_IICMP.eth_header.ether_dhost, request_IICMP->eth_header.ether_shost, 6);
-
-								// Set ether header type.
-								reply_IICMP.eth_header.ether_type = htons(ETHERTYPE_IP);
-
-								// Set ip header desination and source ip address.
-								reply_IICMP.ip_header.daddr = request_IICMP->ip_header.saddr;
-								memcpy(&reply_IICMP.ip_header.saddr, prime_Interface->ip_addrs, 4);
-
-								// Set other ip header fields.
-								reply_IICMP.ip_header.check    = 0;
-								reply_IICMP.ip_header.frag_off = 0; 
-								reply_IICMP.ip_header.ihl      = 5;
-								reply_IICMP.ip_header.protocol = IPPROTO_ICMP; 
-								reply_IICMP.ip_header.tos      = 0;
-								reply_IICMP.ip_header.tot_len  = htons(28); 
-								reply_IICMP.ip_header.ttl      = 64;
-								reply_IICMP.ip_header.version  = 4;
-
-								// Set icmp header fields.						
-								reply_IICMP.icmp_header.type = ICMP_HOST_UNREACH;
-								reply_IICMP.icmp_header.checksum = 0;
-								reply_IICMP.icmp_header.code = ICMP_HOST_UNREACH;
-
-
-								// Calculate icmp header checksum.
-								unsigned char *data;
-								int datalength = ntohs(request_IICMP->ip_header.tot_len) - 
-															 sizeof(request_IICMP->ip_header) - 
-															 sizeof(request_IICMP->icmp_header);
-								if(datalength > 0){
-									data = malloc(datalength);
-									memcpy(data, buf + sizeof(struct iicmp), datalength);
-								}
-								unsigned char ptr2[sizeof(reply_IICMP.icmp_header) + datalength];
-								memcpy(ptr2, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
-								memcpy(ptr2 + sizeof(reply_IICMP.icmp_header), data, datalength);
-								reply_IICMP.icmp_header.checksum = icmp_checksum(&ptr2, sizeof(ptr2));
-
-
-								// Calc the ip checksum.
-								reply_IICMP.ip_header.check = 0;
-								char data5[1500];
-								memcpy(data5, buf, 1500);
-								memcpy(data5 + sizeof(struct ether_header), &reply_IICMP.ip_header, sizeof(struct iphdr));
-								reply_IICMP.ip_header.check = ntohs(calculateIPChecksum(data5, n));
-
-
-								// Send on original interface.
-								//send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
-
-								//#############################################################################	
-								// END: send ICMP error - ICMP_DEST_UNREACH.
-								//#############################################################################
+								
 						  	}
 						}
 					}
