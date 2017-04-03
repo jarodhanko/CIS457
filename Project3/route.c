@@ -82,7 +82,7 @@ void load_table(char *filename);
 void print_ETHERTYPE_ARP(struct aarp *request);
 void print_ETHERTYPE_IP(struct iicmp reply);
 void clearArray(char *array);
-int icmp_checksum(void* vdata,size_t length);
+u_int16_t icmp_checksum(void* vdata,size_t length);
 int calculateIPChecksum(char *buf, int length);
 
 
@@ -246,31 +246,19 @@ int main(int argc, char **argv){
     		//start processing all others
     		printf("\n***** Got a %d byte packet *****\n", n);
 
-			printf("Interface Was: %s\n", prime_Interface->name);
+			printf("PCKT - Interface Was: %s\n", prime_Interface->name);
 	
-
-			// Store the original interface ip as a u_int32
-			//u_int32_t interfaceIP = prime_Interface->ip_addrs[0] | 
-			//				 	   (prime_Interface->ip_addrs[1] << 8) | 								
-			//					   (prime_Interface->ip_addrs[2] << 16) | 
-			//					   (prime_Interface->ip_addrs[3] << 24);
 			
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-/*
 
-
-
-
-*/
 
 			//-----------------------------------------------------------------------------------------
 			// Recieved ARP.
 			//-----------------------------------------------------------------------------------------
 			if((ntohs(recvaddr.sll_protocol) == ETH_P_ARP)){
-				printf("----- Recieved ARP -----\n");
 
 				printf("PCKT- New ARP packet");
 			
@@ -358,7 +346,7 @@ int main(int argc, char **argv){
 			// Recieved IP.
 			//---------------------------------------------------------------------------------------------
 			else if ((ntohs(recvaddr.sll_protocol) == ETH_P_IP)){
-				printf("----- Recieved IP -----\n");
+				printf("PCKT - Recieved IP packet\n");
 
 
 				// The original packet sent to us.
@@ -380,7 +368,7 @@ int main(int argc, char **argv){
 
 
 				if(temp_checksum == request_IICMP->ip_header.check){
-					printf("--- Good Checksum ---\n");
+					printf("ICMP - Good Checksum \n");
 				
 				
 
@@ -398,9 +386,9 @@ int main(int argc, char **argv){
 
              			
 						if (request_IICMP->icmp_header.type == ICMP_ECHO)							
-							printf("PCKT - Received ICMP ECHO\n");
+							printf("ICMP - Received ICMP ECHO\n");
 						else
-							printf("PCKT - Received ICMP REPLY\n");
+							printf("ICMP - Received ICMP REPLY\n");
 
 
 						//###############################################################################
