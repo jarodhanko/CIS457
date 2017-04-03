@@ -1593,7 +1593,7 @@ says it does not contain a full tcp header???
 								memcpy(reply_IIP.eth_header.ether_shost, forwardInterface->mac_addrs, 6);
 
 								// Set ether header type.
-								reply_IIP.eth_header.ether_type = htons(ETH_P_IP);
+								//reply_IIP.eth_header.ether_type = htons(ETH_P_IP);
 
 
 								// Combine headers and data
