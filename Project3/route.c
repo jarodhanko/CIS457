@@ -1606,13 +1606,13 @@ says it does not contain a full tcp header???
 
 								unsigned char result[sizeof(buf)];
 								memcpy(result, &buf, sizeof(buf));
-								memcpy(result, &reply_IIP, sizeof(struct iip));
+								memcpy(buf, &reply_IIP, sizeof(reply_IIP));
 
 
 								printf("FRWD - Sending packet");
 
 								// Send packet on the correct interface.
-							  	send(forwardInterface->packet_socket, &result, sizeof(result), 0);
+							  	send(forwardInterface->packet_socket, &buf, sizeof(buf), 0);
 							}
 
 					  	}
