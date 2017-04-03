@@ -301,24 +301,7 @@ int main(int argc, char **argv){
 
 /*
 
-Any ping works fine. The problem is when doing tcp/udp packets. I dont know if if actually even setting it
-up correctly but it forwards both tcp and udp packts to the destination, heres the catch though, when you
-look at the packet it is forwarding in wireshark it says "malformed packet." The ethernet and ip headers are
-correct but the data must be wrong. Theres a very noticable comment line when the forwarding code is about
-half way down or so. There are a few comments hugging the left side asking about checksums because i wasnt
-sure. Also we still need to calculate the checksum for all incoming packets still but thats easy. The 
-malformed packet problem has me stumped. Like i said the only thing it can be is how we send the data tagged
-on with the headers?? 
 
-At this point i feel we have basically met all of the requirements, but we just need to finish a few things 
-and see why these packets are being flaged malformed, so we might make be able to finish on time.
-
-Looking at wireshark for the tcp packets.
--- Ethernet header is good.
--- IP header is good.
--- TCP header not good.
-
-says it does not contain a full tcp header???
 
 
 */
@@ -329,7 +312,7 @@ says it does not contain a full tcp header???
 			if((ntohs(recvaddr.sll_protocol) == ETH_P_ARP)){
 				printf("----- Recieved ARP -----\n");
 
-
+				printf("PCKT- New ARP packet");
 			
 				// The original arp packet sent to us.
 				struct aarp *request_ARP;
@@ -455,9 +438,9 @@ says it does not contain a full tcp header???
 
              			
 						if (request_IICMP->icmp_header.type == ICMP_ECHO)							
-							printf("ICMP - Received ICMP ECHO\n");
+							printf("PCKT - Received ICMP ECHO\n");
 						else
-							printf("ICMP - Received ICMP REPLY\n");
+							printf("PCKT - Received ICMP REPLY\n");
 
 
 						//###############################################################################
@@ -569,7 +552,7 @@ says it does not contain a full tcp header???
 							if (reply_IICMP.ip_header.ttl == 1){
 
 
-								printf("ICMP - This packets lifeforce has expired\n");
+								printf("ICMP - This packets lifeforce has expired (ttl)\n");
 
 
 								//#############################################################################			
@@ -729,7 +712,7 @@ says it does not contain a full tcp header???
 							u_int32_t ip_HOP = 0;
 
 
-							printf("ICMP - Searching page table...\n");
+							printf("ICMP - Searching routing table...\n");
 							
 
 							// Boolean to break outer loop.
@@ -1020,7 +1003,7 @@ says it does not contain a full tcp header???
 				
 
 									printf("ICMP - Recieved ARP reply\n");
-									printf("ICMP - MAC from ARP request: %02X:%02X:%02X:%02X:%02X:%02X\n", 
+									printf("ICMP - MAC from ARP: %02X:%02X:%02X:%02X:%02X:%02X\n", 
 																	mac_HOST[0], mac_HOST[1], mac_HOST[2], 
 																	mac_HOST[3], mac_HOST[4], mac_HOST[5]);
 
@@ -1046,7 +1029,7 @@ says it does not contain a full tcp header???
 									//---------------------------------------------------------------------------------
 									if (request_IICMP->ip_header.ttl == 1){
 
-										printf("ICMP - The packet died\n");
+										printf("ICMP - The packet died (ttl)\n");
 										//#############################################################################	
 										// START: send ICMP error - ICMP_TIME_EXCEEDED
 										//#############################################################################
@@ -1249,7 +1232,8 @@ says it does not contain a full tcp header???
 //FORWARD			// The icmp_header type was not an icmp echo or reply. Forward the packet.
 //#######			//-----------------------------------------------------------------------------------
 					else {
-              			printf("FRWD - Packet must be forwarded\n");
+              			printf("PCKT - Packet Not ARP/ICMP\n");
+						printf("FRWD - Packet needs to be forwarded\n");
 						printf("FRWD - Scanning interfaces...\n");
 
 
@@ -1270,10 +1254,9 @@ says it does not contain a full tcp header???
 							// The packet ip matches the interface ip.
 							if(temp_ip == request_IICMP->ip_header.daddr){
 
-								printf("FRWD - Found interface1: %s\n", iface1->name);
+								printf("FRWD - Found interface: %s\n", iface1->name);
 								i_name = malloc(sizeof(7));
 								memcpy(i_name, iface1->name, 7);
-								printf("copy\n");
 							  	break;
 							}
 						}
@@ -1307,7 +1290,6 @@ says it does not contain a full tcp header???
 
  							memcpy(reply_IICMP.eth_header.ether_dhost, request_IICMP->eth_header.ether_shost, 6);
 							memcpy(reply_IICMP.eth_header.ether_shost, tmp_MAC, 6);
-							printf("SEG AT SEND\n");
 							send(prime_Interface->packet_socket, &reply_IICMP, sizeof(struct iicmp), 0);
 
   
@@ -1334,7 +1316,7 @@ says it does not contain a full tcp header???
 							// START: find next hop in routing table and correct interface to send on.
 							//-----------------------------------------------------------------------------
 
-							printf("FRWD - Scanning table...\n");
+							printf("FRWD - Scanning routing table...\n");
 
 							// Temp interface.
 							struct interface * iface2;
@@ -1361,7 +1343,7 @@ says it does not contain a full tcp header???
 											forwardInterface = iface2;
 											forward_ip = temptable->hop;
 
-											printf("FRWD - Found interface2: %s\n", forwardInterface->name);
+											printf("FRWD - Found interface: %s\n", forwardInterface->name);
 											printf("FRWD - Next hop: %X\n", forward_ip);
 
 											breakLoop = 1;
@@ -1454,7 +1436,7 @@ says it does not contain a full tcp header???
 								temp_ARP->arp_header.ea_hdr.ar_op  = htons(ARPOP_REQUEST);
 
 							
-								printf("Sending ARP request\n");
+								printf("FRWD - Sending ARP request\n");
 				
 
 								// Send on correct interface.
@@ -1528,7 +1510,7 @@ says it does not contain a full tcp header???
 								if(forward_mac == NULL){
 
 
-								  	printf("ICMP - Could not find an interface\n");
+								  	printf("FRWD - No ARP reply\n");
 // SEND ERROR???
 									
 
@@ -1558,7 +1540,7 @@ says it does not contain a full tcp header???
 									memcpy(result, &reply_IICMP, sizeof(reply_IICMP));
 
 
-									printf("FRWD - Sending packet.");
+									printf("FRWD - Forwarding packet.");
 
 									// Send packet on the correct interface.
 							  		send(forwardInterface->packet_socket, &result, sizeof(result), 0);
@@ -1584,8 +1566,9 @@ says it does not contain a full tcp header???
 	//#######		//-------------------------------------------------------------------------------------
 					else {
 
-		        		printf("FRWD - Recieved packet (not ARP or ICMP), Forwarding\n");
-						printf("FRWD - Scanning interfaces...");
+		        		printf("PCKT - Packet Not ARP/ICMP\n");
+						printf("FRWD - Packet needs to be forwarded\n");
+						printf("FRWD - Scanning interfaces...\n");
 
 
 						// Original packet contents.
@@ -1618,7 +1601,7 @@ says it does not contain a full tcp header???
 							// If interface ip matches the ip of the packet.
 							if(temp_ip == request_IIP->ip_header.daddr){
 
-								printf("FRWD - Found interface3: %s\n", iface1->name);
+								printf("FRWD - Found interface: %s\n", iface1->name);
 								memcpy(i_name, iface1->name, 7);
 							  	break;
 							}
@@ -1668,7 +1651,7 @@ says it does not contain a full tcp header???
 
 
 						  	printf("FRWD - No interface found\n");
-							printf("FRWD - Scanning routing table...");
+							printf("FRWD - Scanning routing table...\n");
 						  	
 							// The interface to send on.
 							struct interface * forwardInterface = NULL;
@@ -1702,7 +1685,7 @@ says it does not contain a full tcp header???
 											forwardInterface = iface2;
 											forward_ip = temptable->hop;
 
-											printf("FRWD - Found interface4: %s\n", forwardInterface->name);
+											printf("FRWD - Found interface: %s\n", forwardInterface->name);
 											printf("FRWD - Next hop: %X\n", forward_ip);
 
 											breakLoop = 1;
@@ -1800,7 +1783,7 @@ says it does not contain a full tcp header???
 								temp_ARP->arp_header.ea_hdr.ar_op  = htons(ARPOP_REQUEST);
 
 							
-								printf("Sending ARP request\n");
+								printf("FRWD - Sending ARP request\n");
 				
 
 								// Send on correct interface.
@@ -1875,7 +1858,7 @@ says it does not contain a full tcp header???
 								if(forward_mac == NULL){
 // SEND ERRROR???
 								  	//send ICMP error
-								  	printf("ICMP - No ARP reply\n");
+								  	printf("FRWD - No ARP reply\n");
 									
 
 
@@ -1917,7 +1900,7 @@ says it does not contain a full tcp header???
 						  	else{
 // SEND ERROR???
 
-								printf("ICMP - Could not find an interface\n");
+								printf("FRWD - Could not find an interface\n");
 								
 						  	}
 						}
@@ -1926,7 +1909,7 @@ says it does not contain a full tcp header???
 				}
 				else {
 					printf("--- Bad Checksum ---\n");
-					printf("The packet was dropped right into the trash.\n");
+					printf("PCKT - The packet was dropped right into the trash.\n");
 //SEND ERROR??
 				}
 			}
