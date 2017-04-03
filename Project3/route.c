@@ -1355,16 +1355,18 @@ says it does not contain a full tcp header???
 									// Table entry matched packet destination address.
 							  		if (temptable->network << (32 - temptable->prefix) == request_IICMP->ip_header.daddr << (32 - temptable->prefix)) {
 									
+										if (strcmp(tmp_TBL->interface, tmp_INT->name) == 0){
+										
 
-										forwardInterface = iface2;
-										forward_ip = temptable->hop;
+											forwardInterface = iface2;
+											forward_ip = temptable->hop;
 
-										printf("FRWD - Found interface2: %s\n", forwardInterface->name);
-										printf("FRWD - Next hop: %X\n", forward_ip);
+											printf("FRWD - Found interface2: %s\n", forwardInterface->name);
+											printf("FRWD - Next hop: %X\n", forward_ip);
 
-										breakLoop = 1;
-										break;
-
+											breakLoop = 1;
+											break;
+										}
 							  		}
 								}
 								if (breakLoop){
@@ -1383,7 +1385,7 @@ says it does not contain a full tcp header???
 								u_int8_t * forward_mac = NULL;
 								
 
-								if(forward_ip == 0) {
+								if(forward_ip == 0 || forward_ip == -1) {
 								  	
 									forward_ip = request_IICMP->ip_header.daddr;
 
