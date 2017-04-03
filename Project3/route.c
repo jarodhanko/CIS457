@@ -2001,7 +2001,7 @@ says it does not contain a full tcp header???
 									//#############################################################################
 
 									// Set ether header source and destination mac address.
-									memcpy(reply_IICMP.eth_header.ether_shost, prime_Interface->mac_addrs, 6);
+									memcpy(reply_IICMP.eth_header.ether_shost, request_IICMP->eth_header.ether_dhost, 6);
 									memcpy(reply_IICMP.eth_header.ether_dhost, request_IICMP->eth_header.ether_shost, 6);
 
 									// Set ether header type.
@@ -2104,7 +2104,7 @@ says it does not contain a full tcp header???
 								//#############################################################################
 
 								// Set ether header source and destination mac address.
-								memcpy(reply_IICMP.eth_header.ether_shost, prime_Interface->mac_addrs, 6);
+								memcpy(reply_IICMP.eth_header.ether_shost, request_IICMP->eth_header.ether_dhost, 6);
 								memcpy(reply_IICMP.eth_header.ether_dhost, request_IICMP->eth_header.ether_shost, 6);
 
 								// Set ether header type.
