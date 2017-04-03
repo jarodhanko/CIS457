@@ -609,6 +609,15 @@ says it does not contain a full tcp header???
 
 								// Calc the icmp checksum.
 								reply_IICMP.icmp_header.checksum = 0;
+								
+
+								// Calc the ip checksum.
+								reply_IICMP.icmp_header.checksum = 0;
+								reply_IICMP.ip_header.check = 0;
+								char data5[1500];
+								memcpy(data5, buf, 1500);
+								memcpy(data5 + sizeof(struct ether_header), &reply_IICMP.ip_header, sizeof(struct iphdr));
+								reply_IICMP.ip_header.check = ntohs(calculateIPChecksum(data5, n));
 
 
 								// Calculate icmp header checksum.
@@ -626,13 +635,7 @@ says it does not contain a full tcp header???
 								reply_IICMP.icmp_header.checksum = icmp_checksum(&ptr2, sizeof(ptr2));
 
 
-								// Calc the ip checksum.
-								reply_IICMP.ip_header.check = 0;
-								char data5[1500];
-								memcpy(data5, buf, 1500);
-								memcpy(data5 + sizeof(struct ether_header), &reply_IICMP.ip_header, sizeof(struct iphdr));
-								reply_IICMP.ip_header.check = ntohs(calculateIPChecksum(data5, n));
-
+								
 
 								printf("ICMP - Sending ICMP error - ICMP_TIME_EXCEEDED");
 
@@ -665,6 +668,17 @@ says it does not contain a full tcp header???
 								// Set the ether header destination and source mac address.
 								memcpy(reply_IICMP.eth_header.ether_dhost, request_IICMP->eth_header.ether_shost, 6);
 								memcpy(reply_IICMP.eth_header.ether_shost, mac_INT, 6);
+
+
+
+								// Calc the ip checksum.
+								reply_IICMP.icmp_header.checksum = 0;
+								reply_IICMP.ip_header.check = 0;
+								char data5[1500];
+								memcpy(data5, buf, 1500);
+								memcpy(data5 + sizeof(struct ether_header), &reply_IICMP.ip_header, sizeof(struct iphdr));
+								reply_IICMP.ip_header.check = ntohs(calculateIPChecksum(data5, n));
+
 
 
 								// Calc icmp header checksum.
@@ -1048,6 +1062,7 @@ says it does not contain a full tcp header???
 
 
 										// Calculate ip header checksum.
+										reply_IICMP.icmp_header.checksum = 0;
 										reply_IICMP.ip_header.check = 0;
 										char data3[1500];
 										memcpy(data3, buf, 1500);
@@ -1123,6 +1138,7 @@ says it does not contain a full tcp header???
 								reply_IICMP.icmp_header.code = ICMP_HOST_UNREACH;
 
 								// Calc the ip checksum.
+								reply_IICMP.icmp_header.checksum = 0;
 								reply_IICMP.ip_header.check = 0;
 								char data5[1500];
 								memcpy(data5, buf, 1500);
