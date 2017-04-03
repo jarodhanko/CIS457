@@ -1605,14 +1605,14 @@ says it does not contain a full tcp header???
 								//memcpy(result + sizeof(reply_IIP), data4, datalength4);
 
 								unsigned char *result = malloc(sizeof(buf));
-								memcpy(result, &buf, sizeof(buf));
+								memcpy(result, buf, sizeof(buf));
 								memcpy(result, &reply_IIP, sizeof(reply_IIP));
 
 
 								printf("FRWD - Sending packet");
 
 								// Send packet on the correct interface.
-							  	send(forwardInterface->packet_socket, &result, sizeof(result), 0);
+							  	send(forwardInterface->packet_socket, result, sizeof(result), 0);
 							}
 
 					  	}
