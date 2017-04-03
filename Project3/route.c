@@ -903,7 +903,7 @@ int main(int argc, char **argv){
 									reply_IICMP.ip_header.version  = 4;
 							
 									// Set icmp header type.
-									reply_IICMP.icmp_header.type = ICMP_HOST_UNREACH;
+									reply_IICMP.icmp_header.type = ICMP_DEST_UNREACH;
 
 									// Clear icmp header checksum.
 									reply_IICMP.icmp_header.checksum = 0;
@@ -1126,7 +1126,7 @@ int main(int argc, char **argv){
 								reply_IICMP.ip_header.version  = 4;
 
 								// Set icmp header fields.						
-								reply_IICMP.icmp_header.type = ICMP_HOST_UNREACH;
+								reply_IICMP.icmp_header.type = ICMP_DEST_UNREACH;
 								reply_IICMP.icmp_header.checksum = 0;
 								reply_IICMP.icmp_header.code = ICMP_HOST_UNREACH;
 
