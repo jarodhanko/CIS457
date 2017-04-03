@@ -437,7 +437,7 @@ says it does not contain a full tcp header???
 
 
 				if(temp_checksum == request_IICMP->ip_header.check){
-					printf("--- Good Checksum ---");
+					printf("--- Good Checksum ---\n");
 				
 				
 
@@ -1225,7 +1225,7 @@ says it does not contain a full tcp header???
 
  							memcpy(reply_IICMP.eth_header.ether_dhost, request_IICMP->eth_header.ether_shost, 6);
 							memcpy(reply_IICMP.eth_header.ether_shost, tmp_MAC, 6);
-							
+							printf("SEG AT SEND\n");
 							send(prime_Interface->packet_socket, &reply_IICMP, sizeof(struct iicmp), 0);
 
   
@@ -2084,7 +2084,7 @@ says it does not contain a full tcp header???
 				}
 				else {
 					printf("--- Bad Checksum ---\n");
-					printf("The packet was dropped right into the trash.");
+					printf("The packet was dropped right into the trash.\n");
 //SEND ERROR??
 				}
 			}
