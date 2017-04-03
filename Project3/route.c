@@ -1583,7 +1583,7 @@ says it does not contain a full tcp header???
 
 
 									// Send on original interface.
-									send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
+									//send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
 
 									//#############################################################################	
 									// END: send ICMP error - ICMP_DEST_UNREACH.
@@ -2051,7 +2051,7 @@ says it does not contain a full tcp header???
 
 
 									// Send on original interface.
-									send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
+									//send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
 
 									//#############################################################################	
 									// END: send ICMP error - ICMP_DEST_UNREACH.
