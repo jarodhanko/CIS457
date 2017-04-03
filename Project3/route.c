@@ -1587,20 +1587,27 @@ says it does not contain a full tcp header???
 
 
 								// Combine headers and data
-								unsigned char *data4;
-								int datalength4 = ntohs(request_IICMP->ip_header.tot_len) - 
-																 sizeof(request_IICMP->ip_header) - 
-																 sizeof(request_IICMP->icmp_header);
+								//unsigned char *data4;
 
-								if(datalength4 > 0){
-									data4 = malloc(datalength4);
-									memcpy(data4, buf + sizeof(struct iip), datalength4);
-								}
+								
+								//int datalength4 = ntohs(request_IIP->ip_header.tot_len) - 
+								//								 sizeof(request_IICMP->ip_header) - 
+								//								 sizeof(request_IICMP->icmp_header);
 
-								char result[sizeof(reply_IIP) + datalength4];
+								//if(datalength4 > 0){
+								//	data4 = malloc(datalength4);
+								//	memcpy(data4, buf + sizeof(struct iip), datalength4);
+								//}
+
+								//char result[sizeof(reply_IIP) + datalength4];
 									
-								memcpy(result, &reply_IIP, sizeof(reply_IIP));
-								memcpy(result + sizeof(reply_IIP), data4, datalength4);
+								//memcpy(result, &reply_IIP, sizeof(reply_IIP));
+								//memcpy(result + sizeof(reply_IIP), data4, datalength4);
+
+								char result[sizeof(buf)];
+								memcpy(result, &buf, sizeof(buf));
+								memcpy(result, &reply_IIP, sizeof(struct iip));
+
 
 								printf("FRWD - Sending packet");
 
