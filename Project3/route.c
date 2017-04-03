@@ -413,7 +413,7 @@ says it does not contain a full tcp header???
 				struct iicmp reply_IICMP = *request_IICMP;
 
 
-				// Calc the checksum.
+				// Calc the ip checksum.
 				int temp_checksum = request_IICMP->ip_header.check;
 				reply_IICMP.ip_header.check = 0;
 				char data5[1500];
@@ -423,9 +423,9 @@ says it does not contain a full tcp header???
 
 
 				if(temp_checksum == request_IICMP->ip_header.check){
-					printf("ITS GOOD IN THE HOOD");
-				}
-
+					printf("--- Good Checksum ---");
+				
+				
 
 				//---------------------------------------------------------------------------------------
 				// If protocol is recieve ICMP packets for all local sockets.
@@ -597,10 +597,27 @@ says it does not contain a full tcp header???
 								reply_IICMP.icmp_header.checksum = 0;
 
 
-								printf("FIX ----- ME");
-// FIX ME: NEED TO UPDATE CHECKSUM
+								// Calculate icmp header checksum.
+								unsigned char *data;
+								int datalength = ntohs(request_IICMP->ip_header.tot_len) - 
+															 sizeof(request_IICMP->ip_header) - 
+															 sizeof(request_IICMP->icmp_header);
+								if(datalength > 0){
+									data = malloc(datalength);
+									memcpy(data, buf + sizeof(struct iicmp), datalength);
+								}
+								unsigned char ptr2[sizeof(reply_IICMP.icmp_header) + datalength];
+								memcpy(ptr2, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
+								memcpy(ptr2 + sizeof(reply_IICMP.icmp_header), data, datalength);
+								reply_IICMP.icmp_header.checksum = ip_checksum(&ptr2, sizeof(ptr2));
 
-// DO we need to calc the checksum  though???
+
+								// Calc the ip checksum.
+								reply_IICMP.ip_header.check = 0;
+								char data5[1500];
+								memcpy(data5, buf, 1500);
+								memcpy(data5 + sizeof(struct ether_header), &reply_IICMP.ip_header, sizeof(struct iphdr));
+								reply_IICMP.ip_header.check = ntohs(calculateIPChecksum(data5, n));
 
 
 								printf("ICMP - Sending ICMP error - ICMP_TIME_EXCEEDED");
@@ -936,8 +953,28 @@ says it does not contain a full tcp header???
 									reply_IICMP.icmp_header.code = ICMP_HOST_UNREACH;
 
 
-// FIX ME: CALC CHECKSUM AND SEND. 
-// Do we need to calc the checksum here???
+									// Calculate icmp header checksum.
+									unsigned char *data;
+									int datalength = ntohs(request_IICMP->ip_header.tot_len) - 
+																 sizeof(request_IICMP->ip_header) - 
+																 sizeof(request_IICMP->icmp_header);
+									if(datalength > 0){
+										data = malloc(datalength);
+										memcpy(data, buf + sizeof(struct iicmp), datalength);
+									}
+									unsigned char ptr2[sizeof(reply_IICMP.icmp_header) + datalength];
+									memcpy(ptr2, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
+									memcpy(ptr2 + sizeof(reply_IICMP.icmp_header), data, datalength);
+									reply_IICMP.icmp_header.checksum = ip_checksum(&ptr2, sizeof(ptr2));
+
+
+									// Calc the ip checksum.
+									reply_IICMP.ip_header.check = 0;
+									char data5[1500];
+									memcpy(data5, buf, 1500);
+									memcpy(data5 + sizeof(struct ether_header), &reply_IICMP.ip_header, sizeof(struct iphdr));
+									reply_IICMP.ip_header.check = ntohs(calculateIPChecksum(data5, n));
+
 
 									// Send the ICMP error on original interface.
 									send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
@@ -1070,7 +1107,27 @@ says it does not contain a full tcp header???
 								reply_IICMP.icmp_header.code = ICMP_HOST_UNREACH;
 
 
-// FIX ME: CALC CHECKSUM AND SEND.
+								// Calculate icmp header checksum.
+								unsigned char *data;
+								int datalength = ntohs(request_IICMP->ip_header.tot_len) - 
+															 sizeof(request_IICMP->ip_header) - 
+															 sizeof(request_IICMP->icmp_header);
+								if(datalength > 0){
+									data = malloc(datalength);
+									memcpy(data, buf + sizeof(struct iicmp), datalength);
+								}
+								unsigned char ptr2[sizeof(reply_IICMP.icmp_header) + datalength];
+								memcpy(ptr2, &reply_IICMP.icmp_header, sizeof(reply_IICMP.icmp_header));
+								memcpy(ptr2 + sizeof(reply_IICMP.icmp_header), data, datalength);
+								reply_IICMP.icmp_header.checksum = ip_checksum(&ptr2, sizeof(ptr2));
+
+
+								// Calc the ip checksum.
+								reply_IICMP.ip_header.check = 0;
+								char data5[1500];
+								memcpy(data5, buf, 1500);
+								memcpy(data5 + sizeof(struct ether_header), &reply_IICMP.ip_header, sizeof(struct iphdr));
+								reply_IICMP.ip_header.check = ntohs(calculateIPChecksum(data5, n));
 
 
 								// Send on original interface.
@@ -1291,369 +1348,371 @@ says it does not contain a full tcp header???
 						}
 					
 					}
-				}
+					}
 
-//#######		//-------------------------------------------------------------------------------------
-//FORWARD		// Protocol is not, recieve ICMP packets for all local sockets. Forward the packet.
-//#######		//-------------------------------------------------------------------------------------
-				else {
+	//#######		//-------------------------------------------------------------------------------------
+	//FORWARD		// Protocol is not, recieve ICMP packets for all local sockets. Forward the packet.
+	//#######		//-------------------------------------------------------------------------------------
+					else {
 
-            		printf("FRWD - Recieved packet (not ARP or ICMP), Forwarding\n");
-					printf("FRWD - Scanning interfaces...");
-
-
-					// Original packet contents.
-					struct iip *request_IIP;
-					request_IIP = ((struct iip*)&buf);
+		        		printf("FRWD - Recieved packet (not ARP or ICMP), Forwarding\n");
+						printf("FRWD - Scanning interfaces...");
 
 
-					// The packet we will send.
-					struct iip reply_IIP = *request_IIP;
-            		
+						// Original packet contents.
+						struct iip *request_IIP;
+						request_IIP = ((struct iip*)&buf);
 
-					// Interface name.
-					char *i_name = NULL;
+
+						// The packet we will send.
+						struct iip reply_IIP = *request_IIP;
+		        		
+
+						// Interface name.
+						char *i_name = NULL;
 			
 
-					// Temp interface for loop.
-					struct interface * iface1;
+						// Temp interface for loop.
+						struct interface * iface1;
 
-					//-----------------------------------------------------------------------------------
-					// START: Find the correct interface given the ip by the request.
-					//----------------------------------------------------------------------------------
-					for(iface1 = interfaceList; iface1 != NULL; iface1 = iface1->next) {
-
-
-						// Interface ip.
-						u_int32_t temp_ip;
-						memcpy(&temp_ip, iface1->ip_addrs, 4);
-
-
-						// If interface ip matches the ip of the packet.
-						if(temp_ip == request_IIP->ip_header.daddr){
-
-							printf("FRWD - Found interface: %s\n", iface1->name);
-							memcpy(i_name, iface1->name, 7);
-						  	break;
-						}
-					}
-					//-----------------------------------------------------------------------------------
-					// END: Find the correct interface given the ip by the request.
-					//----------------------------------------------------------------------------------
-
-
-					if(i_name != NULL) {
-
-
-						u_int8_t tmp_MAC[6];
-
-
-						//----------------------------------------------------------------------------------
-						// START: Find the mac address given the interface name.
 						//-----------------------------------------------------------------------------------
-						struct interface * iface2;
-						for(iface2 = interfaceList; iface2 != NULL; iface2 = iface2->next) {
+						// START: Find the correct interface given the ip by the request.
+						//----------------------------------------------------------------------------------
+						for(iface1 = interfaceList; iface1 != NULL; iface1 = iface1->next) {
 
 
-							// If the name matched the interface name.
-							if(strcmp(iface2->name, i_name)){
+							// Interface ip.
+							u_int32_t temp_ip;
+							memcpy(&temp_ip, iface1->ip_addrs, 4);
 
 
-							  	memcpy(tmp_MAC, iface2->mac_addrs, 6);
+							// If interface ip matches the ip of the packet.
+							if(temp_ip == request_IIP->ip_header.daddr){
+
+								printf("FRWD - Found interface: %s\n", iface1->name);
+								memcpy(i_name, iface1->name, 7);
 							  	break;
 							}
 						}
-						//----------------------------------------------------------------------------------
-						// END: Find the mac address given the interface name.
 						//-----------------------------------------------------------------------------------
-						
-
-						// Set ether header destination and source mac address.
-						memcpy(reply_IIP.eth_header.ether_dhost, request_IIP->eth_header.ether_shost, 6);
-						memcpy(reply_IIP.eth_header.ether_shost, tmp_MAC, 6);
-						
-						// Send on original interface.
-						send(prime_Interface->packet_socket, &reply_IICMP, sizeof(struct iicmp), 0);
+						// END: Find the correct interface given the ip by the request.
+						//----------------------------------------------------------------------------------
 
 
-					}
-
-					else {
+						if(i_name != NULL) {
 
 
-					  	printf("FRWD - No interface found\n");
-						printf("FRWD - Scanning routing table...");
-					  	
-						// The interface to send on.
-						struct interface * forwardInterface = NULL;
-						u_int32_t forward_ip = 0;
+							u_int8_t tmp_MAC[6];
 
-						// Boolean to break outer loop.
-						int breakLoop = 0;
 
-						//-----------------------------------------------------------------------------
-						// START: find next hop in routing table and correct interface to send on.
-						//-----------------------------------------------------------------------------
+							//----------------------------------------------------------------------------------
+							// START: Find the mac address given the interface name.
+							//-----------------------------------------------------------------------------------
+							struct interface * iface2;
+							for(iface2 = interfaceList; iface2 != NULL; iface2 = iface2->next) {
 
-						// Temp interface.
-						struct interface * iface2;
-						
-						// Loop through all the interfaces.
-					  	for(iface2 = interfaceList; iface2 != NULL; iface2 = iface2->next) {
 
-							// Temp table entry.
-							struct routing_table * temptable;
+								// If the name matched the interface name.
+								if(strcmp(iface2->name, i_name)){
 
-							// Loop through all the table entries.
-							for(temptable = rtable; temptable!=NULL; temptable = temptable->next) {
 
-								// If the table ip matches the packet ip.
-						  		if (temptable->network << (32 - temptable->prefix) == request_IIP->ip_header.daddr << (32 - temptable->prefix)) {
-								
-									// If the interface name matches the table entry name.
-									if (strcmp(temptable->interface, iface2->name) == 0){
-
-										forwardInterface = iface2;
-										forward_ip = temptable->hop;
-
-										printf("FRWD - Found interface: %s\n", forwardInterface->name);
-										printf("FRWD - Next hop: %X\n", forward_ip);
-
-										breakLoop = 1;
-										break;
-									}
-						  		}
+								  	memcpy(tmp_MAC, iface2->mac_addrs, 6);
+								  	break;
+								}
 							}
-							if (breakLoop){
-								break;
-							}
-					  	}
-						//-----------------------------------------------------------------------------
-						// END: find next hop in routing table and correct interface to send on.
-						//-----------------------------------------------------------------------------
-
-
-						//-----------------------------------------------------------------------------
-						// Found a match in routing table.
-						//-----------------------------------------------------------------------------
-					  	if(forwardInterface != NULL){
-
-
-							// The mac address we are forwarding to.
-							u_int8_t * forward_mac;
-							
-							
-							// If the hop in the routing table was null, then use packets ip.
-							if(forward_ip == 0 || forward_ip == -1) {
-							  	
-								forward_ip = request_IIP->ip_header.daddr;
-							
-								u_int8_t ip_print[4];
-								memcpy(&ip_print, &forward_ip, 4);
-								printf("New hop: %X.%X.%X.%X\n", ip_print[0],ip_print[1],ip_print[2],ip_print[3]);
-
-							
-							}
-			
-
-							//##########################################################################			
-							// START: send ARP request.
-							//#########################################################################
-
-
-							// Struct for sending arp.
-							struct aarp *temp_ARP;
-							temp_ARP = malloc(sizeof(struct aarp));
+							//----------------------------------------------------------------------------------
+							// END: Find the mac address given the interface name.
+							//-----------------------------------------------------------------------------------
 						
-
-							// Set ether header type.
-							temp_ARP->eth_header.ether_type = htons(ETHERTYPE_ARP);
-
-
-							// Temp arrays.
-							char broadcast_255[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-							char broadcast_0[6]   = {0,0,0,0,0,0};
-
 
 							// Set ether header destination and source mac address.
-							memcpy(&temp_ARP->eth_header.ether_dhost, broadcast_255, 6);
-							memcpy(&temp_ARP->eth_header.ether_shost, forwardInterface->mac_addrs, 6);
+							memcpy(reply_IIP.eth_header.ether_dhost, request_IIP->eth_header.ether_shost, 6);
+							memcpy(reply_IIP.eth_header.ether_shost, tmp_MAC, 6);
+						
+							// Send on original interface.
+							send(prime_Interface->packet_socket, &reply_IICMP, sizeof(struct iicmp), 0);
 
 
-							// Set arp header target and source mac addess.
-							memcpy(temp_ARP->arp_header.arp_tha, &broadcast_0, 6);
-							memcpy(temp_ARP->arp_header.arp_sha, forwardInterface->mac_addrs, 6);
+						}
+
+						else {
+
+
+						  	printf("FRWD - No interface found\n");
+							printf("FRWD - Scanning routing table...");
+						  	
+							// The interface to send on.
+							struct interface * forwardInterface = NULL;
+							u_int32_t forward_ip = 0;
+
+							// Boolean to break outer loop.
+							int breakLoop = 0;
+
+							//-----------------------------------------------------------------------------
+							// START: find next hop in routing table and correct interface to send on.
+							//-----------------------------------------------------------------------------
+
+							// Temp interface.
+							struct interface * iface2;
+						
+							// Loop through all the interfaces.
+						  	for(iface2 = interfaceList; iface2 != NULL; iface2 = iface2->next) {
+
+								// Temp table entry.
+								struct routing_table * temptable;
+
+								// Loop through all the table entries.
+								for(temptable = rtable; temptable!=NULL; temptable = temptable->next) {
+
+									// If the table ip matches the packet ip.
+							  		if (temptable->network << (32 - temptable->prefix) == request_IIP->ip_header.daddr << (32 - temptable->prefix)) {
+								
+										// If the interface name matches the table entry name.
+										if (strcmp(temptable->interface, iface2->name) == 0){
+
+											forwardInterface = iface2;
+											forward_ip = temptable->hop;
+
+											printf("FRWD - Found interface: %s\n", forwardInterface->name);
+											printf("FRWD - Next hop: %X\n", forward_ip);
+
+											breakLoop = 1;
+											break;
+										}
+							  		}
+								}
+								if (breakLoop){
+									break;
+								}
+						  	}
+							//-----------------------------------------------------------------------------
+							// END: find next hop in routing table and correct interface to send on.
+							//-----------------------------------------------------------------------------
+
+
+							//-----------------------------------------------------------------------------
+							// Found a match in routing table.
+							//-----------------------------------------------------------------------------
+						  	if(forwardInterface != NULL){
+
+
+								// The mac address we are forwarding to.
+								u_int8_t * forward_mac;
+							
+							
+								// If the hop in the routing table was null, then use packets ip.
+								if(forward_ip == 0 || forward_ip == -1) {
+								  	
+									forward_ip = request_IIP->ip_header.daddr;
+							
+									u_int8_t ip_print[4];
+									memcpy(&ip_print, &forward_ip, 4);
+									printf("New hop: %X.%X.%X.%X\n", ip_print[0],ip_print[1],ip_print[2],ip_print[3]);
+
+							
+								}
+			
+
+								//##########################################################################			
+								// START: send ARP request.
+								//#########################################################################
+
+
+								// Struct for sending arp.
+								struct aarp *temp_ARP;
+								temp_ARP = malloc(sizeof(struct aarp));
+						
+
+								// Set ether header type.
+								temp_ARP->eth_header.ether_type = htons(ETHERTYPE_ARP);
+
+
+								// Temp arrays.
+								char broadcast_255[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+								char broadcast_0[6]   = {0,0,0,0,0,0};
+
+
+								// Set ether header destination and source mac address.
+								memcpy(&temp_ARP->eth_header.ether_dhost, broadcast_255, 6);
+								memcpy(&temp_ARP->eth_header.ether_shost, forwardInterface->mac_addrs, 6);
+
+
+								// Set arp header target and source mac addess.
+								memcpy(temp_ARP->arp_header.arp_tha, &broadcast_0, 6);
+								memcpy(temp_ARP->arp_header.arp_sha, forwardInterface->mac_addrs, 6);
 							
 
-							// Set arp header target ip address.
-							temp_ARP->arp_header.arp_tpa[3] = (uint8_t) (forward_ip >> 24);
-							temp_ARP->arp_header.arp_tpa[2] = (uint8_t) (forward_ip >> 16);
-							temp_ARP->arp_header.arp_tpa[1] = (uint8_t) (forward_ip >> 8);
-							temp_ARP->arp_header.arp_tpa[0] = (uint8_t) (forward_ip);
+								// Set arp header target ip address.
+								temp_ARP->arp_header.arp_tpa[3] = (uint8_t) (forward_ip >> 24);
+								temp_ARP->arp_header.arp_tpa[2] = (uint8_t) (forward_ip >> 16);
+								temp_ARP->arp_header.arp_tpa[1] = (uint8_t) (forward_ip >> 8);
+								temp_ARP->arp_header.arp_tpa[0] = (uint8_t) (forward_ip);
 
 
-							// Temp interface ip address.
-							u_int32_t temp_ip_INT = forwardInterface->ip_addrs[0] | 
-								  		    	   (forwardInterface->ip_addrs[1] << 8) | 
-					    		  		           (forwardInterface->ip_addrs[2] << 16) | 
-											       (forwardInterface->ip_addrs[3] << 24);
+								// Temp interface ip address.
+								u_int32_t temp_ip_INT = forwardInterface->ip_addrs[0] | 
+									  		    	   (forwardInterface->ip_addrs[1] << 8) | 
+									  		           (forwardInterface->ip_addrs[2] << 16) | 
+													   (forwardInterface->ip_addrs[3] << 24);
 
 
-							// Set arp header source ip address.
-							temp_ARP->arp_header.arp_spa[3] = (uint8_t) (temp_ip_INT >> 24);
-							temp_ARP->arp_header.arp_spa[2] = (uint8_t) (temp_ip_INT >> 16);
-							temp_ARP->arp_header.arp_spa[1] = (uint8_t) (temp_ip_INT >> 8);
-							temp_ARP->arp_header.arp_spa[0] = (uint8_t) (temp_ip_INT);
+								// Set arp header source ip address.
+								temp_ARP->arp_header.arp_spa[3] = (uint8_t) (temp_ip_INT >> 24);
+								temp_ARP->arp_header.arp_spa[2] = (uint8_t) (temp_ip_INT >> 16);
+								temp_ARP->arp_header.arp_spa[1] = (uint8_t) (temp_ip_INT >> 8);
+								temp_ARP->arp_header.arp_spa[0] = (uint8_t) (temp_ip_INT);
 
 
-							// Set other arp header fields.
-							temp_ARP->arp_header.ea_hdr.ar_hln = 6;
-							temp_ARP->arp_header.ea_hdr.ar_hrd = htons(ARPHRD_ETHER);
-							temp_ARP->arp_header.ea_hdr.ar_pln = 4;
-							temp_ARP->arp_header.ea_hdr.ar_pro = htons(ETH_P_IP);
-							temp_ARP->arp_header.ea_hdr.ar_op  = htons(ARPOP_REQUEST);
+								// Set other arp header fields.
+								temp_ARP->arp_header.ea_hdr.ar_hln = 6;
+								temp_ARP->arp_header.ea_hdr.ar_hrd = htons(ARPHRD_ETHER);
+								temp_ARP->arp_header.ea_hdr.ar_pln = 4;
+								temp_ARP->arp_header.ea_hdr.ar_pro = htons(ETH_P_IP);
+								temp_ARP->arp_header.ea_hdr.ar_op  = htons(ARPOP_REQUEST);
 
 							
-							printf("Sending ARP request\n");
+								printf("Sending ARP request\n");
 				
 
-							// Send on correct interface.
-							send(forwardInterface->packet_socket, temp_ARP, sizeof(struct aarp), 0);
+								// Send on correct interface.
+								send(forwardInterface->packet_socket, temp_ARP, sizeof(struct aarp), 0);
 								
 							
-							//##########################################################################			
-							// END: send ARP request.
-							//#########################################################################
+								//##########################################################################			
+								// END: send ARP request.
+								//#########################################################################
 
 
-							//##########################################################################			
-							// START: recieve ARP reply.
-							//#########################################################################
+								//##########################################################################			
+								// START: recieve ARP reply.
+								//#########################################################################
 
 
-							struct sockaddr_ll temp_Recv;
+								struct sockaddr_ll temp_Recv;
 
-							struct timeval tv2;
-							tv2.tv_sec = 0;
-							tv2.tv_usec = 1000 * 20;
-
-							if (setsockopt(forwardInterface->packet_socket, SOL_SOCKET, SO_RCVTIMEO,&tv2,
-																				sizeof(tv2)) < 0) {
-								perror("Error");
-							}
-
-							socklen_t temp_Recvlen = sizeof(struct sockaddr_ll);
-							char temp_Buf[1500];
-
-							int n2 = recvfrom(forwardInterface->packet_socket, temp_Buf, 1500, 0, 
-															(struct sockaddr*)&temp_Recv, &temp_Recvlen);
-											
-		
-							if (n2 < 1){
-								forward_mac = NULL;
-							}
-							else {
-
+								struct timeval tv2;
 								tv2.tv_sec = 0;
-							    tv2.tv_usec = 1000;
+								tv2.tv_usec = 1000 * 20;
 
-								if (setsockopt(forwardInterface->packet_socket, SOL_SOCKET,SO_RCVTIMEO,
-																			&tv2,sizeof(tv2)) < 0) {
+								if (setsockopt(forwardInterface->packet_socket, SOL_SOCKET, SO_RCVTIMEO,&tv2,
+																					sizeof(tv2)) < 0) {
 									perror("Error");
 								}
 
+								socklen_t temp_Recvlen = sizeof(struct sockaddr_ll);
+								char temp_Buf[1500];
 
-								// Create temp arp to hold reply.
-								struct aarp new_aarp;
+								int n2 = recvfrom(forwardInterface->packet_socket, temp_Buf, 1500, 0, 
+																(struct sockaddr*)&temp_Recv, &temp_Recvlen);
+											
+		
+								if (n2 < 1){
+									forward_mac = NULL;
+								}
+								else {
+
+									tv2.tv_sec = 0;
+									tv2.tv_usec = 1000;
+
+									if (setsockopt(forwardInterface->packet_socket, SOL_SOCKET,SO_RCVTIMEO,
+																				&tv2,sizeof(tv2)) < 0) {
+										perror("Error");
+									}
 
 
-								// Copy packet conteents into temp arp.
-								memcpy(&new_aarp, temp_Buf, sizeof(struct aarp));
+									// Create temp arp to hold reply.
+									struct aarp new_aarp;
+
+
+									// Copy packet conteents into temp arp.
+									memcpy(&new_aarp, temp_Buf, sizeof(struct aarp));
 								
 
-								// Allocate memory for mac address pointer.
-								forward_mac = malloc(sizeof(u_int8_t)*6);
+									// Allocate memory for mac address pointer.
+									forward_mac = malloc(sizeof(u_int8_t)*6);
 
 
-								// Copy in mac address from arp reply .
-								memcpy(forward_mac, new_aarp.arp_header.arp_sha, 6);
+									// Copy in mac address from arp reply .
+									memcpy(forward_mac, new_aarp.arp_header.arp_sha, 6);
 
-							}
+								}
 
-							//##########################################################################			
-							// END: recieve ARP reply.
-							//#########################################################################
-
-
-
-							if(forward_mac == NULL){
-
-							  	//send ICMP error
-							  	printf("FRWD - No ARP reply\n");
+								//##########################################################################			
+								// END: recieve ARP reply.
+								//#########################################################################
 
 
-							}
-							else{
 
-								// Print mac address from arp reply.
-							  	printf("FRWD - ARP returned MAC:\n");
-							  	printf("%02x:%02x:%02x:%02x:%02x:%02x\n",
-								forward_mac[0],forward_mac[1],
-								forward_mac[2],forward_mac[3],
-								forward_mac[4],forward_mac[5]);
+								if(forward_mac == NULL){
 
-							  	
-								// Set ether header destination and source mac address.
-								memcpy(reply_IIP.eth_header.ether_dhost, forward_mac, 6);
-								memcpy(reply_IIP.eth_header.ether_shost, forwardInterface->mac_addrs, 6);
-
-								// Set ether header type.
-								reply_IIP.eth_header.ether_type = htons(ETH_P_IP);
+								  	//send ICMP error
+								  	printf("FRWD - No ARP reply\n");
 
 
-								// Combine headers and data
-								//unsigned char *data4;
+								}
+								else{
+
+									// Print mac address from arp reply.
+								  	printf("FRWD - ARP returned MAC:\n");
+								  	printf("%02x:%02x:%02x:%02x:%02x:%02x\n",
+									forward_mac[0],forward_mac[1],
+									forward_mac[2],forward_mac[3],
+									forward_mac[4],forward_mac[5]);
+
+								  	
+									// Set ether header destination and source mac address.
+									memcpy(reply_IIP.eth_header.ether_dhost, forward_mac, 6);
+									memcpy(reply_IIP.eth_header.ether_shost, forwardInterface->mac_addrs, 6);
+
+									// Set ether header type.
+									reply_IIP.eth_header.ether_type = htons(ETH_P_IP);
+
+
+									// Combine headers and data
+									//unsigned char *data4;
 
 								
-								//int datalength4 = ntohs(request_IIP->ip_header.tot_len) - 
-								//								 sizeof(request_IICMP->ip_header) - 
-								//								 sizeof(request_IICMP->icmp_header);
+									//int datalength4 = ntohs(request_IIP->ip_header.tot_len) - 
+									//								 sizeof(request_IICMP->ip_header) - 
+									//								 sizeof(request_IICMP->icmp_header);
 
-								//if(datalength4 > 0){
-								//	data4 = malloc(datalength4);
-								//	memcpy(data4, buf + sizeof(struct iip), datalength4);
-								//}
+									//if(datalength4 > 0){
+									//	data4 = malloc(datalength4);
+									//	memcpy(data4, buf + sizeof(struct iip), datalength4);
+									//}
 
-								//char result[sizeof(reply_IIP) + datalength4];
+									//char result[sizeof(reply_IIP) + datalength4];
 									
-								//memcpy(result, &reply_IIP, sizeof(reply_IIP));
-								//memcpy(result + sizeof(reply_IIP), data4, datalength4);
+									//memcpy(result, &reply_IIP, sizeof(reply_IIP));
+									//memcpy(result + sizeof(reply_IIP), data4, datalength4);
 
-								char result[sizeof(buf)];
-								memcpy(result, &buf, sizeof(buf));
-								memcpy(&result, &reply_IIP, sizeof(reply_IIP));
+									char result[sizeof(buf)];
+									memcpy(result, &buf, sizeof(buf));
+									memcpy(&result, &reply_IIP, sizeof(reply_IIP));
 
 
-								printf("FRWD - Sending packet");
+									printf("FRWD - Sending packet");
 
-								// Send packet on the correct interface.
-							  	send(forwardInterface->packet_socket, &result, sizeof(result), 0);
-							}
+									// Send packet on the correct interface.
+								  	send(forwardInterface->packet_socket, &result, sizeof(result), 0);
+								}
 
-					  	}
+						  	}
 
-						//-----------------------------------------------------------------------------
-						// No  match in routing table.
-						//-----------------------------------------------------------------------------
-					  	else{
+							//-----------------------------------------------------------------------------
+							// No  match in routing table.
+							//-----------------------------------------------------------------------------
+						  	else{
 
-							printf("FRWD - Address not found in routing table \n");
-					  	}
+								printf("FRWD - Address not found in routing table \n");
+						  	}
+						}
 					}
+				
 				}
-			}
-			else {
-				printf("Dropping this packet because why not?\n");
+				else {
+					printf("--- Bad Checksum ---\n");
+				}
 			}
 		}
 	}
