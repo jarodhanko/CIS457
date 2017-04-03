@@ -285,16 +285,15 @@ int main(int argc, char **argv){
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-// NEW CODE, NOT FINISHED.
 
-
+			//-----------------------------------------------------------------------------------------
 			// Recieved ARP.
+			//-----------------------------------------------------------------------------------------
 			if((ntohs(recvaddr.sll_protocol) == ETH_P_ARP)){
 				printf("----- Recieved ARP -----\n");
 
-// START: process ARP request.
-				
 
+			
 				// The original arp packet sent to us.
 				struct aarp *request_ARP;
 				request_ARP = ((struct aarp*)&buf);
@@ -302,12 +301,10 @@ int main(int argc, char **argv){
 
 				// The arp packet we will send.
 				struct aarp reply_ARP = *request_ARP;
-
-
-				//struct aarp *tempArp;
-				//tempArp  = ((struct aarp*)&buf);
-
+				
+				//---------------------------------------------------------------------------------------
 				// Arp_header op_code was not arp reply
+				//---------------------------------------------------------------------------------------
 				if (request_ARP->arp_header.ea_hdr.ar_op != ntohs(ARPOP_REPLY)){
 
 					printf("ARP - op = 'REQUEST'\n");
@@ -323,8 +320,10 @@ int main(int argc, char **argv){
 									  (prime_Interface->ip_addrs[1] << 8) | 
 						    		  (prime_Interface->ip_addrs[2] << 16) | 
 						   			  (prime_Interface->ip_addrs[3] << 24);
-				 	
+					
+					//--------------------------------------------------------------------------------				 	
 					// Interface ip matches arp_header ip, then we want this arp request.
+					//--------------------------------------------------------------------------------
 					if(ip_ARP == ip_INT){
 
 						printf("ARP - found interface\n");
@@ -354,24 +353,29 @@ int main(int argc, char **argv){
 						send(prime_Interface->packet_socket, &reply_ARP, sizeof(reply_ARP), 0);
 					}
 
+					//-----------------------------------------------------------------------------------
 					// Interface ip doesn't match arp ip, disregard the arp request.
+					//----------------------------------------------------------------------------------
 					else {
 					
 						printf("We dont want this ARP packet sir\n");
 
 					}
 				}
+				//---------------------------------------------------------------------------------------
+				// Arp_header op_code was arp reply
+				//---------------------------------------------------------------------------------------
 				else {
 				
-					printf("ARP - op = 'OTHER'\n");	
+					printf("ARP - op = 'REPLY'\n");	
 
 				}
 
-// END: process ARP requst.
-
 			}
 
+			//---------------------------------------------------------------------------------------------
 			// Recieved IP.
+			//---------------------------------------------------------------------------------------------
 			else if ((ntohs(recvaddr.sll_protocol) == ETH_P_IP)){
 				printf("----- Recieved IP -----\n");
 
@@ -384,24 +388,30 @@ int main(int argc, char **argv){
 				// The packet we will send.
 				struct iicmp reply_IICMP = *request_IICMP;
 
-				
+				//---------------------------------------------------------------------------------------
 				// If protocol is recieve ICMP packets for all local sockets.
+				//--------------------------------------------------------------------------------------
 				if (request_IICMP->ip_header.protocol == IPPROTO_ICMP) {	
 				
+
+					//-----------------------------------------------------------------------------------
 					// If the icmp_header type is an icmp echo or reply.
+					//-----------------------------------------------------------------------------------
 					if (request_IICMP->icmp_header.type == ICMP_ECHO || 
 						request_IICMP->icmp_header.type == ICMP_ECHOREPLY) {
+
              			
 						if (request_IICMP->icmp_header.type == ICMP_ECHO)							
 							printf("ICMP - Received ICMP ECHO\n");
 						else
 							printf("ICMP - Received ICMP REPLY\n");
 
-// START: process ICMP echo request.
+
+						//###############################################################################
+						// START: process ICMP echo request.
+						//################################################################################
 						
-
-			// START: find interface given ip address.
-
+						printf("ICMP - Need interface for: %X \n", request_IICMP->ip_header.daddr);
 						printf("ICMP - Scanning interfaces...\n");
 
 						// Create a temp interface pointer for looping.
@@ -412,7 +422,9 @@ int main(int argc, char **argv){
 						char   name1A_INT[7];
 						char * name1P_INT = NULL;
 
-						// START: Loop - interface list.
+						//-----------------------------------------------------------------------------------
+						// START: Find the correct interface given the ip by the request.
+						//----------------------------------------------------------------------------------
 						while (tmp1_INT != NULL){
 
 							// Store the interface ip as a u_int32
@@ -421,12 +433,6 @@ int main(int argc, char **argv){
 							 	   (tmp1_INT->ip_addrs[1] << 8) | 								
 								   (tmp1_INT->ip_addrs[2] << 16) | 
 								   (tmp1_INT->ip_addrs[3] << 24);
-
-							//u_int32_t ip_TEMP_IICMP ;
-							//memcpy(&ip_TEMP_IICMP, &request_IICMP->ip_header.daddr, 4);
-
-							printf("WHHHHY INT: %X \n", ip_INT);
-							printf("WHHHHY REQ: %X \n", request_IICMP->ip_header.daddr);
 
 							
 							if (ip_INT == request_IICMP->ip_header.daddr){
@@ -445,16 +451,20 @@ int main(int argc, char **argv){
 							tmp1_INT = tmp1_INT->next;
 
 						}
+						//-----------------------------------------------------------------------------------
+						// END: Find the correct interface given the ip by the request.
+						//----------------------------------------------------------------------------------
 
-						// END: Loop - interface list.
-			// END: find interface given ip address
-					
-						// If there was a match in the loop.
+	
+						//------------------------------------------------------------------------------------
+						// Found an interface given the ip
+						//-----------------------------------------------------------------------------------
 						if (name1P_INT != NULL) {
+				
+							printf("ICMP - Found interface: %s\n", name1P_INT);
 
-							printf("ICMP - We got mail!!!\n");
+							
 
-			// START: find mac given interface
 
 							// Create a temp interface pointer for looping.
 							struct interface * tmp2_INT;
@@ -462,7 +472,9 @@ int main(int argc, char **argv){
 
 							u_int8_t mac_INT[6];
 					
-							// START: Loop - interface list
+							//----------------------------------------------------------------------------------
+							// START: find mac address given the found interface
+							//---------------------------------------------------------------------------------
 							while (tmp2_INT != NULL){
 			
 								// Temp char array to hold current interface name.
@@ -477,9 +489,10 @@ int main(int argc, char **argv){
 
 								tmp2_INT = tmp2_INT->next;
 							}
-							// END: Loop - interface list.
+							//----------------------------------------------------------------------------------
+							// END: find mac address given the found interface.
+							//---------------------------------------------------------------------------------
 
-			// END: find mac given interface
 
 							printf("ICMP - MAC ADDRESS: %X:%X:%X:%X:%X:%X\n", mac_INT[0], mac_INT[1], mac_INT[2],
 																	          mac_INT[3], mac_INT[4], mac_INT[5]);
@@ -491,10 +504,17 @@ int main(int argc, char **argv){
 
 							printf("ICMP - Adjusting time to live\n");
 
+
+							//---------------------------------------------------------------------------------
+							// The time to live would be zero
+							//---------------------------------------------------------------------------------
 							if (reply_IICMP.ip_header.ttl == 1){
 								printf("ICMP - This packets lifeforce has expired\n");
 
-			// START: send ICMP error - ICMP_TIME_EXCEEDED
+
+								//#############################################################################			
+								// START: send ICMP error - ICMP_TIME_EXCEEDED
+								//#############################################################################
 							
 	
 								memcpy(reply_IICMP.eth_header.ether_shost, prime_Interface->mac_addrs, 6);
@@ -518,36 +538,23 @@ int main(int argc, char **argv){
 								reply_IICMP.icmp_header.code = ICMP_HOST_UNREACH;
 
 
+								printf("FIX ----- ME");
+// FIX ME: NEED TO UPDATE CHECKSUM
 
+// DO we need to calc the checksum  though???
 
-printf("FIX ----- ME");
-// FIX ME: NEED TO UPDATE CHECKSUM, THEN SEND.
-
-								/*
-
-								int datalength = ntohs(requestIICMP->ip_header.tot_len) - 
-											sizeof(requestIICMP->ip_header) - sizeof(requestIICMP->icmp_header);
-								unsigned char *data = NULL;
-								unsigned char ptr[sizeof(replyIICMP.icmp_header) + datalength];
-								memcpy(ptr, &replyIICMP.icmp_header, sizeof(replyIICMP.icmp_header));
-								memcpy(ptr + sizeof(replyIICMP.icmp_header), data, datalength);
-								replyIICMP.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));		
-								unsigned char result[sizeof(replyIICMP) + datalength];
-								memcpy(result, &replyIICMP, sizeof(replyIICMP));
-								memcpy(result + sizeof(replyIICMP), data, datalength);
-	
-
-
-
+					
 								send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
 
-								*/
-
-
-								
-			// END: send ICMP error - ICMP_TIME_EXCEEDED
+								//#############################################################################			
+								// END: send ICMP error - ICMP_TIME_EXCEEDED
+								//#############################################################################
 
 							}
+
+							//---------------------------------------------------------------------------------
+							// time to live was okay, update and send.
+							//---------------------------------------------------------------------------------
 							else {
 					
 
@@ -591,23 +598,29 @@ printf("FIX ----- ME");
 							}
 						}
 
-						// Did not find an interface name.
+						//------------------------------------------------------------------------------------
+						// Did not find an interface given the ip
+						//-----------------------------------------------------------------------------------
 						else {
 
-							printf("Whose packet is this???\n");
+							printf("ICMP - Could not find an interface\n");
 
 							struct interface * prize_Interface = NULL;
 							u_int32_t ip_HOP = 0;
 
 			// START: find interface from ip
 
-							printf("searching page table...\n");
+							printf("ICMP - Searching page table...\n");
 							
 							int foundMatch = 0;
 
 							struct interface * tmp_INT;
 							tmp_INT = interfaceList;
 
+
+							//-----------------------------------------------------------------------------
+							// START: find next hop in routing table and correct interface to send on.
+							//-----------------------------------------------------------------------------
 							while (tmp_INT != NULL){
 
 								struct routing_table * tmp_TBL;
@@ -615,18 +628,24 @@ printf("FIX ----- ME");
 
 								while (tmp_TBL != NULL){
 
+									//---------------------------------------------------------------------
+									// Found an ip in table that matched requested ip.
+									//---------------------------------------------------------------------
 									if (tmp_TBL->network << (32 - tmp_TBL->prefix) == 
 													request_IICMP->ip_header.daddr << (32 - tmp_TBL->prefix)){
 										
+										//-------------------------------------------------------------------
+										// Found interface that matched table interface.
+										//--------------------------------------------------------------------
 										if (strcmp(tmp_TBL->interface, tmp_INT->name) == 0){
 										
 											foundMatch = 1;
 											ip_HOP = tmp_TBL->hop;
 											prize_Interface = tmp_INT;
-											printf("Found interface: %s\n", prize_Interface->name);
+											printf("ICMP - Found interface: %s\n", prize_Interface->name);
 											u_int8_t ip_print[4];
 											memcpy(&ip_print, &ip_HOP, 4);
-											printf("Found hop: %X.%X.%X.%X\n", ip_print[0],ip_print[1],ip_print[2],ip_print[3]);
+											printf("ICMP - Next hop: %X.%X.%X.%X\n", ip_print[0],ip_print[1],ip_print[2],ip_print[3]);
 											break;
 										}
 									}
@@ -641,62 +660,77 @@ printf("FIX ----- ME");
 								tmp_INT = tmp_INT->next;
 							}
 
-			// END: find interface from ip.
+							//-----------------------------------------------------------------------------
+							// END: find next hop in routing table and correct interface to send on.
+							//-----------------------------------------------------------------------------
 							
-							
+
+
+							//-----------------------------------------------------------------------------
+							// Table look-up yielded results.
+							//-----------------------------------------------------------------------------
 							if (prize_Interface != NULL){
 
 								u_int8_t * mac_HOST;
 
-			// START: send ARP request.
+								//##########################################################################			
+								// START: send ARP request.
+								//#########################################################################
 
+
+								// If hop was null, then hop is in packets ip header.
 								if (ip_HOP == 0 || ip_HOP == -1){
 								
 									ip_HOP = request_IICMP->ip_header.daddr;
+
+
+									// Print out the new hop address.
+									u_int8_t ip_print[4];
+									memcpy(&ip_print, &ip_HOP, 4);
+									printf("ICMP - New hop:  %X.%X.%X.%X\n", ip_print[0],ip_print[1],ip_print[2],ip_print[3]);
+
 								}
 								
+								
 
-								u_int8_t ip_print[4];
-								memcpy(&ip_print, &ip_HOP, 4);
-								printf("New hop: %X.%X.%X.%X\n", ip_print[0],ip_print[1],ip_print[2],ip_print[3]);
-
-
-								//struct aarp * temp_ARP = malloc(sizeof(struct aarp));
-
-
+								// ARP packet to send.
 								struct aarp *temp_ARP;
 								temp_ARP = malloc(sizeof(struct aarp));
-								//req_ARP = ((struct aarp*)&buf);
-								//struct aarp temp_ARP = *req_ARP;
-
+							
+								// Set ether header type to arp.
 								temp_ARP->eth_header.ether_type = htons(ETHERTYPE_ARP);
 
-
+								// Temporary arrays.
 								char broadcast_255[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 								char broadcast_0[6]   = {0,0,0,0,0,0};
 
+								// Set ether header destination and source host.
 								memcpy(&temp_ARP->eth_header.ether_dhost, broadcast_255, 6);
-
 								memcpy(&temp_ARP->eth_header.ether_shost, prize_Interface->mac_addrs, 6);
 
+								// Set arp header target and source mac address.
 								memcpy(temp_ARP->arp_header.arp_tha, &broadcast_0, 6);
 								memcpy(temp_ARP->arp_header.arp_sha, prize_Interface->mac_addrs, 6);
 								
+								// Set arp header target ip address.
 								temp_ARP->arp_header.arp_tpa[3] = (uint8_t) (ip_HOP >> 24);
 								temp_ARP->arp_header.arp_tpa[2] = (uint8_t) (ip_HOP >> 16);
 								temp_ARP->arp_header.arp_tpa[1] = (uint8_t) (ip_HOP >> 8);
 								temp_ARP->arp_header.arp_tpa[0] = (uint8_t) (ip_HOP);
 
+								// Temporary ip address from the interface.
 								u_int32_t temp_ip_INT = prize_Interface->ip_addrs[0] | 
 									  		    	   (prize_Interface->ip_addrs[1] << 8) | 
 						    		  		           (prize_Interface->ip_addrs[2] << 16) | 
 												       (prize_Interface->ip_addrs[3] << 24);
 
+								// Set arp header source ip address.
 								temp_ARP->arp_header.arp_spa[3] = (uint8_t) (temp_ip_INT >> 24);
 								temp_ARP->arp_header.arp_spa[2] = (uint8_t) (temp_ip_INT >> 16);
 								temp_ARP->arp_header.arp_spa[1] = (uint8_t) (temp_ip_INT >> 8);
 								temp_ARP->arp_header.arp_spa[0] = (uint8_t) (temp_ip_INT);
 
+								// Set other arp header fields.
 								temp_ARP->arp_header.ea_hdr.ar_hln = 6;
 								temp_ARP->arp_header.ea_hdr.ar_hrd = htons(ARPHRD_ETHER);
 								temp_ARP->arp_header.ea_hdr.ar_pln = 4;
@@ -704,33 +738,48 @@ printf("FIX ----- ME");
 								temp_ARP->arp_header.ea_hdr.ar_op  = htons(ARPOP_REQUEST);
 
 								
-								printf("Sending ARP request\n");
+								printf("ICMP - Sending ARP request\n");
 					
-
+								// Send the arp request on interface that matched table look-up.
 								send(prize_Interface->packet_socket, temp_ARP, sizeof(struct aarp), 0);
 									
-								
+								//##########################################################################			
+								// END: send ARP request.
+								//#########################################################################
+
+
+								//##########################################################################			
+								// START: recieve ARP reply.
+								//#########################################################################
+
 								struct sockaddr_ll temp_Recv;
 
+								// Set up time out.
   								struct timeval tv2;
   								tv2.tv_sec = 0;
   								tv2.tv_usec = 1000 * 20;
 
+								// Add time out to interface.
   								if (setsockopt(prize_Interface->packet_socket, SOL_SOCKET, SO_RCVTIMEO,&tv2,
 																					sizeof(tv2)) < 0) {
     								perror("Error");
+
 								}
 
 								socklen_t temp_Recvlen = sizeof(struct sockaddr_ll);
+
+								// Char array to store packet.
 								char temp_Buf[1500];
 
   								int n2 = recvfrom(prize_Interface->packet_socket, temp_Buf, 1500, 0, 
 																(struct sockaddr*)&temp_Recv, &temp_Recvlen);
  												
-			
+								// Recieved no arp reply.
   								if (n2 < 1){
     								mac_HOST = NULL;
 								}
+
+								// Recieved arp reply.
 								else {
 
 									tv2.tv_sec = 0;
@@ -741,32 +790,49 @@ printf("FIX ----- ME");
 										perror("Error");
 									}
 
+									// Create new arp structure.
 									struct aarp new_aarp;
 
+									// Copy packet int arp structure.
 									memcpy(&new_aarp, temp_Buf, sizeof(struct aarp));
 									
+									// Allocate memory for mac address.
 									mac_HOST = malloc(sizeof(u_int8_t)*6);
+
+									// Store mac address from arp reply.
 									memcpy(mac_HOST, new_aarp.arp_header.arp_sha, 6);
 
 								}
 
-			// END: send ARP request.
+								//##########################################################################			
+								// END: recieve ARP reply.
+								//##########################################################################
 
 								
+								//--------------------------------------------------------------------------
+								// Did not get an arp reply. No mac address to send to.
+								//---------------------------------------------------------------------------
 								if (mac_HOST == NULL) {
 					
-									printf("No MAC received from ARP request\n");
-									printf("Sending ICMP error\n");
+									printf("ICMP - No ARP reply\n");
+									printf("ICMP - Sending ICMP error - ICMP_DEST_UNREACH.\n");
 
-			// START: send ICMP error - ICMP_DEST_UNREACH.
+									//#############################################################################	
+									// START: send ICMP error - ICMP_DEST_UNREACH.
+									//#############################################################################
 
+									// Set ether header source and destination host.
 									memcpy(reply_IICMP.eth_header.ether_shost, prime_Interface->mac_addrs, 6);
 									memcpy(reply_IICMP.eth_header.ether_dhost, request_IICMP->eth_header.ether_shost, 6);
 
+									// Set ether header type.
 									reply_IICMP.eth_header.ether_type = htons(ETHERTYPE_IP);
 
+									// Set ip header destination and source address.
 									reply_IICMP.ip_header.daddr = request_IICMP->ip_header.saddr;
 									memcpy(&reply_IICMP.ip_header.saddr, prime_Interface->ip_addrs, 4);
+
+									// Set other ip header fields.
 									reply_IICMP.ip_header.check    = 0;
 									reply_IICMP.ip_header.frag_off = 0; 
 									reply_IICMP.ip_header.ihl      = 5;
@@ -776,21 +842,35 @@ printf("FIX ----- ME");
 									reply_IICMP.ip_header.ttl      = 64;
 									reply_IICMP.ip_header.version  = 4;
 							
+									// Set icmp header type.
 									reply_IICMP.icmp_header.type = ICMP_HOST_UNREACH;
+
+									// Clear icmp header checksum.
 									reply_IICMP.icmp_header.checksum = 0;
+
+									// Set icmp error code.
 									reply_IICMP.icmp_header.code = ICMP_HOST_UNREACH;
 
 
 // FIX ME: CALC CHECKSUM AND SEND. 
+// Do we need to calc the checksum here???
 
-
+									// Send the ICMP error on original interface.
 									send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
 
-			// END: send ICMP error - ICMP_DEST_UNREACH.
+									//#############################################################################	
+									// END: send ICMP error - ICMP_DEST_UNREACH.
+									//#############################################################################
 								}
-								else {
 
-									printf("MAC from ARP request: %02X:%02X:%02X:%02X:%02X:%02X\n", 
+								//--------------------------------------------------------------------------
+								// Did get an arp reply. Recieved mac address to send to.
+								//---------------------------------------------------------------------------
+								else {
+				
+									printf("ICMP - Recieved ARP reply\n");
+
+									printf("ICMP - MAC from ARP request: %02X:%02X:%02X:%02X:%02X:%02X\n", 
 																	mac_HOST[0], mac_HOST[1], mac_HOST[2], 
 																	mac_HOST[3], mac_HOST[4], mac_HOST[5]);
 
@@ -802,12 +882,20 @@ printf("FIX ----- ME");
 
 									reply_IICMP.icmp_header.checksum = 0;
 									
+
+									//---------------------------------------------------------------------------------
+									// The time to live would be zero
+									//---------------------------------------------------------------------------------
 									if (request_IICMP->ip_header.ttl == 1){
 
 										printf("The packet died\n");
 										// ICMP error - packet died in our arms.
 
 									}
+
+									//---------------------------------------------------------------------------------
+									// The time to live was okay.
+									//---------------------------------------------------------------------------------
 									else {
 
 
@@ -853,10 +941,13 @@ printf("FIX ----- ME");
 									}
 								}
 							}
-							// No address was found in table, send an error.
+							//-----------------------------------------------------------------------------
+							// Table look-up yielded no results.
+							//-----------------------------------------------------------------------------
 							else {
 
-								printf("Not my neighbor, sending ICMP error\n");
+								printf("ICMP - Could not find an interface\n");
+								printf("ICMP - Sending ICMP error - ICMP_HOST_UNREACH\n");
 
 			// START: send ICMP error - ICMP_DEST_UNREACH.
 
@@ -886,7 +977,7 @@ printf("FIX ----- ME");
 // FIX ME: CALC CHECKSUM AND SEND.
 
 
-								//send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
+								send(prime_Interface->packet_socket, &reply_IICMP, sizeof(reply_IICMP), 0);
 
 
 			// END: send ICMP error - ICMP_DEST_UNREACH.
@@ -1060,6 +1151,10 @@ printf("FIX ----- ME");
 // END: forward packet.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 					}
 				}
+
+				//-------------------------------------------------------------------------------------
+				// Protocol is not, recieve ICMP packets for all local sockets.
+				//-------------------------------------------------------------------------------------
 				else {
             		printf("Recieved packet (not ARP or ICMP), Forwarding\n");
 
