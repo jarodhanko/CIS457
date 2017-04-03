@@ -239,7 +239,7 @@ int main(int argc, char **argv){
     		if(recvaddr.sll_pkttype==PACKET_OUTGOING)
       			continue;
 
-			// Timed out.
+			// Time out.
 			if(n == -1){
 				continue;
 			}
