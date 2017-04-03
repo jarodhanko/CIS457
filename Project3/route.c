@@ -1192,6 +1192,7 @@ says it does not contain a full tcp header???
 
 								printf("FRWD - Found interface1: %s\n", iface1->name);
 								memcpy(i_name, iface1->name, 7);
+								printf("copy\n");
 							  	break;
 							}
 						}
