@@ -219,7 +219,7 @@ int main(int argc, char **argv){
   	while(1){
 		
 		// Loop through all interfaces for packets.
-		struct interface * prime_Interface;		
+		struct interface * prime_Interface = NULL;		
 		for(prime_Interface = interfaceList; prime_Interface != NULL; prime_Interface = prime_Interface->next){		
 
   			char buf[1500];
