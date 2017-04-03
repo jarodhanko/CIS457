@@ -246,7 +246,7 @@ int main(int argc, char **argv){
     		//start processing all others
     		printf("\n***** Got a %d byte packet *****\n", n);
 
-			printf("PCKT - Interface Was: %s\n", prime_Interface->name);
+			//printf("PCKT - Interface Was: %s\n", prime_Interface->name);
 	
 			
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1319,7 +1319,7 @@ int main(int argc, char **argv){
 
 									u_int8_t ip_print[4];
 									memcpy(&ip_print, &forward_ip, 4);
-									printf("New hop: %X.%X.%X.%X\n", ip_print[0],ip_print[1],ip_print[2],ip_print[3]);
+									printf("FRWD - New hop: %X.%X.%X.%X\n", ip_print[0],ip_print[1],ip_print[2],ip_print[3]);
 								
 								}
 
