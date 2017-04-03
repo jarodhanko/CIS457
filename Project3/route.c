@@ -1019,6 +1019,7 @@ says it does not contain a full tcp header???
 
 										printf("ICMP - The packet died\n");
 										// ICMP error - packet died in our arms.
+// SEND ERROR???
 
 									}
 
@@ -1430,7 +1431,7 @@ says it does not contain a full tcp header???
 
 								  	//send ICMP error
 								  	printf("FRWD - ARP returned no MAC\n");
-
+// SEND ERROR???
 
 								}
 								else{
@@ -1468,7 +1469,7 @@ says it does not contain a full tcp header???
 
 						  	}
 						  	else{
-
+// SEND ERROR???
 								printf("FRWD - Address not found in table, sending error\n");
 						  	}
 						}
@@ -1770,7 +1771,7 @@ says it does not contain a full tcp header???
 
 
 								if(forward_mac == NULL){
-
+// SEND ERRROR???
 								  	//send ICMP error
 								  	printf("FRWD - No ARP reply\n");
 
@@ -1794,24 +1795,6 @@ says it does not contain a full tcp header???
 									reply_IIP.eth_header.ether_type = htons(ETH_P_IP);
 
 
-									// Combine headers and data
-									//unsigned char *data4;
-
-								
-									//int datalength4 = ntohs(request_IIP->ip_header.tot_len) - 
-									//								 sizeof(request_IICMP->ip_header) - 
-									//								 sizeof(request_IICMP->icmp_header);
-
-									//if(datalength4 > 0){
-									//	data4 = malloc(datalength4);
-									//	memcpy(data4, buf + sizeof(struct iip), datalength4);
-									//}
-
-									//char result[sizeof(reply_IIP) + datalength4];
-									
-									//memcpy(result, &reply_IIP, sizeof(reply_IIP));
-									//memcpy(result + sizeof(reply_IIP), data4, datalength4);
-
 									char result[sizeof(buf)];
 									memcpy(result, &buf, sizeof(buf));
 									memcpy(&result, &reply_IIP, sizeof(reply_IIP));
@@ -1829,7 +1812,7 @@ says it does not contain a full tcp header???
 							// No  match in routing table.
 							//-----------------------------------------------------------------------------
 						  	else{
-
+// SEND ERROR???
 								printf("FRWD - Address not found in routing table \n");
 						  	}
 						}
@@ -1838,6 +1821,7 @@ says it does not contain a full tcp header???
 				}
 				else {
 					printf("--- Bad Checksum ---\n");
+//SEND ERROR??
 				}
 			}
 		}
@@ -1853,219 +1837,8 @@ says it does not contain a full tcp header???
 
 
 
-
-/*
-
-
-
-
-
-struct aarp *tempArp;
-			tempArp  = ((struct aarp*)&buf);
-			struct iicmp *tempIcmp;
-			tempIcmp = ((struct iicmp*)&buf);
-
-
-
-
-				struct aarp *request;
-		
-				request = ((struct aarp*)&buf);
-				
-				// Print the request contents.	
-				print_ETHERTYPE_ARP(request);
-
-				// Create reply structure.
-				struct aarp reply = *request;
-	
-				// IS THIS FOR US?
-				if (request->arp_header.arp_spa == tempInterface->ip_addrs){
-					printf("YOU'VE GOT MAIL\n");
-				
-				}
-
-
-
-				// Copy info to reply.
-				memcpy(reply.eth_header.ether_shost, tempInterface->mac_addrs, ETH_ALEN);		
-				memcpy(reply.eth_header.ether_dhost, request->eth_header.ether_shost, ETH_ALEN);
-				reply.arp_header.ea_hdr.ar_op=htons(ARPOP_REPLY);
-				memcpy(reply.arp_header.arp_sha, tempInterface->mac_addrs, 6);
-				memcpy(reply.arp_header.arp_spa, tempInterface->ip_addrs, 4);
-				memcpy(reply.arp_header.arp_tha, request->arp_header.arp_sha, ETH_ALEN);
-				memcpy(reply.arp_header.arp_tpa, request->arp_header.arp_spa, 4);
-		
-				// Send the reply packet.	
-				send(tempInterface->packet_socket, &reply, sizeof(reply), 0);
-				printf("Sent ARP reply \n");
-
-			}else if((ntohs(recvaddr.sll_protocol) == ETH_P_IP) && n > -1 && tempIcmp->icmp_header.type == 										ICMP_ECHO && tempIcmp->ip_header.daddr == interfaceIP){
-				
-		
-				char buf2[1500];
-				memcpy(buf2, buf, sizeof(buf));
-		
-				struct iicmp request2;
-				unsigned char *data;
-				request2 = *((struct iicmp*)&buf2);
-				int datalength = ntohs(request2.ip_header.tot_len) - sizeof(request2.ip_header) - 
-																	 sizeof(request2.icmp_header);
-//fdbg
-				if(datalength > 0){
-					data = malloc(datalength);
-					memcpy(data, buf2 + sizeof(request2), datalength);
-				}
-				printf("\n THE DATA LENGTH IS %lu\n", sizeof(&data));
-				unsigned char tmp3[] = {buf2[26], buf2[27], buf2[28], buf2[29]};
-				unsigned char tmp4[] = {buf2[30], buf2[31], buf2[32], buf2[33]};
-		
-				// Create reply structure.
-				struct iicmp reply;
-
-				// Copy info to reply.
-				memcpy(&reply, &request2, sizeof(request2));
-				memcpy(&reply.eth_header.ether_shost, tempInterface->mac_addrs, ETH_ALEN);
-//dsd				memcpy(&reply.eth_header.ether_dhost, request2.eth_header.ether_shost, ETH_ALEN);
-				memcpy(&reply.ip_header.daddr, tmp3, 4);
-				memcpy(&reply.ip_header.saddr, tmp4, 4);
-				reply.icmp_header.type = ICMP_ECHOREPLY;
-				reply.icmp_header.checksum = 0;
-				unsigned char ptr[sizeof(reply.icmp_header) + datalength];
-				memcpy(ptr, &reply.icmp_header, sizeof(reply.icmp_header));
-				memcpy(ptr + sizeof(reply.icmp_header), data, datalength);
-				reply.icmp_header.checksum = ip_checksum(&ptr, sizeof(ptr));
-		
-				// Print the reply contents.
-				//print_ETHERTYPE_IP(reply);		
-	
-				unsigned char result[sizeof(reply) + datalength];
-				memcpy(result, &reply, sizeof(reply));
-				memcpy(result + sizeof(reply), data, datalength);
-		
-				send(tempInterface->packet_socket, &result, sizeof(result), 0);
-			}else if ((ntohs(recvaddr.sll_protocol) == ETH_P_IP) && n > -1 && 
-						ntohs(tempIcmp->eth_header.ether_type) == ETHERTYPE_IP){
-				struct iip *iip;
-				iip = ((struct iip*)&buf);
-				
-				struct aarp *request = malloc(sizeof(struct aarp));
-				request->eth_header.ether_type = htons(ETHERTYPE_ARP);
-			
-				//figure out next hop IP and interface
-				struct routing_table *tempRtable = rtable;
-				int skip = 0;
-				while(tempRtable != NULL){	
-					char chars[4];
-					memcpy(chars, &tempRtable->network, 4);
-					if((tempRtable->prefix == 24 && 
-						(tempRtable->network >> 8) | 
-						(iip->ip_header.daddr >> 8)) == 0){	
-						struct interface *iList = interfaceList;
-						while(iList != NULL){
-							if(strcmp(iList->name, tempRtable->interface) == 0){									
-								//printf("NEXT HOP: %s \n", inet_ntoa(*((struct in_addr*)&tempRtable->hop)));		
-								memcpy(request->eth_header.ether_shost, iList->mac_addrs, 6);
-								char broadcast[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-								char broadcast2[6] = {0,0,0,0,0,0};
-								memcpy(request->eth_header.ether_dhost, &broadcast, 6);
-								request->arp_header.ea_hdr.ar_hrd = htons(ARPHRD_ETHER);
-								request->arp_header.ea_hdr.ar_pro = htons(0x800);
-								request->arp_header.ea_hdr.ar_hln = sizeof(iList->mac_addrs); //6
-								request->arp_header.ea_hdr.ar_pln = sizeof(iList->ip_addrs);
-								request->arp_header.ea_hdr.ar_op = htons(ARPOP_REQUEST);
-								memcpy(request->arp_header.arp_sha, iList->mac_addrs, 6); //NOTE
-								memcpy(request->arp_header.arp_spa, iList->ip_addrs, 4);
-								memcpy(request->arp_header.arp_tha, &broadcast2, 6);
-								if(tempRtable->hop < 0xffffffff){
-									memcpy(request->arp_header.arp_tpa, &tempRtable->hop, 4);
-								}else{						
-									memcpy(request->arp_header.arp_tpa,&iip->ip_header.daddr,4);						
-								}		
-								printf("IPADDR: %s", inet_ntoa(*((struct in_addr*) &iip->ip_header.daddr)));			
-								//print_ETHERTYPE_ARP(request);
-								send(iList->packet_socket, request, sizeof(struct aarp), 0);	
-							}
-							iList = iList->next;
-						}	
-						skip = 1;
-						break;					
-					}
-					tempRtable = tempRtable->next;
-				}
-				if(skip == 0){
-					tempRtable = rtable;
-					while(tempRtable != NULL){	
-					char chars[4];
-					memcpy(chars, &tempRtable->network, 4);
-					if((tempRtable->prefix == 16 && 
-						(tempRtable->network >> 16) | 
-						(iip->ip_header.daddr >> 16)) == 0){	
-						struct interface *iList = interfaceList;
-						while(iList != NULL){
-							if(strcmp(iList->name, tempRtable->interface) == 0){									
-								//printf("NEXT HOP: %s \n", inet_ntoa(*((struct in_addr*)&tempRtable->hop)));		
-								memcpy(request->eth_header.ether_shost, iList->mac_addrs, 6);
-								char broadcast[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-								char broadcast2[6] = {0,0,0,0,0,0};
-								memcpy(request->eth_header.ether_dhost, &broadcast, 6);
-								request->arp_header.ea_hdr.ar_hrd = htons(ARPHRD_ETHER);
-								request->arp_header.ea_hdr.ar_pro = htons(0x800);
-								send(iList->packet_socket, request, sizeof(struct aarp), 0);	
-								request->arp_header.ea_hdr.ar_hln = sizeof(iList->mac_addrs); //6
-								request->arp_header.ea_hdr.ar_pln = sizeof(iList->ip_addrs);
-								request->arp_header.ea_hdr.ar_op = htons(ARPOP_REQUEST);
-								memcpy(request->arp_header.arp_sha, iList->mac_addrs, 6); //NOTE
-								memcpy(request->arp_header.arp_spa, iList->ip_addrs, 4);
-								memcpy(request->arp_header.arp_tha, &broadcast2, 6);
-								if(tempRtable->hop < 0xffffffff){
-										memcpy(request->arp_header.arp_tpa, &tempRtable->hop, 4);
-									}else{						
-										memcpy(request->arp_header.arp_tpa,&iip->ip_header.daddr,4);						
-									}		
-								printf("IPADDR: %s", inet_ntoa(*((struct in_addr*) &iip->ip_header.daddr)));			
-								//print_ETHERTYPE_ARP(request);
-								send(iList->packet_socket, request, sizeof(struct aarp), 0);	
-							}
-							iList = iList->next;
-						}	
-						skip = 1;
-						break;					
-					}
-					tempRtable = tempRtable->next;
-				}
-				}			
-						
-				//wait for ARP response (timeout)
-				
-				
-				//print
-			}else if((ntohs(recvaddr.sll_protocol) == ETH_P_ARP) && n > -1 && ntohs(tempArp->arp_header.ea_hdr.ar_op) == ARPOP_REPLY){
-				struct aarp *request;
-		
-				request = ((struct aarp*)&buf);
-				
-				
-				printf("Next Hop MAC: %02X:%02X:%02X:%02X:%02X:%02X \n", request->arp_header.arp_sha[0],
-								request->arp_header.arp_sha[1], request->arp_header.arp_sha[2],
-								request->arp_header.arp_sha[3], request->arp_header.arp_sha[4],
-								request->arp_header.arp_sha[5]);
-				printf("Next Hop IP: %u.%u.%u.%u \n", request->arp_header.arp_spa[0],
-						 request->arp_header.arp_spa[1], request->arp_header.arp_spa[2],
-						 request->arp_header.arp_spa[3]);
-			
-			}
-		}
-  	}
-  	// Exit main
-  	return 0;
-}
-
-
-
-**/
-
 /****************************************************************************************
-* LOAD ROUTING TABLE  ---- FIX ME ---- 
+* LOAD ROUTING TABLE 	
 ****************************************************************************************/
 void load_table(char *filename){
 		
