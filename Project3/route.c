@@ -1357,7 +1357,7 @@ says it does not contain a full tcp header???
 									
 
 										forwardInterface = iface2;
-										forward_ip = temptable->network;
+										forward_ip = temptable->hop;
 
 										printf("FRWD - Found interface2: %s\n", forwardInterface->name);
 										printf("FRWD - Next hop: %X\n", forward_ip);
