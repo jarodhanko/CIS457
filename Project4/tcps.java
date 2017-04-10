@@ -125,7 +125,7 @@ class TcpsThreadIn extends Thread{
 				}
 				String message = cm.getMessage();
 				if(message.trim().toLowerCase().equals("quit")){
-					tcpserverchat.kill();
+					Tcps.kill(-1);
 					csc.sc.close();
 					runLoop = false;
 					break;

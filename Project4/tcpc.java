@@ -59,7 +59,7 @@ class TcpClientThreadOut extends Thread{
 				if(m.trim().toLowerCase().equals("quit")){
 					ByteBuffer buf = ByteBuffer.wrap("quit".getBytes());
 					sc.write(buf);
-					tcpclientchat.kill();
+					Tcpc.kill();
 					sc.close();
 					runLoop = false;
 				}else if(m.trim().toLowerCase().equals("broadcast")){
