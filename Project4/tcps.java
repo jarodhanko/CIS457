@@ -51,6 +51,7 @@ class Tcps{
 		for(ClientSocketChannel c : clients){
 			if (c.id == id){
 				clients.remove(c);
+				break;
 			}
 		}
 	}
@@ -87,7 +88,7 @@ class TcpsThreadOut extends Thread{
 				Tcps.removeClient(csc.id);
 			}
 		}catch(IOException ex){
-			System.out.println("Exception: " + ex.getStackTrace());
+			//System.out.println("Exception: " + ex.getStackTrace());
 			//we quit the application or there was an error
 		}finally{
 			try{
@@ -156,6 +157,7 @@ class TcpsThreadIn extends Thread{
 						break;
 					}
 				}
+				System.out.println("No client found");
 				break;
 			case BROADCAST:
 				for (ClientSocketChannel c : clients){

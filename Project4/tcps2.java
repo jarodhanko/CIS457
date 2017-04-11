@@ -70,6 +70,7 @@ class Tcps2{
 		for(ClientSocketChannel c : clients){
 			if (c.id == id){
 				clients.remove(c);
+				break;
 			}
 		}
 	}
@@ -222,6 +223,7 @@ class TcpsThreadIn extends Thread{
 						break;
 					}
 				}
+				System.out.println("No client found");
 				break;
 			case BROADCAST:
 				for (ClientSocketChannel c : clients){
@@ -272,6 +274,7 @@ enum MessageType {
 }
 
 class KeyExchange implements Serializable{
+	private static final long serialVersionUID = 1L;
 	private byte[] key;
 	private byte[] iv;
 	
