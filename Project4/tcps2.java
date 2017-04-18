@@ -15,17 +15,16 @@ class ClientSocketChannel{
 	public SocketChannel sc;
 	public int id;
     public SecretKey secKey;
-	public	IvParameterSpec iv;
+	public IvParameterSpec iv;
 	
 	public ClientSocketChannel(SocketChannel sc, int id){
 		this.sc = sc;
 		this.id = id;
 	}
 
-	public ClientSocketChannel(SocketChannel sc, int id, PublicKey pubKey, IvParameterSpec iv){
+	public ClientSocketChannel(SocketChannel sc, int id, PublicKey pubKey){
 		this(sc, id);
 		this.secKey = secKey;
-		this.iv = iv;
 	}
 }
 
@@ -85,6 +84,14 @@ class Tcps2{
 	public static PrivateKey getPrivKey(){
 		return privKey;
 	}
+
+	public static IvParameterSpec generateIv(ClientSocketChannel csc){		
+		SecureRandom r = new SecureRandom();
+		byte ivbytes[] = new byte[16];
+		r.nextBytes(ivbytes);
+		csc.iv = new IvParameterSpec(ivbytes);
+		return csc.iv;
+	}
 }
 
 class TcpsThreadOut extends Thread{
@@ -98,29 +105,42 @@ class TcpsThreadOut extends Thread{
 
 
 	public void run(){		
-		System.out.println("starting");
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ObjectOutput out = null;
 		try{
-			System.out.println("attempting to send");
+			System.out.println("Sending messsage to client #" + csc.id);
 			out = new ObjectOutputStream(bos);
 			out.writeObject(this.message);
 			out.flush();
 			byte messageBytes[] = bos.toByteArray();
 			byte encryptedBytes[] = null;
-			if(csc.secKey != null && csc.iv != null){
-				encryptedBytes = CryptoHelpers.encrypt(messageBytes, csc.secKey, csc.iv);
+			if(csc.secKey != null){
+				encryptedBytes = CryptoHelpers.encrypt(messageBytes, csc.secKey, Tcps2.generateIv(csc));
 			}else{
 				encryptedBytes = messageBytes;
 			}
-			ByteBuffer buf = ByteBuffer.wrap(encryptedBytes);
+			ClientMessageWithIv cmiv = new ClientMessageWithIv(encryptedBytes, csc.iv.getIV());
+			ByteArrayOutputStream bos2 = new ByteArrayOutputStream();
+			ObjectOutput out2 = null;
+			try {
+				out2 = new ObjectOutputStream(bos2);
+				out2.writeObject(cmiv);
+				out2.flush();
+			}finally{
+				try{
+					bos2.close();
+				}catch(IOException ex){}
+			}
+			ByteBuffer buf = ByteBuffer.wrap(bos2.toByteArray());
 			csc.sc.write(buf);
 			if (message.getType() == MessageType.KICK){				
 				csc.sc.close();
 				Tcps2.removeClient(csc.id);
 			}
 		}catch(IOException ex){
-			System.out.println("Exception: " + ex.getStackTrace());
+			if (message.getType() == MessageType.KICK){		
+				Tcps2.removeClient(csc.id);
+			}
 			//we quit the application or there was an error
 		}finally{
 			try{
@@ -152,8 +172,7 @@ class TcpsThreadIn extends Thread{
 
 			kin = new ObjectInputStream(kbis);
 			kcm = (KeyExchange)kin.readObject();
-			csc.secKey = new SecretKeySpec(kcm.getKey(),"AES");					
-			csc.iv = new IvParameterSpec(kcm.getIv());
+			csc.secKey = new SecretKeySpec(kcm.getKey(),"AES");		
 				
 		}catch(Exception ex){
 			System.out.println("Error: " + ex.getStackTrace());			
@@ -167,18 +186,37 @@ class TcpsThreadIn extends Thread{
 		while(runLoop){
 			try{
 				ByteBuffer buf = ByteBuffer.allocate(4096);							
-				int length = csc.sc.read(buf);	
+				int length = csc.sc.read(buf);
 				byte[] shortArry = new byte[length];
 				System.arraycopy(buf.array(), 0, shortArry, 0, length);
-				byte[] serializedBuf = null;
-				if(csc.secKey != null && csc.iv != null){
-					serializedBuf = CryptoHelpers.decrypt(shortArry, csc.secKey, csc.iv);
+				byte[] serializedBuf = null;				
+				ByteArrayInputStream bis2 = new ByteArrayInputStream(shortArry);
+				ObjectInput in2 = null;
+				ClientMessageWithIv cmiv = null;
+				IvParameterSpec iv = null;
+				try{
+					in2 = new ObjectInputStream(bis2);
+					cmiv = (ClientMessageWithIv)in2.readObject();
+				}catch(ClassNotFoundException ex){
+					System.out.println("Client Message is corrupted");
+					return;
+				}finally{
+					try{
+						if(in2 != null){
+							in2.close();
+						}
+					}catch(IOException e){}	
+				}
+				iv = new IvParameterSpec(cmiv.iv);
+				if(csc.secKey != null){
+					serializedBuf = CryptoHelpers.decrypt(cmiv.c, csc.secKey, iv);
 				}else{
 					serializedBuf = buf.array();
 				}
 				handleIncomingMessage(serializedBuf, csc.id);
-			}catch(IOException ex){
-				runLoop = false;
+			}catch(Exception ex){
+				runLoop = false;	
+				Tcps2.removeClient(csc.id);
 			}
 		}
 	}
@@ -215,15 +253,14 @@ class TcpsThreadIn extends Thread{
 		switch (cm.getType()){
 			case MESSAGE:
 				for (ClientSocketChannel c : clients){
-					System.out.println("starting thread 1");
 					if (c.id == cm.getClientId()){
+						System.out.println("starting thread 1");
 						cm.setClientId(id);
 						TcpsThreadOut out = new TcpsThreadOut(c, cm);
 						out.start();
 						break;
 					}
 				}
-				System.out.println("No client found");
 				break;
 			case BROADCAST:
 				for (ClientSocketChannel c : clients){
@@ -276,21 +313,28 @@ enum MessageType {
 class KeyExchange implements Serializable{
 	private static final long serialVersionUID = 1L;
 	private byte[] key;
-	private byte[] iv;
 	
 	public KeyExchange(){}
-	public KeyExchange(byte[] key, byte[] iv){
+	public KeyExchange(byte[] key){
 		this.key = key;
-		this.iv = iv;	
 	}
 
 	public byte[] getKey(){
 		return key;
 	}
-	public byte[] getIv(){
-		return iv;
-	}
 }
+
+class ClientMessageWithIv implements Serializable {
+	private static final long serialVersionUID = 1L;
+	public byte[] c;
+	public byte[] iv;
+
+	public ClientMessageWithIv(byte[] c, byte[] iv){
+		this.c = c;
+		this.iv = iv;
+	}
+} 
+
 
 class ClientMessage implements Serializable {
 	private static final long serialVersionUID = 1L;

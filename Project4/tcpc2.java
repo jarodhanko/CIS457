@@ -29,10 +29,6 @@ class Tcpc2 {
 			pubKey = CryptoHelpers.loadPublicKey("RSApub.der");
 
 			s = CryptoHelpers.generateAESKey();
-			SecureRandom r = new SecureRandom();
-			byte ivbytes[] = new byte[16];
-			r.nextBytes(ivbytes);
-			iv = new IvParameterSpec(ivbytes);
 		
 			TcpClientThreadOut out = new TcpClientThreadOut(sc);
 			TcpClientThreadIn in = new TcpClientThreadIn(sc);
@@ -61,6 +57,14 @@ class Tcpc2 {
 	public static PublicKey getPubKey(){
 		return pubKey;
 	}
+
+	public static IvParameterSpec generateIv(){		
+		SecureRandom r = new SecureRandom();
+		byte ivbytes[] = new byte[16];
+		r.nextBytes(ivbytes);
+		iv = new IvParameterSpec(ivbytes);
+		return iv;
+	}
 }
 
 
@@ -74,7 +78,7 @@ class TcpClientThreadOut extends Thread{
 
 	public void run(){	
 		//send encrypted secret key
-		KeyExchange keyMessage = new KeyExchange(Tcpc2.getS().getEncoded(), Tcpc2.getIv().getIV());
+		KeyExchange keyMessage = new KeyExchange(Tcpc2.getS().getEncoded()); //, Tcpc2.getIv().getIV());
 		ByteArrayOutputStream kbos = new ByteArrayOutputStream();
 		ObjectOutput kout = null;
 		try {
@@ -128,11 +132,24 @@ class TcpClientThreadOut extends Thread{
 						byte[] messageBytes = bos.toByteArray();
 						//encrypt			
 						byte encryptedBytes[] = null;
-						if(Tcpc2.getS() != null)
-							encryptedBytes = CryptoHelpers.encrypt(messageBytes, Tcpc2.getS(), Tcpc2.getIv());
-						else
+						if(Tcpc2.getS() != null){
+							encryptedBytes = CryptoHelpers.encrypt(messageBytes, Tcpc2.getS(), Tcpc2.generateIv());
+						}else{
 							encryptedBytes = messageBytes;
-						ByteBuffer buf = ByteBuffer.wrap(encryptedBytes);
+						}
+						ClientMessageWithIv cmiv = new ClientMessageWithIv(encryptedBytes, Tcpc2.getIv().getIV());
+						ByteArrayOutputStream bos2 = new ByteArrayOutputStream();
+						ObjectOutput out2 = null;
+						try {
+							out2 = new ObjectOutputStream(bos2);
+							out2.writeObject(cmiv);
+							out2.flush();
+						}finally{
+							try{
+								bos2.close();
+							}catch(IOException ex){}
+						}
+						ByteBuffer buf = ByteBuffer.wrap(bos2.toByteArray());
 						sc.write(buf);
 					}finally{
 						try{
@@ -153,10 +170,23 @@ class TcpClientThreadOut extends Thread{
 						//encrypt			
 						byte encryptedBytes[] = null;
 						if(Tcpc2.getS() != null)
-							encryptedBytes = CryptoHelpers.encrypt(messageBytes, Tcpc2.getS(), Tcpc2.getIv());
+							encryptedBytes = CryptoHelpers.encrypt(messageBytes, Tcpc2.getS(), Tcpc2.generateIv());
 						else
 							encryptedBytes = messageBytes;
-						ByteBuffer buf = ByteBuffer.wrap(encryptedBytes);
+						
+						ClientMessageWithIv cmiv = new ClientMessageWithIv(encryptedBytes, Tcpc2.getIv().getIV());
+						ByteArrayOutputStream bos2 = new ByteArrayOutputStream();
+						ObjectOutput out2 = null;
+						try {
+							out2 = new ObjectOutputStream(bos2);
+							out2.writeObject(cmiv);
+							out2.flush();
+						}finally{
+							try{
+								bos2.close();
+							}catch(IOException ex){}
+						}
+						ByteBuffer buf = ByteBuffer.wrap(bos2.toByteArray());
 						sc.write(buf);
 					}finally{
 						try{
@@ -175,11 +205,24 @@ class TcpClientThreadOut extends Thread{
 						//encrypt			
 						byte encryptedBytes[] = null;
 						if(Tcpc2.getS() != null)
-							encryptedBytes = CryptoHelpers.encrypt(messageBytes, Tcpc2.getS(), Tcpc2.getIv());
+							encryptedBytes = CryptoHelpers.encrypt(messageBytes, Tcpc2.getS(), Tcpc2.generateIv());
 						else
 							encryptedBytes = messageBytes;
-						ByteBuffer buf = ByteBuffer.wrap(encryptedBytes);
-						sc.write(buf);
+						
+						ClientMessageWithIv cmiv = new ClientMessageWithIv(encryptedBytes, Tcpc2.getIv().getIV());
+						ByteArrayOutputStream bos2 = new ByteArrayOutputStream();
+						ObjectOutput out2 = null;
+						try {
+							out2 = new ObjectOutputStream(bos2);
+							out2.writeObject(cmiv);
+							out2.flush();
+						}finally{
+							try{
+								bos2.close();
+							}catch(IOException ex){}
+						}
+						ByteBuffer buf = ByteBuffer.wrap(bos2.toByteArray());
+						sc.write(buf);						
 					}finally{
 						try{
 							bos.close();
@@ -207,10 +250,23 @@ class TcpClientThreadOut extends Thread{
 						//encrypt			
 						byte encryptedBytes[] = null;
 						if(Tcpc2.getS() != null)
-							encryptedBytes = CryptoHelpers.encrypt(messageBytes, Tcpc2.getS(), Tcpc2.getIv());
+							encryptedBytes = CryptoHelpers.encrypt(messageBytes, Tcpc2.getS(), Tcpc2.generateIv());
 						else
-							encryptedBytes = messageBytes;
-						ByteBuffer buf = ByteBuffer.wrap(encryptedBytes);
+							encryptedBytes = messageBytes;				
+						
+						ClientMessageWithIv cmiv = new ClientMessageWithIv(encryptedBytes, Tcpc2.getIv().getIV());
+						ByteArrayOutputStream bos2 = new ByteArrayOutputStream();
+						ObjectOutput out2 = null;
+						try {
+							out2 = new ObjectOutputStream(bos2);
+							out2.writeObject(cmiv);
+							out2.flush();
+						}finally{
+							try{
+								bos2.close();
+							}catch(IOException ex){}
+						}
+						ByteBuffer buf = ByteBuffer.wrap(bos2.toByteArray());
 						sc.write(buf);
 					}finally{
 						try{
@@ -244,14 +300,33 @@ class TcpClientThreadIn extends Thread{
 				byte[] shortArry = new byte[length];
 				System.arraycopy(buf.array(), 0, shortArry, 0, length);
 
-				byte encryptedBytes[] = null;
-				if(Tcpc2.getS() != null && Tcpc2.getIv() != null){
-					encryptedBytes = CryptoHelpers.decrypt(shortArry, Tcpc2.getS(), Tcpc2.getIv());
+				byte decryptedBytes[] = null;				
+				ByteArrayInputStream bis2 = new ByteArrayInputStream(shortArry);
+				ObjectInput in2 = null;
+				ClientMessageWithIv cmiv = null;
+				IvParameterSpec iv = null;
+				try{
+					in2 = new ObjectInputStream(bis2);
+					cmiv = (ClientMessageWithIv)in2.readObject();
+				}catch(ClassNotFoundException ex){
+					System.out.println("Client Message is corrupted");
+					return;
+				}finally{
+					try{
+						if(in2 != null){
+							in2.close();
+						}
+					}catch(IOException e){}	
+				}
+				iv = new IvParameterSpec(cmiv.iv);
+
+				if(Tcpc2.getS() != null){
+					decryptedBytes = CryptoHelpers.decrypt(cmiv.c, Tcpc2.getS(), iv);
 				}else{
-					encryptedBytes = shortArry;
+					decryptedBytes = shortArry;
 				}
 				
-				ByteArrayInputStream bis = new ByteArrayInputStream(encryptedBytes);
+				ByteArrayInputStream bis = new ByteArrayInputStream(decryptedBytes);
 				ObjectInput in = null;
 				ClientMessage cm = null;
 				try{
@@ -286,10 +361,12 @@ class TcpClientThreadIn extends Thread{
 						runLoop = false;
 						break;
 				}
-			}catch(IOException ex){
+			}catch(Exception ex){
 				runLoop = false;
-			}catch(ClassNotFoundException ex){
-				runLoop = false;
+				Tcpc2.kill();
+				try{
+					sc.close();
+				}catch(Exception e){}
 			}
 		}
 	}
